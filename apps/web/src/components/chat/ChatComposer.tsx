@@ -1,4 +1,5 @@
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
+import { findSessionPresetDescriptor, SessionPresetPicker } from "./SessionPresetPicker";
 import { DESKTOP_PASTE_AS_TEXT_EVENT } from "../../lib/desktopPasteAsText";
 import { runtimeModeConfig, runtimeModeOptions as runtimeModes } from "./runtimeModeConfig";
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
@@ -2854,6 +2855,14 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   // ------------------------------------------------------------------
   // Provider traits UI
   // ------------------------------------------------------------------
+  const sessionPresetDescriptor = findSessionPresetDescriptor(
+    selectedProviderModels,
+    selectedModel,
+    selectedProvider,
+  );
+  const presetSessionStarted =
+    threadShellHasStarted(props.activeThreadShell) ||
+    promptHistoryMessages.some((message) => message.role === "user");
   const setPromptFromTraits = useCallback(
     (nextPrompt: string) => {
       if (nextPrompt === promptRef.current) {
@@ -2888,6 +2897,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     prompt,
     onPromptChange: setPromptFromTraits,
     planModeEnabled: settings.planModeEnabled,
+    sessionStarted: presetSessionStarted,
+    excludedOptionIds: sessionPresetDescriptor ? ["agent_preset"] : [],
   });
   const providerTraitsPickerInput = {
     provider: selectedProvider,
@@ -2902,6 +2913,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     onPromptChange: setPromptFromTraits,
     planModeEnabled: settings.planModeEnabled,
     isComposerOwned: true,
+    sessionStarted: presetSessionStarted,
+    excludedOptionIds: sessionPresetDescriptor ? ["agent_preset"] : [],
   } satisfies Parameters<typeof renderProviderTraitsPicker>[0];
   const providerTraitsPicker = renderProviderTraitsPicker(providerTraitsPickerInput);
   const [inlineRestingControlsHost, setInlineRestingControlsHost] = useState<HTMLDivElement | null>(
@@ -5309,6 +5322,28 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     hidden: composerControlsHidden || restingHiddenBlockCount > 1,
   });
   const restingBlockDefs = [
+    ...(sessionPresetDescriptor
+      ? [
+          {
+            id: "preset",
+            content: (
+              <SessionPresetPicker
+                target={composerDraftTarget}
+                provider={selectedProvider}
+                selection={{
+                  instanceId: selectedInstanceId,
+                  model: selectedModel,
+                  options: composerModelOptions?.[selectedInstanceId] ?? [],
+                }}
+                reportedSelection={reportedModelSelection}
+                descriptor={sessionPresetDescriptor}
+                disabled={presetSessionStarted || isSendBusy}
+                size={composerControlsCollapsed ? "xs" : "sm"}
+              />
+            ),
+          },
+        ]
+      : []),
     ...(providerTraitsPicker
       ? [
           {
@@ -5496,7 +5531,14 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
             hidden={composerControlsHidden || hiddenRestingBlockIds.length === 0}
             showInteractionModeToggle={planModeUiEnabled && hiddenRestingBlockIds.includes("mode")}
             traitsMenuContent={
-              hiddenRestingBlockIds.includes("traits") ? providerTraitsMenuContent : undefined
+              hiddenRestingBlockIds.includes("preset")
+                ? renderProviderTraitsMenuContent({
+                    ...providerTraitsPickerInput,
+                    excludedOptionIds: [],
+                  })
+                : hiddenRestingBlockIds.includes("traits")
+                  ? providerTraitsMenuContent
+                  : undefined
             }
             onToggleInteractionMode={toggleInteractionMode}
             onRuntimeModeChange={handleRuntimeModeChange}

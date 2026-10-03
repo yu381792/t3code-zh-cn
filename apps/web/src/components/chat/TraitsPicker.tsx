@@ -44,6 +44,7 @@ import { useComposerMenuProps } from "./composerEventScope";
 import { useComposerMenuState } from "./useComposerMenuState";
 
 type ProviderOptions = ReadonlyArray<ProviderOptionSelection>;
+const EMPTY_OPTION_IDS: ReadonlyArray<string> = [];
 
 const SAVED_OPTION_LABELS: Readonly<Record<string, string>> = {
   agent: "Agent",
@@ -285,6 +286,10 @@ export interface TraitsMenuContentProps {
   planModeEnabled: boolean;
   triggerClassName?: string;
   isComposerOwned?: boolean;
+  /** Presets are immutable once the first message starts a session. */
+  sessionStarted?: boolean | undefined;
+  /** A dedicated composer picker owns these options. */
+  excludedOptionIds?: ReadonlyArray<string>;
 }
 
 export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
@@ -298,6 +303,8 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
   reportedModelSelection,
   allowPromptInjectedEffort = true,
   planModeEnabled,
+  sessionStarted = false,
+  excludedOptionIds = EMPTY_OPTION_IDS,
   ...persistence
 }: TraitsMenuContentProps & TraitsPersistence) {
   const t3T = useUiTranslate();
@@ -398,65 +405,71 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
 
   return (
     <>
-      {selectDescriptors.map((descriptor, index) => {
-        const selectedValue =
-          ultrathinkPromptControlled && descriptor.id === primarySelectDescriptor?.id
-            ? "ultrathink"
-            : (getDescriptorStringValue(descriptor, modelSelection, reportedModelSelection) ?? "");
+      {selectDescriptors
+        .filter((descriptor) => !excludedOptionIds.includes(descriptor.id))
+        .map((descriptor, index) => {
+          const selectedValue =
+            ultrathinkPromptControlled && descriptor.id === primarySelectDescriptor?.id
+              ? "ultrathink"
+              : (getDescriptorStringValue(descriptor, modelSelection, reportedModelSelection) ??
+                "");
 
-        return (
-          <div key={descriptor.id}>
-            {index > 0 ? <MenuDivider /> : null}
-            <MenuGroup>
-              <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs">
-                {t3T(descriptor.label)}
-              </div>
-              {ultrathinkInBodyText && descriptor.id === primarySelectDescriptor?.id ? (
-                <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
-                  {t3T(
-                    'Your prompt contains "ultrathink" in the text. Remove it to change this option.',
-                  )}
+          return (
+            <div key={descriptor.id}>
+              {index > 0 ? <MenuDivider /> : null}
+              <MenuGroup>
+                <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs">
+                  {t3T(descriptor.label)}
                 </div>
-              ) : null}
-              <MenuRadioGroup
-                value={selectedValue}
-                onValueChange={(value) => handleSelectChange(descriptor, value)}
-              >
-                {descriptor.options.map((option) => (
-                  <MenuRadioItem
-                    key={option.id}
-                    value={option.id}
-                    hideIndicator
-                    // Base UI keeps radio menus open by default. Close on pick so
-                    // the traits menu behaves like the model picker.
-                    closeOnClick
-                    disabled={ultrathinkInBodyText && descriptor.id === primarySelectDescriptor?.id}
-                  >
-                    <span className="flex w-full min-w-0 flex-col">
-                      <span className="flex w-full min-w-0 items-center justify-between gap-3">
-                        <span className="min-w-0 truncate">
-                          {t3T(option.label)}
-                          {option.isDefault ? (
-                            <>
-                              {" "}
-                              <DefaultBadge />
-                            </>
-                          ) : null}
+                {ultrathinkInBodyText && descriptor.id === primarySelectDescriptor?.id ? (
+                  <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
+                    {t3T(
+                      'Your prompt contains "ultrathink" in the text. Remove it to change this option.',
+                    )}
+                  </div>
+                ) : null}
+                <MenuRadioGroup
+                  value={selectedValue}
+                  onValueChange={(value) => handleSelectChange(descriptor, value)}
+                >
+                  {descriptor.options.map((option) => (
+                    <MenuRadioItem
+                      key={option.id}
+                      value={option.id}
+                      hideIndicator
+                      // Base UI keeps radio menus open by default. Close on pick so
+                      // the traits menu behaves like the model picker.
+                      closeOnClick
+                      disabled={
+                        (sessionStarted && descriptor.id === "agent_preset") ||
+                        (ultrathinkInBodyText && descriptor.id === primarySelectDescriptor?.id)
+                      }
+                    >
+                      <span className="flex w-full min-w-0 flex-col">
+                        <span className="flex w-full min-w-0 items-center justify-between gap-3">
+                          <span className="min-w-0 truncate">
+                            {t3T(option.label)}
+                            {option.isDefault ? (
+                              <>
+                                {" "}
+                                <DefaultBadge />
+                              </>
+                            ) : null}
+                          </span>
                         </span>
+                        {option.description ? (
+                          <span className="max-w-56 text-pretty text-muted-foreground/80 text-xs">
+                            {t3T(option.description)}
+                          </span>
+                        ) : null}
                       </span>
-                      {option.description ? (
-                        <span className="max-w-56 text-pretty text-muted-foreground/80 text-xs">
-                          {t3T(option.description)}
-                        </span>
-                      ) : null}
-                    </span>
-                  </MenuRadioItem>
-                ))}
-              </MenuRadioGroup>
-            </MenuGroup>
-          </div>
-        );
-      })}
+                    </MenuRadioItem>
+                  ))}
+                </MenuRadioGroup>
+              </MenuGroup>
+            </div>
+          );
+        })}
       {booleanDescriptors.map((descriptor, index) => {
         const selectedValue = descriptor.currentValue === true ? "on" : "off";
 
@@ -577,6 +590,8 @@ export const TraitsPicker = memo(function TraitsPicker({
   isComposerOwned,
   size = "sm",
   hidden = false,
+  sessionStarted,
+  excludedOptionIds = EMPTY_OPTION_IDS,
   ...persistence
 }: TraitsMenuContentProps &
   TraitsPersistence & {
@@ -613,7 +628,7 @@ export const TraitsPicker = memo(function TraitsPicker({
   const { label: triggerLabel, speedIcon } = buildTraitsTriggerDisplay({
     provider,
     translateLabel: t3T,
-    descriptors,
+    descriptors: descriptors.filter((descriptor) => !excludedOptionIds.includes(descriptor.id)),
     primarySelectDescriptorId: primarySelectDescriptor?.id ?? null,
     ultrathinkPromptControlled,
     modelSelection: instanceId && model ? { instanceId, model, options: modelOptions ?? [] } : null,
@@ -719,6 +734,8 @@ export const TraitsPicker = memo(function TraitsPicker({
           reportedModelSelection={reportedModelSelection}
           allowPromptInjectedEffort={allowPromptInjectedEffort}
           planModeEnabled={planModeEnabled}
+          sessionStarted={sessionStarted}
+          excludedOptionIds={excludedOptionIds}
           {...persistence}
         />
       </MenuPopup>

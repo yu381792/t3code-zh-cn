@@ -57,6 +57,8 @@ type TraitsRenderInput = {
   hidden?: boolean;
   triggerClassName?: string;
   isComposerOwned?: boolean;
+  sessionStarted?: boolean;
+  excludedOptionIds?: ReadonlyArray<string>;
 };
 
 export function getComposerPromptInjectionState(prompt: string): ComposerPromptInjectionState {
@@ -180,6 +182,8 @@ function renderTraitsControl(
     hidden,
     triggerClassName,
     isComposerOwned,
+    sessionStarted,
+    excludedOptionIds,
   } = input;
   const hasTarget = threadRef !== undefined || draftId !== undefined;
   const { selections: resolvedModelOptions } = resolveComposerOptionSelections(
@@ -219,6 +223,8 @@ function renderTraitsControl(
       {...(hidden !== undefined ? { hidden } : {})}
       {...(triggerClassName !== undefined ? { triggerClassName } : {})}
       {...(isComposerOwned ? { isComposerOwned } : {})}
+      {...(sessionStarted !== undefined ? { sessionStarted } : {})}
+      {...(excludedOptionIds ? { excludedOptionIds } : {})}
     />
   );
 }

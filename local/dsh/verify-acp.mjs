@@ -84,6 +84,19 @@ try {
   });
   const sessionId = resumeId ?? session.sessionId;
   console.log("session/new:", JSON.stringify({ sessionId, configOptions: session.configOptions }));
+  const preset = argument("--preset");
+  if (preset) {
+    const result = await request("session/set_config_option", {
+      sessionId,
+      configId: "agent_preset",
+      value: preset,
+    });
+    if (
+      result.configOptions.find((option) => option.id === "agent_preset")?.currentValue !== preset
+    )
+      throw new Error("Preset selection did not apply");
+    console.log("preset selected:", preset);
+  }
   const writeProbe = argument("--write-probe");
   if (writeProbe || process.argv.includes("--prompt")) {
     if (writeProbe && !/^\/[a-zA-Z0-9_./-]+$/.test(writeProbe))
@@ -101,6 +114,22 @@ try {
     });
     console.log("session/prompt:", JSON.stringify({ stopReason: result.stopReason, answer }));
     if (!writeProbe && !answer.includes("DSH_T3_OK")) throw new Error("Expected marker absent");
+    const lockedPreset = argument("--assert-preset-locked");
+    if (lockedPreset) {
+      let rejected = false;
+      try {
+        await request("session/set_config_option", {
+          sessionId,
+          configId: "agent_preset",
+          value: lockedPreset,
+        });
+      } catch (error) {
+        if (!error.message.includes("already started")) throw error;
+        rejected = true;
+      }
+      if (!rejected) throw new Error("Started session allowed preset change");
+      console.log("started preset switch: correctly rejected");
+    }
   }
 } catch (error) {
   console.error(error.message);
