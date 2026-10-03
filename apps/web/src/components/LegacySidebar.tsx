@@ -2607,11 +2607,13 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
                   <SelectValue>
                     {projectGroupingSelection === "inherit"
                       ? t3T("Use global default ({0})", [
-                          PROJECT_GROUPING_MODE_LABELS[
-                            projectGroupingSettings.sidebarProjectGroupingMode
-                          ],
+                          t3T(
+                            PROJECT_GROUPING_MODE_LABELS[
+                              projectGroupingSettings.sidebarProjectGroupingMode
+                            ],
+                          ),
                         ])
-                      : PROJECT_GROUPING_MODE_LABELS[projectGroupingSelection]}
+                      : t3T(PROJECT_GROUPING_MODE_LABELS[projectGroupingSelection])}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
@@ -2619,13 +2621,13 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
                     {t3T("Use global default")}
                   </SelectItem>
                   <SelectItem hideIndicator value="repository">
-                    {PROJECT_GROUPING_MODE_LABELS.repository}
+                    {t3T(PROJECT_GROUPING_MODE_LABELS.repository)}
                   </SelectItem>
                   <SelectItem hideIndicator value="repository_path">
-                    {PROJECT_GROUPING_MODE_LABELS.repository_path}
+                    {t3T(PROJECT_GROUPING_MODE_LABELS.repository_path)}
                   </SelectItem>
                   <SelectItem hideIndicator value="separate">
-                    {PROJECT_GROUPING_MODE_LABELS.separate}
+                    {t3T(PROJECT_GROUPING_MODE_LABELS.separate)}
                   </SelectItem>
                 </SelectPopup>
               </Select>
@@ -2792,7 +2794,7 @@ function ProjectSortMenu({
             {(Object.entries(SIDEBAR_SORT_LABELS) as Array<[SidebarProjectSortOrder, string]>).map(
               ([value, label]) => (
                 <MenuRadioItem key={value} value={value}>
-                  {label}
+                  {t3T(label)}
                 </MenuRadioItem>
               ),
             )}
@@ -2812,7 +2814,7 @@ function ProjectSortMenu({
               Object.entries(SIDEBAR_THREAD_SORT_LABELS) as Array<[SidebarThreadSortOrder, string]>
             ).map(([value, label]) => (
               <MenuRadioItem key={value} value={value}>
-                {label}
+                {t3T(label)}
               </MenuRadioItem>
             ))}
           </MenuRadioGroup>

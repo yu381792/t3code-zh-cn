@@ -69,14 +69,14 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
     () => [
       {
         value: "local",
-        label: workspaceDisplayName ?? resolveCurrentWorkspaceLabel(activeWorktreePath),
+        label: workspaceDisplayName ?? t3T(resolveCurrentWorkspaceLabel(activeWorktreePath)),
       },
-      { value: "worktree", label: resolveEnvModeLabel("worktree") },
+      { value: "worktree", label: t3T(resolveEnvModeLabel("worktree")) },
       ...(showPreviousWorktree && previousWorktreeLabel
         ? [{ value: PREVIOUS_WORKTREE_SELECT_VALUE, label: previousWorktreeLabel }]
         : []),
     ],
-    [activeWorktreePath, previousWorktreeLabel, showPreviousWorktree, workspaceDisplayName],
+    [activeWorktreePath, previousWorktreeLabel, showPreviousWorktree, workspaceDisplayName, t3T],
   );
 
   const handleWorkspaceContextMenu = (event: ReactMouseEvent) => {
@@ -148,11 +148,11 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
           {forceNewWorktree
             ? t3T(resolveEnvModeLabel("worktree"))
             : (workspaceDisplayName ??
-              resolveLockedWorkspaceLabel(activeWorktreePath, effectiveEnvMode))}
+              t3T(resolveLockedWorkspaceLabel(activeWorktreePath, effectiveEnvMode)))}
         </ComposerContextLabel>
         {displayMode === "panel" ? (
           <span className="shrink-0 text-3xs font-normal text-muted-foreground/70">
-            {forceNewWorktree ? t3T("Worktree") : workspaceKind}
+            {forceNewWorktree ? t3T("Worktree") : t3T(workspaceKind)}
           </span>
         ) : null}
       </span>
@@ -217,7 +217,7 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
             <span className="shrink-0 text-3xs font-normal text-muted-foreground/70">
               {effectiveEnvMode === "worktree" && !activeWorktreePath
                 ? t3T("Create")
-                : workspaceKind}
+                : t3T(workspaceKind)}
             </span>
           ) : null}
         </TooltipTrigger>

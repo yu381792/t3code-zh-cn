@@ -394,7 +394,7 @@ function ChoiceSelect<V extends string>(props: {
       <SelectTrigger size="xs" className="w-40" aria-label={props.ariaLabel}>
         <SelectValue>
           {current ? (
-            current.label
+            t3T(current.label)
           ) : (
             <span className="text-muted-foreground">{props.placeholder ?? t3T("Unknown")}</span>
           )}
@@ -403,7 +403,7 @@ function ChoiceSelect<V extends string>(props: {
       <SelectPopup align="end" alignItemWithTrigger={false}>
         {props.options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            {t3T(option.label)}
           </SelectItem>
         ))}
       </SelectPopup>

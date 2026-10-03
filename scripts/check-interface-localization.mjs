@@ -116,7 +116,21 @@ for (const file of files(NodePath.join(root, "apps/web/src"))) {
   function displayExpression(node) {
     if (!node) return;
     if (node.type === "StringLiteral") checkText(node, node.value);
-    else if (node.type === "TemplateLiteral")
+    else if (node.type === "ArrowFunctionExpression" || node.type === "FunctionExpression") {
+      if (node.body.type === "BlockStatement") {
+        for (const statement of node.body.body)
+          if (statement.type === "ReturnStatement") displayExpression(statement.argument);
+      } else displayExpression(node.body);
+    } else if (
+      node.type === "MemberExpression" &&
+      node.object.type === "Identifier" &&
+      node.object.name.endsWith("_LABELS") &&
+      node.object.name !== "INTERFACE_LANGUAGE_LABELS"
+    ) {
+      errors.push(
+        location(node) + ": untranslated UI label-map lookup " + source.slice(node.start, node.end),
+      );
+    } else if (node.type === "TemplateLiteral")
       checkText(node, node.quasis.map((q) => q.value.cooked).join(""));
     else if (node.type === "ConditionalExpression") {
       displayExpression(node.consequent);

@@ -497,12 +497,14 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
  */
 export function buildTraitsTriggerDisplay(input: {
   provider: ProviderDriverKind;
+  translateLabel?: (label: string) => string;
   descriptors: ReadonlyArray<ProviderOptionDescriptor>;
   primarySelectDescriptorId: string | null;
   ultrathinkPromptControlled: boolean;
   modelSelection?: ModelSelection | null;
   reportedModelSelection?: ModelSelection | null | undefined;
 }): { label: string; speedIcon: "fast" | "ultrafast" | null } {
+  const displayLabel = input.translateLabel ?? ((label: string) => label);
   let fastModeFallbackLabel: string | null = null;
   let speedIcon: "fast" | "ultrafast" | null = null;
   const labels: Array<string> = [];
@@ -538,16 +540,16 @@ export function buildTraitsTriggerDisplay(input: {
     }
     const label =
       input.ultrathinkPromptControlled && descriptor.id === input.primarySelectDescriptorId
-        ? "Ultrathink"
+        ? displayLabel("Ultrathink")
         : descriptor.type === "boolean"
-          ? `${descriptor.label} ${descriptor.currentValue === true ? "On" : "Off"}`
+          ? `${displayLabel(descriptor.label)} ${displayLabel(descriptor.currentValue === true ? "On" : "Off")}`
           : getProviderOptionCurrentLabel(
               descriptor,
               input.modelSelection,
               input.reportedModelSelection,
             );
     if (typeof label === "string" && label.length > 0) {
-      labels.push(label);
+      labels.push(displayLabel(label));
     }
   }
 
@@ -555,7 +557,7 @@ export function buildTraitsTriggerDisplay(input: {
   // off an empty label list alone would also catch descriptors that resolved to
   // no label at all, printing a bogus "Normal" for a model without fast mode.
   if (labels.length === 0 && fastModeFallbackLabel !== null) {
-    return { label: fastModeFallbackLabel, speedIcon: null };
+    return { label: displayLabel(fastModeFallbackLabel), speedIcon: null };
   }
   return { label: labels.join(" · "), speedIcon };
 }
@@ -581,6 +583,7 @@ export const TraitsPicker = memo(function TraitsPicker({
     size?: ComposerControlSize;
     hidden?: boolean;
   }) {
+  const t3T = useUiTranslate();
   const composerFloatingLayerProps = useComposerMenuProps();
   const [isMenuOpen, setIsMenuOpen] = useComposerMenuState(hidden);
   const { descriptors, primarySelectDescriptor, ultrathinkPromptControlled } =
@@ -609,13 +612,14 @@ export const TraitsPicker = memo(function TraitsPicker({
 
   const { label: triggerLabel, speedIcon } = buildTraitsTriggerDisplay({
     provider,
+    translateLabel: t3T,
     descriptors,
     primarySelectDescriptorId: primarySelectDescriptor?.id ?? null,
     ultrathinkPromptControlled,
     modelSelection: instanceId && model ? { instanceId, model, options: modelOptions ?? [] } : null,
     reportedModelSelection,
   });
-  const speedLabel = speedIcon === "ultrafast" ? "Ultrafast mode on" : "Fast mode on";
+  const speedLabel = speedIcon === "ultrafast" ? t3T("Ultrafast mode on") : t3T("Fast mode on");
   const accessibleLabel = speedIcon ? `${triggerLabel}, ${speedLabel}` : triggerLabel;
   const fastModeIcon = speedIcon ? (
     <>

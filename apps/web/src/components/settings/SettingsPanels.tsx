@@ -1449,7 +1449,7 @@ export function AppearanceSettingsPanel() {
                 }}
               >
                 <SelectTrigger size="sm" className="w-full min-w-0" aria-label={t3T("Chat width")}>
-                  <SelectValue>{CHAT_WIDTH_LABELS[settings.chatWidth]}</SelectValue>
+                  <SelectValue>{t3T(CHAT_WIDTH_LABELS[settings.chatWidth])}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   <SelectItem value="comfortable">{t3T("Comfortable (default)")}</SelectItem>
@@ -2361,13 +2361,13 @@ export function GeneralSettingsPanel() {
             >
               <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t3T("Project order")}>
                 <SelectValue>
-                  {SIDEBAR_PROJECT_SORT_ORDER_LABELS[settings.sidebarProjectSortOrder]}
+                  {t3T(SIDEBAR_PROJECT_SORT_ORDER_LABELS[settings.sidebarProjectSortOrder])}
                 </SelectValue>
               </SelectTrigger>
               <SelectPopup align="end" alignItemWithTrigger={false}>
                 {SidebarProjectSortOrder.literals.map((sortOrder) => (
                   <SelectItem hideIndicator key={sortOrder} value={sortOrder}>
-                    {SIDEBAR_PROJECT_SORT_ORDER_LABELS[sortOrder]}
+                    {t3T(SIDEBAR_PROJECT_SORT_ORDER_LABELS[sortOrder])}
                   </SelectItem>
                 ))}
               </SelectPopup>
@@ -2666,7 +2666,7 @@ export function GeneralSettingsPanel() {
               >
                 <SelectValue>
                   {(value: ResponseStreamingMode | null) =>
-                    value === null ? "Mixed" : RESPONSE_STREAMING_MODE_LABELS[value]
+                    t3T(value === null ? "Mixed" : RESPONSE_STREAMING_MODE_LABELS[value])
                   }
                 </SelectValue>
               </SelectTrigger>
@@ -2928,10 +2928,10 @@ export function GeneralSettingsPanel() {
                 aria-label={t3T("Send shortcut")}
               >
                 <SelectValue>
-                  {
+                  {t3T(
                     sendShortcutOptions.find((option) => option.value === settings.sendShortcut)
-                      ?.label
-                  }
+                      ?.label,
+                  )}
                 </SelectValue>
               </SelectTrigger>
               <SelectPopup align="end" alignItemWithTrigger={false}>
@@ -3118,7 +3118,9 @@ export function GeneralSettingsPanel() {
                 >
                   <SelectValue>
                     {(value: BackgroundActivityProfileOption | null) =>
-                      value === null ? "Mixed" : BACKGROUND_ACTIVITY_PROFILE_OPTION_LABELS[value]
+                      t3T(
+                        value === null ? "Mixed" : BACKGROUND_ACTIVITY_PROFILE_OPTION_LABELS[value],
+                      )
                     }
                   </SelectValue>
                 </SelectTrigger>

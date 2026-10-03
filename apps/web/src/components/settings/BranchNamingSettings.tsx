@@ -61,13 +61,13 @@ export function BranchNamingSettings() {
           >
             <SelectTrigger size="sm" aria-label={t3T("Worktree branch naming")}>
               <SelectValue>
-                {(value: BranchNamingMode | null) => (value === null ? "Mixed" : MODES[value])}
+                {(value: BranchNamingMode | null) => t3T(value === null ? "Mixed" : MODES[value])}
               </SelectValue>
             </SelectTrigger>
             <SelectPopup align="end" alignItemWithTrigger={false}>
               {BranchNamingMode.literals.map((mode) => (
                 <SelectItem key={mode} value={mode}>
-                  {MODES[mode]}
+                  {t3T(MODES[mode])}
                 </SelectItem>
               ))}
             </SelectPopup>

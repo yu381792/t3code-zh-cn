@@ -191,7 +191,7 @@ function CustomSnoozeDialog() {
                       {t3T("Unit")}
                       <Select
                         value={unit}
-                        items={{ minutes: "Minutes", hours: "Hours", days: "Days" }}
+                        items={{ minutes: t3T("Minutes"), hours: t3T("Hours"), days: t3T("Days") }}
                         onValueChange={(value) => {
                           if (value === "minutes" || value === "hours" || value === "days")
                             setUnit(value);

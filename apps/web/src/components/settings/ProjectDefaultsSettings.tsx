@@ -233,11 +233,13 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
           <SelectTrigger size="sm" aria-label={t3T("Default workspace")}>
             <SelectValue>
               {(value: string | null) =>
-                value === "local" || value === "worktree"
-                  ? resolveEnvModeLabel(value)
-                  : unavailable
-                    ? "Unavailable"
-                    : "Mixed"
+                t3T(
+                  value === "local" || value === "worktree"
+                    ? resolveEnvModeLabel(value)
+                    : unavailable
+                      ? "Unavailable"
+                      : "Mixed",
+                )
               }
             </SelectValue>
           </SelectTrigger>
@@ -367,18 +369,20 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
                 <SelectTrigger size="sm" aria-label={t3T("Worktree submodules")}>
                   <SelectValue>
                     {(value: string | null) =>
-                      isWorktreeSubmodules(value)
-                        ? WORKTREE_SUBMODULES_LABELS[value]
-                        : unavailable
-                          ? "Unavailable"
-                          : "Mixed"
+                      t3T(
+                        isWorktreeSubmodules(value)
+                          ? WORKTREE_SUBMODULES_LABELS[value]
+                          : unavailable
+                            ? "Unavailable"
+                            : "Mixed",
+                      )
                     }
                   </SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   {WORKTREE_SUBMODULES_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {WORKTREE_SUBMODULES_LABELS[option]}
+                      {t3T(WORKTREE_SUBMODULES_LABELS[option])}
                     </SelectItem>
                   ))}
                 </SelectPopup>
@@ -454,19 +458,27 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
                 <SelectTrigger size="sm" aria-label={t3T("Default pull request merge method")}>
                   <SelectValue>
                     {(value: string | null) =>
-                      value === "merge" || value === "squash" || value === "rebase"
-                        ? PULL_REQUEST_MERGE_METHOD_LABELS[value]
-                        : value === "last"
-                          ? "Last selected"
-                          : "Mixed"
+                      t3T(
+                        value === "merge" || value === "squash" || value === "rebase"
+                          ? PULL_REQUEST_MERGE_METHOD_LABELS[value]
+                          : value === "last"
+                            ? "Last selected"
+                            : "Mixed",
+                      )
                     }
                   </SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   <SelectItem value="last">{t3T("Last selected")}</SelectItem>
-                  <SelectItem value="merge">{PULL_REQUEST_MERGE_METHOD_LABELS.merge}</SelectItem>
-                  <SelectItem value="squash">{PULL_REQUEST_MERGE_METHOD_LABELS.squash}</SelectItem>
-                  <SelectItem value="rebase">{PULL_REQUEST_MERGE_METHOD_LABELS.rebase}</SelectItem>
+                  <SelectItem value="merge">
+                    {t3T(PULL_REQUEST_MERGE_METHOD_LABELS.merge)}
+                  </SelectItem>
+                  <SelectItem value="squash">
+                    {t3T(PULL_REQUEST_MERGE_METHOD_LABELS.squash)}
+                  </SelectItem>
+                  <SelectItem value="rebase">
+                    {t3T(PULL_REQUEST_MERGE_METHOD_LABELS.rebase)}
+                  </SelectItem>
                 </SelectPopup>
               </Select>
             }

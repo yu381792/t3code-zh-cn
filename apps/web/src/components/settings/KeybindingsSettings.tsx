@@ -1175,7 +1175,11 @@ function NewKeybindingCommandSelect({
       onValueChange={(value) => draft.setCommandDraft(value as KeybindingCommand)}
     >
       <SelectTrigger size="sm" className={className}>
-        <SelectValue placeholder={t3T("Command")} />
+        <SelectValue placeholder={t3T("Command")}>
+          {(value: string | null) =>
+            value ? t3T(commandLabel(value as KeybindingCommand)) : t3T("Command")
+          }
+        </SelectValue>
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false} matchTriggerWidth={false} className="max-h-72">
         {commandOptions.map((command) => (

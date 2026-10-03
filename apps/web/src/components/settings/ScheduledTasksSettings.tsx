@@ -754,7 +754,7 @@ function ScheduledTaskEditorDialog({
                   }
                 >
                   <SelectTrigger size="sm" id="scheduled-task-workspace">
-                    <SelectValue>{WORKSPACE_MODE_LABELS[draft.workspaceMode]}</SelectValue>
+                    <SelectValue>{t3T(WORKSPACE_MODE_LABELS[draft.workspaceMode])}</SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
                     <SelectItem value="worktree">{t3T("Create a new worktree")}</SelectItem>
@@ -884,8 +884,8 @@ function ScheduledTaskEditorDialog({
                     }}
                   >
                     {WEEKDAY_ORDER.map((day) => (
-                      <Toggle key={day} value={String(day)} aria-label={WEEKDAY_LABELS[day]}>
-                        {WEEKDAY_SHORT[day]}
+                      <Toggle key={day} value={String(day)} aria-label={t3T(WEEKDAY_LABELS[day])}>
+                        {t3T(WEEKDAY_SHORT[day])}
                       </Toggle>
                     ))}
                   </ToggleGroup>

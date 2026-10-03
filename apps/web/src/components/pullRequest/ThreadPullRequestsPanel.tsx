@@ -113,7 +113,7 @@ function LinkRow({
                 #{link.number}
               </TooltipTrigger>
               <TooltipPopup>
-                {SOURCE_LABELS[link.source]} · {formatRelativeTimeLabel(link.linkedAt)}
+                {t3T(SOURCE_LABELS[link.source])} · {formatRelativeTimeLabel(link.linkedAt)}
               </TooltipPopup>
             </Tooltip>
           }

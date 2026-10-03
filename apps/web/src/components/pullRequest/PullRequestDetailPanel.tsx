@@ -2170,7 +2170,7 @@ export function PullRequestDetailPanel({
                                     icon and the label need their own row to share a line. */}
                                 <span className="flex min-w-0 items-center gap-2">
                                   <PullRequestGlyph.merged className="size-3.5" />
-                                  <span>{PULL_REQUEST_MERGE_METHOD_LABELS[method]}</span>
+                                  <span>{t3T(PULL_REQUEST_MERGE_METHOD_LABELS[method])}</span>
                                 </span>
                               </MenuRadioItem>
                             ))}

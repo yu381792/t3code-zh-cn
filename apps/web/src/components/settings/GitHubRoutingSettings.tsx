@@ -88,7 +88,7 @@ export function GitHubRoutingSettings({
           subtitle={environmentTransportLabel(environment)}
         >
           <Select
-            items={options}
+            items={options.map((option) => ({ ...option, label: t3T(option.label) }))}
             value={gitHubRoutingPermissionFor(environment.entry, permissions)}
             disabled={
               !catalog.isReady || saving || gitHubRoutingConnectionKey(environment.entry) === null
@@ -118,7 +118,7 @@ export function GitHubRoutingSettings({
             <SelectPopup align="end" alignItemWithTrigger={false}>
               {options.map(({ value, label }) => (
                 <SelectItem key={value} value={value}>
-                  {label}
+                  {t3T(label)}
                 </SelectItem>
               ))}
             </SelectPopup>

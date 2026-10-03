@@ -187,7 +187,7 @@ export function BrowserDeviceToolbar({
         modal={false}
         value={selectedValue}
         onValueChange={selectViewport}
-        items={SELECT_ITEMS}
+        items={SELECT_ITEMS.map((item) => ({ ...item, label: t3T(item.label) }))}
         disabled={pending}
       >
         <SelectTrigger

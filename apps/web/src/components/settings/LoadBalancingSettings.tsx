@@ -101,7 +101,7 @@ export function LoadBalancingSettings({
           subtitle={environmentTransportLabel(environment)}
         >
           <Select
-            items={preferences}
+            items={preferences.map((option) => ({ ...option, label: t3T(option.label) }))}
             value={loadPreferenceForWeight(
               settings.loadBalancingWeights[environment.environmentId],
             )}
@@ -126,7 +126,7 @@ export function LoadBalancingSettings({
             <SelectPopup align="end" alignItemWithTrigger={false}>
               {preferences.map(({ value, label }) => (
                 <SelectItem key={value} value={value}>
-                  {label}
+                  {t3T(label)}
                 </SelectItem>
               ))}
             </SelectPopup>
