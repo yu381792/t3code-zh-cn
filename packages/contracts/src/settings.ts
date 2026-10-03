@@ -890,7 +890,8 @@ export const AcpRegistrySettings = makeProviderSettingsSchema(
       Schema.withDecodingDefault(Effect.succeed("")),
       Schema.annotateKey({
         title: "Registry agent ID",
-        description: "Agent identifier from the official ACP Registry, for example 'devin'.",
+        description:
+          "Agent identifier from the official ACP Registry, for example 'devin'. Leave empty to run a local ACP executable.",
         providerSettingsForm: { placeholder: "devin", clearWhenEmpty: "persist" },
       }),
     ),
@@ -899,7 +900,7 @@ export const AcpRegistrySettings = makeProviderSettingsSchema(
       Schema.annotateKey({
         title: "Executable override",
         description:
-          "Optional local executable to use instead of installing the registry distribution. Registry arguments and environment are still applied.",
+          "Local ACP executable or wrapper. With a registry agent ID, registry arguments and environment are applied; without one, the executable runs directly.",
         providerSettingsForm: { placeholder: "Registry default", clearWhenEmpty: "omit" },
       }),
     ),

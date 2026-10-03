@@ -3181,9 +3181,15 @@ export const ZH_CN_V2_DICTIONARY: Readonly<Record<string, string>> = {
   "Registry agent ID": "注册表代理 ID",
   "Agent identifier from the official ACP Registry, for example 'devin'.":
     "官方 ACP 注册表中的代理标识，例如 devin。",
+  "Agent identifier from the official ACP Registry, for example 'devin'. Leave empty to run a local ACP executable.":
+    "填写官方目录中的智能体标识，例如 devin；调用本机智能体时留空。",
   "Executable override": "指定可执行文件",
   "Optional local executable to use instead of installing the registry distribution. Registry arguments and environment are still applied.":
     "可选：使用本地可执行文件，而不安装注册表发行包；仍会应用注册表参数和环境变量。",
+  "Local ACP executable or wrapper. With a registry agent ID, registry arguments and environment are applied; without one, the executable runs directly.":
+    "本机智能体的启动程序。填写目录标识时使用目录规定的参数和环境；留空时直接运行本机程序。",
+  "Select an ACP Registry agent or a local ACP executable before starting a thread.":
+    "开始对话前，请选择官方目录中的智能体，或指定本机智能体的启动程序。",
   "Registry default": "注册表默认值",
   "Authentication method": "认证方式",
   "Optional ACP authentication method ID. By default, the first agent-managed method is selected.":

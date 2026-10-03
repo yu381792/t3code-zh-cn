@@ -1613,7 +1613,19 @@ export const makeAcpRegistryCatalog = Effect.fn("AcpRegistryCatalog.make")(funct
   const inspect: AcpRegistryCatalog["Service"]["inspect"] = (settings, environment) =>
     Effect.gen(function* () {
       const agentId = settings.agentId.trim();
-      if (agentId.length === 0) return { status: "unconfigured" } as const;
+      if (agentId.length === 0) {
+        const command = settings.commandPath.trim();
+        if (command.length === 0) return { status: "unconfigured" } as const;
+        return resolveExecutable(command, platform, environment ?? hostEnvironment) !== undefined
+          ? ({ status: "ready", agentId: "local", version: null, distribution: "binary" } as const)
+          : ({
+              status: "missing_runner",
+              agentId: "local",
+              version: "local",
+              distribution: "binary",
+              runner: command,
+            } as const);
+      }
       const registry = yield* loadCachedRegistry();
       const agent = registry.agents.find((candidate) => candidate.id === agentId);
       if (agent === undefined) return { status: "not_found", agentId } as const;
@@ -1715,10 +1727,34 @@ export const makeAcpRegistryCatalog = Effect.fn("AcpRegistryCatalog.make")(funct
     Effect.gen(function* () {
       const agentId = settings.agentId.trim();
       if (agentId.length === 0) {
-        return yield* new AcpRegistryError({
-          reason: "agent_not_configured",
-          detail: "ACP Registry provider requires a registry agent ID.",
-        });
+        const command = settings.commandPath.trim();
+        if (command.length === 0) {
+          return yield* new AcpRegistryError({
+            reason: "agent_not_configured",
+            detail: "ACP provider requires a registry agent ID or a local executable.",
+          });
+        }
+        const effectiveEnvironment = environment ?? hostEnvironment;
+        const executable = resolveExecutable(command, platform, effectiveEnvironment);
+        if (executable === undefined) {
+          return yield* new AcpRegistryError({
+            reason: "runner_unavailable",
+            detail: `Local ACP executable '${command}' is not available on this provider instance's PATH.`,
+          });
+        }
+        // Local wrappers own their arguments and environment; never consult or
+        // install a registry distribution for an explicitly local executable.
+        return {
+          agent: {
+            id: "local",
+            name: "Local ACP agent",
+            version: "local",
+            description: "User-configured local ACP executable",
+            distribution: {},
+          },
+          distribution: "binary",
+          spawn: { command: executable, args: [], cwd, env: effectiveEnvironment },
+        } satisfies ResolvedAcpRegistryAgent;
       }
       const registry = yield* loadRegistry();
       const agent = yield* findAgent(registry, agentId);

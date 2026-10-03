@@ -138,7 +138,7 @@ export function acpRegistrySnapshotReadiness(
         installed: false,
         version: null,
         status: "warning",
-        message: "Select an ACP Registry agent before starting a thread.",
+        message: "Select an ACP Registry agent or a local ACP executable before starting a thread.",
       };
     case "not_found":
       return {

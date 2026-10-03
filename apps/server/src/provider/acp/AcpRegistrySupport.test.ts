@@ -254,6 +254,55 @@ describe("AcpRegistrySupport", () => {
     ).toBeUndefined();
   });
 
+  it.effect("runs a local ACP executable without registry access or installation", () => {
+    const requests: Array<string> = [];
+    return Effect.gen(function* () {
+      const fileSystem = yield* FileSystem.FileSystem;
+      const cacheDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-local-acp-" });
+      const commandPath = `${cacheDir}/local-agent`;
+      yield* fileSystem.writeFileString(commandPath, "#!/bin/sh\n");
+      yield* fileSystem.chmod(commandPath, 0o755);
+      const resolver = yield* AcpRegistrySupport.makeAcpRegistryCatalog({
+        cacheDir,
+        toolsDir: `${cacheDir}/tools`,
+        registryUrl,
+      });
+      const localSettings = settings({ agentId: "", commandPath });
+      const environment = { LOCAL_SETTING: "kept" };
+      expect(yield* resolver.inspect(localSettings, environment)).toMatchObject({
+        status: "ready",
+        version: null,
+      });
+      expect((yield* resolver.resolve(localSettings, "/workspace", environment)).spawn).toEqual({
+        command: commandPath,
+        args: [],
+        cwd: "/workspace",
+        env: environment,
+      });
+      const missing = settings({ agentId: "", commandPath: `${cacheDir}/missing` });
+      expect(yield* resolver.inspect(missing, environment)).toMatchObject({
+        status: "missing_runner",
+      });
+      expect(
+        (yield* resolver.resolve(missing, "/workspace", environment).pipe(Effect.flip)).reason,
+      ).toBe("runner_unavailable");
+      expect(yield* resolver.inspect(settings({ agentId: "", commandPath: "" }))).toEqual({
+        status: "unconfigured",
+      });
+      expect(requests).toEqual([]);
+    }).pipe(
+      Effect.scoped,
+      Effect.provide(
+        resolverLayer((request) => {
+          requests.push(request.url);
+          return Effect.succeed(
+            HttpClientResponse.fromWeb(request, new Response("unreachable", { status: 500 })),
+          );
+        }),
+      ),
+    );
+  });
+
   it.effect("resolves command overrides while preserving registry args and environment", () => {
     const agent = makeAgent({
       binary: {
