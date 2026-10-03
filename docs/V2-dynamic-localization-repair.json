@@ -1,0 +1,23 @@
+{
+  "installedApplication": "/Applications/T3 Code (Nightly).app",
+  "installedVersion": "0.0.46-nightly.20261003.2",
+  "DMG": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/verified-desktop-2-complete/T3-Code-0.0.46-nightly.20261003.2-arm64.dmg",
+  "sha256": "63c5c016816ee83334508c718defe055b4dbecb2aa70974525ac0a7c6b483c40",
+  "sourceCommit": "4cf69a9d",
+  "sourceBranch": "main",
+  "testsPassed": 30,
+  "realDomTests": 4,
+  "descriptorValueImmutabilityTests": 1,
+  "translationDictionaryKeys": 3936,
+  "translatedCalls": 4004,
+  "buildExitCode": 0,
+  "packageAndInstalledVerifierExitCode": 0,
+  "codeSealExitCode": 0,
+  "backendSmokeExitCode": 0,
+  "priorAppQuit": "normal non-forced semantic quit of exact PID7747",
+  "userDataFilesReadOrEditedByInstaller": false,
+  "applicationRelaunched": false,
+  "GUIVisualVerification": false,
+  "appleNotarization": false,
+  "oldAppBackup": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/.trash/retired-V2-1/T3 Code (Nightly).app"
+}
