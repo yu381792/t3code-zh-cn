@@ -1356,6 +1356,9 @@ export function resolveMergedStageDependencies(input: {
   return {
     ...selectCliRuntimeExternalDependencies(input.serverDependencies),
     ...input.desktopDependencies,
+    // Auto-installed peers may select zod 3.25.0, which was published without dist.
+    // Use the complete compatible v3 release already present in the workspace lock.
+    zod: "3.25.76",
     ...resolveFffNativeDependencies(input.platform, input.arch, input.fffNodeVersion),
   };
 }
