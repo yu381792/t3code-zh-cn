@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { RefreshIcon } from "~/components/ui/refresh-icon";
 import type {
   ContextMenuItem as TreeContextMenuItem,
@@ -46,6 +47,8 @@ function treePath(entry: ProjectEntry): string {
 }
 
 function RefreshFilesButton(props: { isPending: boolean; onRefresh: () => void }) {
+  const t3T = useUiTranslate();
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -54,14 +57,14 @@ function RefreshFilesButton(props: { isPending: boolean; onRefresh: () => void }
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Refresh workspace files"
+            aria-label={t3T("Refresh workspace files")}
             onClick={props.onRefresh}
           />
         }
       >
         <RefreshIcon refreshing={props.isPending} />
       </TooltipTrigger>
-      <TooltipPopup>{props.isPending ? "Refreshing…" : "Refresh files"}</TooltipPopup>
+      <TooltipPopup>{props.isPending ? t3T("Refreshing…") : t3T("Refresh files")}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -73,6 +76,8 @@ function FileSearchField(props: {
   onValueChange: (value: string) => void;
   value: string;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <InputGroup variant="ghost" className="h-7 min-w-0 flex-1">
       <InputGroupInput
@@ -81,7 +86,7 @@ function FileSearchField(props: {
         size="sm"
         value={props.value}
         aria-label={props.ariaLabel}
-        placeholder="Search files"
+        placeholder={t3T("Search files")}
         spellCheck={false}
         onChange={(event) => props.onValueChange(event.target.value)}
         onKeyDown={(event) => {
@@ -104,6 +109,8 @@ export default function FileBrowserPanel({
   onRefreshSelectedFile,
   workspaceMutationId,
 }: FileBrowserPanelProps) {
+  const t3T = useUiTranslate();
+
   const { resolvedTheme } = useTheme();
   const composerRef = useComposerHandleContext();
   const fileContextMenu = useFileContextMenu(environmentId);
@@ -494,7 +501,7 @@ export default function FileBrowserPanel({
         <RefreshFilesButton isPending={isPending} onRefresh={handleRefresh} />
         <FileSearchField
           name="project-files-search"
-          ariaLabel={`Search ${projectName} files`}
+          ariaLabel={t3T("Search {0} files", [projectName])}
           value={search.value}
           onValueChange={handleSearchValueChange}
           onClose={closeSearch}
@@ -509,8 +516,8 @@ export default function FileBrowserPanel({
                   variant="ghost"
                   aria-label={
                     expandAll || allDirectoriesExpanded
-                      ? "Collapse all folders"
-                      : "Expand all folders"
+                      ? t3T("Collapse all folders")
+                      : t3T("Expand all folders")
                   }
                   onClick={toggleAllDirectories}
                 />
@@ -523,7 +530,9 @@ export default function FileBrowserPanel({
               )}
             </TooltipTrigger>
             <TooltipPopup>
-              {expandAll || allDirectoriesExpanded ? "Collapse all folders" : "Expand all folders"}
+              {expandAll || allDirectoriesExpanded
+                ? t3T("Collapse all folders")
+                : t3T("Expand all folders")}
             </TooltipPopup>
           </Tooltip>
         ) : null}
@@ -534,22 +543,22 @@ export default function FileBrowserPanel({
           onClick={handleRefresh}
           className="p-4 text-left text-xs leading-relaxed text-destructive"
         >
-          {error ?? pathSearch.error} Click to retry.
+          {error ?? pathSearch.error} {t3T("Click to retry.")}
         </button>
       ) : null}
       {query.trim() && pathSearch.truncated && !pathSearch.isPending ? (
         <div className="px-3 py-1 text-xs text-muted-foreground">
-          More matches available. Refine your search.
+          {t3T("More matches available. Refine your search.")}
         </div>
       ) : null}
       {(isPending || pathSearch.isPending) && (
         <div role="status" className="px-3 py-1 text-xs text-muted-foreground">
-          Loading files…
+          {t3T("Loading files…")}
         </div>
       )}
       <FileTree
         model={model}
-        aria-label={`${projectName} files`}
+        aria-label={t3T("{0} files", [projectName])}
         className="min-h-0 flex-1 overflow-hidden"
         style={pierreTreeStyle(resolvedTheme)}
       />

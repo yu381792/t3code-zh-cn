@@ -1,3 +1,4 @@
+import { getInterfaceLanguage, translate } from "../i18n/translate";
 import type { TimestampFormat } from "@t3tools/contracts/settings";
 import {
   resolveSnoozePresets as resolveSharedSnoozePresets,
@@ -21,13 +22,14 @@ export function resolveSnoozePresets(
 ): ReadonlyArray<SnoozePreset> {
   return resolveSharedSnoozePresets(now).map((preset) => {
     const wake = parseTimestampDate(preset.snoozedUntil);
-    if (wake === null) return preset;
+    if (wake === null) return { ...preset, label: translate(preset.label) };
     const time = timeOfDayLabel(wake, timestampFormat);
     return {
       ...preset,
+      label: translate(preset.label),
       whenLabel:
         preset.id === "next-week"
-          ? `${wake.toLocaleDateString(undefined, { weekday: "short" })} ${time}`
+          ? `${wake.toLocaleDateString(getInterfaceLanguage() === "zh-CN" ? "zh-CN" : undefined, { weekday: "short" })} ${time}`
           : time,
     };
   });
@@ -49,9 +51,15 @@ export function snoozeWakeDescription(
   startOfToday.setHours(0, 0, 0, 0);
   const dayDelta = Math.floor((wake.getTime() - startOfToday.getTime()) / DAY_MS);
   if (dayDelta === 0) return time;
-  if (dayDelta === 1) return `tomorrow ${time}`;
-  const weekday = wake.toLocaleDateString(undefined, { weekday: "short" });
+  if (dayDelta === 1) return translate("tomorrow {0}", [time]);
+  const weekday = wake.toLocaleDateString(
+    getInterfaceLanguage() === "zh-CN" ? "zh-CN" : undefined,
+    { weekday: "short" },
+  );
   if (dayDelta < 7) return `${weekday} ${time}`;
-  const date = wake.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const date = wake.toLocaleDateString(getInterfaceLanguage() === "zh-CN" ? "zh-CN" : undefined, {
+    month: "short",
+    day: "numeric",
+  });
   return `${date}, ${time}`;
 }

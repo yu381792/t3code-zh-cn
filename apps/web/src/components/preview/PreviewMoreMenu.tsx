@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import type { DesktopPreviewColorScheme, EnvironmentId } from "@t3tools/contracts";
 import { Minus, MoreVertical, Plus as PlusIcon, RotateCcw } from "lucide-react";
 
@@ -83,6 +85,8 @@ export function PreviewMoreMenu({
   profileId,
   profileName,
 }: Props) {
+  const t3T = useUiTranslate();
+
   if (!previewBridge) return null;
   const bridge = previewBridge;
   const tabDisabled = !tabId || !hasWebContents;
@@ -99,32 +103,37 @@ export function PreviewMoreMenu({
           render={
             <MenuTrigger
               render={
-                <Button variant="ghost" size="icon-xs" type="button" aria-label="Preview menu" />
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  type="button"
+                  aria-label={t3T("Preview menu")}
+                />
               }
             />
           }
         >
           <MoreVertical />
         </TooltipTrigger>
-        <TooltipPopup>More</TooltipPopup>
+        <TooltipPopup>{t3T("More")}</TooltipPopup>
       </Tooltip>
       <MenuPopup align="end" sideOffset={6}>
         <MenuItem onClick={callTab(bridge.hardReload)} disabled={tabDisabled}>
-          Hard reload
+          {t3T("Hard reload")}
         </MenuItem>
         <MenuItem onClick={callTab(bridge.openDevTools)} disabled={tabDisabled}>
-          Open DevTools
+          {t3T("Open DevTools")}
         </MenuItem>
         <MenuItem onClick={onNativePictureInPicture} disabled={tabDisabled}>
           {nativePictureInPicture
-            ? "Close separate preview window"
-            : "Open separate preview window"}
+            ? t3T("Close separate preview window")
+            : t3T("Open separate preview window")}
         </MenuItem>
         <MenuItem onClick={onToggleDeviceToolbar} disabled={tabDisabled}>
-          {deviceToolbarVisible ? "Hide device toolbar" : "Show device toolbar"}
+          {deviceToolbarVisible ? t3T("Hide device toolbar") : t3T("Show device toolbar")}
         </MenuItem>
         <MenuSub>
-          <MenuSubTrigger disabled={tabDisabled}>Appearance</MenuSubTrigger>
+          <MenuSubTrigger disabled={tabDisabled}>{t3T("Appearance")}</MenuSubTrigger>
           <MenuSubPopup>
             <MenuRadioGroup
               value={colorScheme}
@@ -137,7 +146,7 @@ export function PreviewMoreMenu({
             >
               {COLOR_SCHEME_OPTIONS.map((option) => (
                 <MenuRadioItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t3T(option.label)}
                 </MenuRadioItem>
               ))}
             </MenuRadioGroup>
@@ -154,14 +163,14 @@ export function PreviewMoreMenu({
           className="justify-between"
           disabled={tabDisabled}
         >
-          <span>Zoom</span>
+          <span>{t3T("Zoom")}</span>
           <span className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon-xs"
               type="button"
               onClick={callTab(bridge.zoomOut)}
-              aria-label="Zoom out"
+              aria-label={t3T("Zoom out")}
               disabled={tabDisabled}
             >
               <Minus />
@@ -174,7 +183,7 @@ export function PreviewMoreMenu({
               size="icon-xs"
               type="button"
               onClick={callTab(bridge.zoomIn)}
-              aria-label="Zoom in"
+              aria-label={t3T("Zoom in")}
               disabled={tabDisabled}
             >
               <PlusIcon />
@@ -184,7 +193,7 @@ export function PreviewMoreMenu({
               size="icon-xs"
               type="button"
               onClick={callTab(bridge.resetZoom)}
-              aria-label="Reset zoom"
+              aria-label={t3T("Reset zoom")}
               disabled={tabDisabled}
             >
               <RotateCcw />
@@ -208,7 +217,9 @@ export function PreviewMoreMenu({
             // Truncation needs a block box: `text-overflow` on an inline child
             // never applies and a long name would push the popup past its width.
             <MenuGroupLabel className="max-w-64">
-              <span className="block truncate">Profile: {profileName}</span>
+              <span className="block truncate">
+                {t3T("Profile:")} {profileName}
+              </span>
             </MenuGroupLabel>
           ) : null}
           <MenuItem
@@ -216,12 +227,12 @@ export function PreviewMoreMenu({
               void bridge.clearCookies(environmentId, profileId).catch(() => undefined)
             }
           >
-            Clear cookies
+            {t3T("Clear cookies")}
           </MenuItem>
           <MenuItem
             onClick={() => void bridge.clearCache(environmentId, profileId).catch(() => undefined)}
           >
-            Clear cache
+            {t3T("Clear cache")}
           </MenuItem>
         </MenuGroup>
       </MenuPopup>

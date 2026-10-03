@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import type { PullRequestStack } from "@t3tools/contracts";
 import { cn } from "~/lib/utils";
 import { resolvePullRequestState } from "./pullRequestPresentation";
@@ -20,7 +21,7 @@ export function PullRequestStackLayerContent({
         <span className="block truncate">{layer.title || layer.headBranch}</span>
         <span className="block truncate text-xs font-normal text-muted-foreground">
           #{layer.number} · {compact ? null : `${layer.headBranch} · `}
-          {state.label}
+          <LocalizedUiText source={state.label} />
         </span>
       </span>
     </>

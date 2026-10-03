@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
@@ -58,6 +59,8 @@ export function AcpRegistrySearchStep({
   onLoadingChange,
   onPreparingChange,
 }: AcpRegistrySearchStepProps) {
+  const t3T = useUiTranslate();
+
   const [query, setQuery] = useState("");
   // An empty registry query is the compact compatible catalog. Start there so
   // entering this step is useful before the user knows what to search for.
@@ -133,7 +136,7 @@ export function AcpRegistrySearchStep({
   return (
     <section className="grid gap-3" aria-labelledby="acp-registry-search-heading">
       <h3 className="sr-only" id="acp-registry-search-heading">
-        Choose an agent
+        {t3T("Choose an agent")}
       </h3>
 
       <form className="flex flex-wrap items-center gap-2" onSubmit={handleSearch}>
@@ -142,7 +145,7 @@ export function AcpRegistrySearchStep({
             <SearchIcon />
           </InputGroupAddon>
           <InputGroupInput
-            aria-label="Search ACP Registry"
+            aria-label={t3T("Search ACP Registry")}
             disabled={preparingId !== null}
             onChange={(event) => {
               const nextQuery = event.currentTarget.value;
@@ -154,7 +157,7 @@ export function AcpRegistrySearchStep({
                 setSubmittedQuery(nextQuery.trim());
               }, 300);
             }}
-            placeholder="Search agents…"
+            placeholder={t3T("Search agents…")}
             size="sm"
             type="search"
             value={query}
@@ -167,17 +170,20 @@ export function AcpRegistrySearchStep({
           type="button"
           variant="ghost-muted"
         >
-          Enter manually
+          {t3T("Enter manually")}
         </Button>
       </form>
 
       <div className="sr-only" role="status">
         {isInitialSearch
-          ? "Searching the ACP Registry."
+          ? t3T("Searching the ACP Registry.")
           : isRefreshing
-            ? "Refreshing ACP Registry results."
+            ? t3T("Refreshing ACP Registry results.")
             : results
-              ? `${resultCount} compatible ${resultCount === 1 ? "agent" : "agents"} found.`
+              ? t3T("{0} compatible {1} found.", [
+                  resultCount,
+                  resultCount === 1 ? t3T("agent") : t3T("agents"),
+                ])
               : ""}
       </div>
 
@@ -189,15 +195,15 @@ export function AcpRegistrySearchStep({
 
       {isInitialSearch ? (
         <div className="flex min-h-20 items-center justify-center text-sm text-muted-foreground">
-          Searching the registry...
+          {t3T("Searching the registry...")}
         </div>
       ) : null}
 
       {results ? (
         results.length === 0 ? (
           <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-dashed px-4 text-center">
-            <p className="text-sm font-medium">No compatible agents found</p>
-            <p className="mt-1 text-xs text-muted-foreground">Try a broader search.</p>
+            <p className="text-sm font-medium">{t3T("No compatible agents found")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t3T("Try a broader search.")}</p>
           </div>
         ) : (
           <ScrollArea scrollFade className="max-h-64">
@@ -240,7 +246,7 @@ export function AcpRegistrySearchStep({
                                 <Button
                                   size="icon-xs"
                                   variant="ghost-muted"
-                                  aria-label={`About ${agent.name}`}
+                                  aria-label={t3T("About {0}", [agent.name])}
                                   render={
                                     <a
                                       href={agent.website || agent.repository || undefined}
@@ -253,7 +259,9 @@ export function AcpRegistrySearchStep({
                                 </Button>
                               }
                             />
-                            <TooltipPopup>About {agent.name}</TooltipPopup>
+                            <TooltipPopup>
+                              {t3T("About")} {agent.name}
+                            </TooltipPopup>
                           </Tooltip>
                         ) : null}
                         <Button
@@ -263,7 +271,7 @@ export function AcpRegistrySearchStep({
                           size="xs"
                           variant={isPreparing ? "secondary" : "outline"}
                         >
-                          {alreadyAdded ? "Added" : isPreparing ? progressLabel : "Add"}
+                          {alreadyAdded ? t3T("Added") : isPreparing ? progressLabel : t3T("Add")}
                         </Button>
                       </div>
                     </div>

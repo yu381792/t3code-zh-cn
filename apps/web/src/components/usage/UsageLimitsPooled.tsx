@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   CHATGPT_USAGE_URL,
   collectLimitAccounts,
@@ -52,11 +53,13 @@ function accountHue(email: string): number {
 
 /** The two-letter chip for an email, coloured by a stable hue per address. */
 function AccountChip({ email }: { readonly email: string }) {
+  const t3T = useUiTranslate();
+
   const hue = accountHue(email);
   return (
     <span
       role="img"
-      aria-label={`Account ${accountInitials(email)}`}
+      aria-label={t3T("Account {0}", [accountInitials(email)])}
       className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-3xs leading-none font-semibold"
       style={{ backgroundColor: `oklch(0.85 0.08 ${hue})`, color: `oklch(0.35 0.1 ${hue})` }}
     >
@@ -151,6 +154,8 @@ function SegmentPopover({
   readonly redeem: ReturnType<typeof useResetCredit> | null;
   readonly onRedeem: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const remaining = remainingPercent(window);
   const resetsIn = formatResetsIn(window, now);
@@ -172,7 +177,7 @@ function SegmentPopover({
         {account.email ? (
           <RedactedSensitiveText
             value={account.email}
-            ariaLabel="Toggle account email visibility"
+            ariaLabel={t3T("Toggle account email visibility")}
             revealTooltip="Click to reveal email"
             hideTooltip="Click to hide email"
             className="w-fit"
@@ -180,21 +185,24 @@ function SegmentPopover({
         ) : null}
       </div>
       <div className="flex flex-col gap-1 border-t border-border/60 pt-2.5">
-        {account.plan ? <Row label="Plan">{account.plan}</Row> : null}
+        {account.plan ? <Row label={t3T("Plan")}>{account.plan}</Row> : null}
         {where ? (
-          <Row label={account.environments.length > 0 ? "Signed in" : "Via"}>{where}</Row>
+          <Row label={account.environments.length > 0 ? t3T("Signed in") : t3T("Via")}>{where}</Row>
         ) : null}
       </div>
       <div className="flex flex-col gap-1 border-t border-border/60 pt-2.5">
-        <Row label="Left">{remaining}%</Row>
+        <Row label={t3T("Left")}>{remaining}%</Row>
         {window.resetsAt ? (
-          <Row label="Resets">
+          <Row label={t3T("Resets")}>
             {formatUpcomingTimestamp(window.resetsAt, timestampFormat, now)}
             {resetsIn ? ` · ${resetsIn.replace("resets in ", "in ")}` : ""}
           </Row>
         ) : null}
         {reset && reset.restoresPercent > 0 ? (
-          <Row label="Restores">+{reset.restoresPercent}% of pool</Row>
+          <Row label={t3T("Restores")}>
+            +{reset.restoresPercent}
+            {t3T("% of pool")}
+          </Row>
         ) : null}
       </div>
       {credits && redeem ? (
@@ -208,7 +216,7 @@ function SegmentPopover({
               className="ms-auto"
               onClick={onRedeem}
             >
-              {redeem.busy ? "Using…" : "Use reset"}
+              {redeem.busy ? t3T("Using…") : t3T("Use reset")}
             </Button>
           </span>
         </div>
@@ -240,6 +248,8 @@ function PoolSegment({
   readonly index: number;
   readonly showAccountName: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   const remaining = remainingPercent(window);
   const resetsIn = formatResetsIn(window, now);
@@ -252,7 +262,13 @@ function PoolSegment({
           <button
             type="button"
             style={{ gridColumn: index, gridRow: 1 }}
-            aria-label={`${account.displayName ?? (account.email ? accountInitials(account.email) : account.driver)}: ${remaining}% left${resetsIn ? `, ${resetsIn}` : ""}${credits ? `, ${credits} reset ${credits === 1 ? "credit" : "credits"} banked` : ""}`}
+            aria-label={t3T("{0}: {1}% left{2}{3}", [
+              account.displayName ??
+                (account.email ? accountInitials(account.email) : account.driver),
+              remaining,
+              resetsIn ? `, ${resetsIn}` : "",
+              credits ? `, ${credits} reset ${credits === 1 ? "credit" : "credits"} banked` : "",
+            ])}
             className="relative h-5 min-w-0 cursor-pointer overflow-hidden rounded-md bg-muted text-start outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[popup-open]:ring-1 data-[popup-open]:ring-border @2xl/pool:h-8"
           />
         }
@@ -351,6 +367,8 @@ function LegendRow({
   readonly now: number;
   readonly index: number;
 }) {
+  const t3T = useUiTranslate();
+
   const remaining = remainingPercent(window);
   const resetsIn = formatResetsIn(window, now);
   const credits = account.limits.resetCredits?.availableCount ?? 0;
@@ -366,7 +384,7 @@ function LegendRow({
           className="absolute inset-0 rounded-sm opacity-35"
           style={{ backgroundColor: color }}
         />
-        <span className="sr-only">Segment </span>
+        <span className="sr-only">{t3T("Segment")} </span>
         <span className="relative">{index}</span>
       </span>
       <AccountName account={account} className="min-w-0 truncate font-medium text-foreground" />
@@ -384,7 +402,8 @@ function LegendRow({
               {credits}
             </span>
             <span className="sr-only">
-              {credits} reset {credits === 1 ? "credit" : "credits"} banked
+              {credits} {t3T("reset")} {credits === 1 ? t3T("credit") : t3T("credits")}{" "}
+              {t3T("banked")}
             </span>
           </>
         ) : null}
@@ -501,6 +520,8 @@ function PoolWindowCard({
   readonly label?: string | undefined;
   readonly description?: string | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   // The soonest reset that hands anything back; an untouched account resets to no effect.
   const nextRefill = pool.resets.find((reset) => reset.restoresPercent > 0);
   return (
@@ -511,7 +532,7 @@ function PoolWindowCard({
           <span className="text-3xl font-semibold text-foreground tabular-nums">
             {pool.remainingPercent}%
           </span>
-          <span className="text-sm text-muted-foreground">left</span>
+          <span className="text-sm text-muted-foreground">{t3T("left")}</span>
           {pool.pace ? <PaceIcon pace={pool.pace} /> : null}
         </span>
         {nextRefill && pool.columns.length > 1 ? (
@@ -575,6 +596,8 @@ export function UsageLimitsPooled({
   readonly now: number;
   readonly cursorPrompt?: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const pools = collectLimitPools(collectLimitAccounts(presentations), now);
   const notices = collectLimitNotices(presentations);
   const externalLinks = collectExternalUsageLinks(presentations);
@@ -587,7 +610,7 @@ export function UsageLimitsPooled({
     <div className="flex flex-col gap-8">
       {pools.length === 0 && notices.length === 0 && !cursorPrompt && externalLinks.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No provider on the selected environments reports subscription limits.
+          {t3T("No provider on the selected environments reports subscription limits.")}
         </p>
       ) : null}
       {pools.map((pool, index) => (
@@ -610,7 +633,7 @@ export function UsageLimitsPooled({
               <h2 className="text-sm font-medium">{link.label}</h2>
               {link.url === CHATGPT_USAGE_URL ? (
                 <p className="text-xs text-muted-foreground">
-                  View usage in ChatGPT with your connected account.
+                  {t3T("View usage in ChatGPT with your connected account.")}
                 </p>
               ) : link.message ? (
                 <p className="max-w-xl text-xs text-muted-foreground">{link.message}</p>
@@ -622,7 +645,7 @@ export function UsageLimitsPooled({
             size="xs"
             onClick={() => void ensureLocalApi().shell.openExternal(link.url)}
           >
-            Manage usage
+            {t3T("Manage usage")}
             <ExternalLinkIcon className="size-3.5" aria-hidden="true" />
           </Button>
         </section>

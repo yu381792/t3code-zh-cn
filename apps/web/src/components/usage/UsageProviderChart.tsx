@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
 import type { UsageProviderKind } from "@t3tools/contracts";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -181,6 +182,8 @@ export function UsageProviderChart({
   resolution,
   timeZone,
 }: UsageProviderChartProps) {
+  const t3T = useUiTranslate();
+
   const periods = resolution === "hour" ? hours : days;
   const byPeriod = useMemo(
     () =>
@@ -345,7 +348,10 @@ export function UsageProviderChart({
             viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             preserveAspectRatio="none"
             role="img"
-            aria-label={`${resolution === "hour" ? "Hourly" : "Daily"} ${metric === "tokens" ? "processed tokens" : "cost"} by provider`}
+            aria-label={t3T("{0} {1} by provider", [
+              resolution === "hour" ? "Hourly" : "Daily",
+              metric === "tokens" ? "processed tokens" : "cost",
+            ])}
           >
             {ticks.map((tick) => {
               const y = toY(tick);
@@ -429,7 +435,7 @@ export function UsageProviderChart({
                 );
               })}
               <div className="mt-1 flex items-center justify-between gap-3 border-t border-border pt-1">
-                <span className="text-muted-foreground">Total</span>
+                <span className="text-muted-foreground">{t3T("Total")}</span>
                 <span className="text-foreground tabular-nums">
                   {format(hoveredColumn?.total ?? 0)}
                 </span>

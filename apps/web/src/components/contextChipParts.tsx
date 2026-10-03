@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { EnvironmentId, PullRequestContextMetadata } from "@t3tools/contracts";
 import { CircleDashedIcon, FilmIcon, ImageIcon } from "lucide-react";
 import {
@@ -70,6 +71,8 @@ export function ContextChipPopover(props: {
   accessibleLabel: string;
   children: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <Popover>
       <PopoverTrigger
@@ -77,7 +80,7 @@ export function ContextChipPopover(props: {
           <ContextChip
             kind={props.kind}
             render={<button type="button" />}
-            aria-label={`${props.accessibleLabel}. Show details`}
+            aria-label={t3T("{0}. Show details", [props.accessibleLabel])}
             data-markdown-copy={props.copyMarkdown}
           />
         }
@@ -102,6 +105,8 @@ export function PullRequestChip(props: {
   copyMarkdown?: string;
   onOpen: (event: MouseEvent<HTMLElement>, url: string) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const previewTarget = usePullRequestPreviewTarget(props.environmentId, props.metadata.url);
   const displayState =
     props.metadata.state === "open" && props.metadata.isDraft ? "draft" : props.metadata.state;
@@ -110,7 +115,7 @@ export function PullRequestChip(props: {
     <ContextChip
       kind={props.kind}
       render={<button type="button" />}
-      aria-label={`Open ${props.kindLabel} ${props.label}: ${props.metadata.title}`}
+      aria-label={t3T("Open {0} {1}: {2}", [props.kindLabel, props.label, props.metadata.title])}
       data-markdown-copy={props.copyMarkdown}
       onClick={(event) => props.onOpen(event, props.metadata.url)}
     >
@@ -181,6 +186,8 @@ export function ImageChipButton({
   size: string;
   suffix?: string | null;
 }) {
+  const t3T = useUiTranslate();
+
   const [sample, setSample] = useState<{ url: string; color: string | undefined }>();
   const [corsFailedUrl, setCorsFailedUrl] = useState<string>();
   const accent = sample?.url === previewUrl ? sample?.color : undefined;
@@ -188,7 +195,7 @@ export function ImageChipButton({
     <ContextChip
       kind="image"
       render={<button type="button" />}
-      aria-label={`Image attachment, ${name}, ${size}`}
+      aria-label={t3T("Image attachment, {0}, {1}", [name, size])}
       style={{ ...style, ...(accent ? { "--context-chip-accent": accent } : {}) } as CSSProperties}
       {...props}
     >
@@ -291,12 +298,14 @@ function FileChipContent(props: {
 }
 
 export function UnresolvedChip(props: { label: string; tooltip: string; copyMarkdown?: string }) {
+  const t3T = useUiTranslate();
+
   return (
     <ContextChipShell
       icon={<CircleDashedIcon />}
       label={props.label}
       state="unresolved"
-      aria-label={`Unavailable context, ${props.label}`}
+      aria-label={t3T("Unavailable context, {0}", [props.label])}
       data-markdown-copy={props.copyMarkdown}
       tooltip={props.tooltip}
     />

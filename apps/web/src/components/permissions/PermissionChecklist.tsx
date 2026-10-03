@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { CircleCheckIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { Button } from "../ui/button";
@@ -18,23 +20,29 @@ export function PermissionChecklist({
   permissions: readonly PermissionItem[];
   busy?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <div className="space-y-2">
       {permissions.map((permission) => (
         <div key={permission.id} className="flex items-center gap-3 rounded-lg border px-3 py-2">
           {permission.icon}
           <div className="min-w-0 flex-1">
-            <p className="font-medium">{permission.title}</p>
-            <p className="text-xs text-muted-foreground">{permission.description}</p>
+            <p className="font-medium">
+              <LocalizedUiText source={permission.title} />
+            </p>
+            <p className="text-xs text-muted-foreground">
+              <LocalizedUiText source={permission.description} />
+            </p>
           </div>
           {permission.granted ? (
             <span role="status" className="flex items-center gap-1 text-xs text-success">
               <CircleCheckIcon className="size-4" aria-hidden="true" />
-              Allowed
+              {t3T("Allowed")}
             </span>
           ) : (
             <Button size="xs" variant="outline" disabled={busy} onClick={permission.onAllow}>
-              Allow
+              {t3T("Allow")}
             </Button>
           )}
         </div>

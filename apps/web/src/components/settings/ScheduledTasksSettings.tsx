@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import {
   Clock3Icon,
@@ -210,6 +211,8 @@ export function ScheduledTasksSettings(target: {
   readonly environmentId?: EnvironmentId;
   readonly taskId?: ScheduledTaskId | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   const { scope, environments, connectedEnvironments, environment } = useSettingsScope();
   const [editor, setEditor] = useState<{
     environmentId: EnvironmentId;
@@ -222,7 +225,7 @@ export function ScheduledTasksSettings(target: {
   return (
     <SettingsPageContainer>
       <SettingsSection
-        title="Scheduled tasks"
+        title={t3T("Scheduled tasks")}
         variant="plain"
         headerAction={
           <Button
@@ -235,12 +238,12 @@ export function ScheduledTasksSettings(target: {
             }
           >
             <PlusIcon className="size-3" />
-            New task
+            {t3T("New task")}
           </Button>
         }
       >
         {scope.kind === "unavailable" ? (
-          <SettingsSection title="Unavailable selection">
+          <SettingsSection title={t3T("Unavailable selection")}>
             <SettingsRow title={scope.message} />
           </SettingsSection>
         ) : environments.length === 0 ? (
@@ -249,8 +252,10 @@ export function ScheduledTasksSettings(target: {
               <EmptyMedia variant="icon">
                 <Clock3Icon />
               </EmptyMedia>
-              <EmptyTitle>No environments available</EmptyTitle>
-              <EmptyDescription>Connect an environment to manage scheduled tasks.</EmptyDescription>
+              <EmptyTitle>{t3T("No environments available")}</EmptyTitle>
+              <EmptyDescription>
+                {t3T("Connect an environment to manage scheduled tasks.")}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -295,6 +300,8 @@ function ScheduledTaskEnvironmentSection({
   readonly taskId?: ScheduledTaskId | undefined;
   readonly onEdit: (environmentId: EnvironmentId, task: ScheduledTask) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const { scope } = useSettingsScope();
   const connected =
     environment.connection.phase === "connected" && environment.serverConfig !== null;
@@ -331,26 +338,28 @@ function ScheduledTaskEnvironmentSection({
     >
       {!connected ? (
         <SettingsRow
-          title="Environment disconnected"
-          description={`Reconnect ${environment.label} to view its scheduled tasks.`}
+          title={t3T("Environment disconnected")}
+          description={t3T("Reconnect {0} to view its scheduled tasks.", [environment.label])}
         />
       ) : tasksQuery.error ? (
-        <SettingsRow title="Could not load scheduled tasks" description={tasksQuery.error} />
+        <SettingsRow title={t3T("Could not load scheduled tasks")} description={tasksQuery.error} />
       ) : !tasks ? (
-        <SettingsRow title="Loading scheduled tasks…" role="status" />
+        <SettingsRow title={t3T("Loading scheduled tasks…")} role="status" />
       ) : (
         <>
           {taskId && !linkedTask ? (
             <SettingsRow
-              title="Task unavailable"
-              description="This task no longer exists or is outside the selected project scope."
+              title={t3T("Task unavailable")}
+              description={t3T(
+                "This task no longer exists or is outside the selected project scope.",
+              )}
               role="status"
             />
           ) : null}
           {tasks.length === 0 ? (
             <SettingsRow
-              title="No scheduled tasks"
-              description="No tasks match this environment and project selection."
+              title={t3T("No scheduled tasks")}
+              description={t3T("No tasks match this environment and project selection.")}
             />
           ) : (
             tasks.map((task) => (
@@ -377,6 +386,8 @@ function ScheduledTaskRow({
   readonly task: ScheduledTask;
   readonly onEdit: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [busy, setBusy] = useState(false);
   const toggle = useAtomCommand(serverEnvironment.setScheduledTaskEnabled, {
     label: "scheduled task enabled",
@@ -417,9 +428,9 @@ function ScheduledTaskRow({
             {scheduleLabel(task.schedule)} ·{" "}
             {task.enabled
               ? task.nextRunAt
-                ? `Next run ${relativeLabel(task.nextRunAt)}`
-                : "Not scheduled"
-              : "Paused"}
+                ? t3T("Next run {0}", [relativeLabel(task.nextRunAt)])
+                : t3T("Not scheduled")
+              : t3T("Paused")}
           </span>
           {task.lastRunStatus !== "never" ? (
             <Badge variant={statusVariant(task.lastRunStatus)}>{task.lastRunStatus}</Badge>
@@ -432,7 +443,7 @@ function ScheduledTaskRow({
           <Switch
             checked={task.enabled}
             disabled={busy}
-            aria-label={`Enable ${task.title}`}
+            aria-label={t3T("Enable {0}", [task.title])}
             onCheckedChange={() => void act("toggle")}
           />
           <Menu>
@@ -442,7 +453,7 @@ function ScheduledTaskRow({
                   size="icon-sm"
                   variant="ghost"
                   disabled={busy}
-                  aria-label={`Actions for ${task.title}`}
+                  aria-label={t3T("Actions for {0}", [task.title])}
                 />
               }
             >
@@ -451,16 +462,16 @@ function ScheduledTaskRow({
             <MenuPopup align="end">
               <MenuItem onClick={onEdit}>
                 <PencilIcon />
-                Edit
+                {t3T("Edit")}
               </MenuItem>
               <MenuItem onClick={() => void act("run")}>
                 <PlayIcon />
-                Run now
+                {t3T("Run now")}
               </MenuItem>
               <MenuSeparator />
               <MenuItem onClick={() => void act("delete")}>
                 <Trash2Icon />
-                Delete
+                {t3T("Delete")}
               </MenuItem>
             </MenuPopup>
           </Menu>
@@ -479,6 +490,8 @@ function ScheduledTaskEditorDialog({
   readonly task: ScheduledTask | null;
   readonly onClose: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const { scope, connectedEnvironments } = useSettingsScope();
   const [environmentId, setEnvironmentId] = useState(initialEnvironmentId);
   const environment = useEnvironment(environmentId);
@@ -633,18 +646,20 @@ function ScheduledTaskEditorDialog({
     >
       <DialogPopup className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{draft.editingId ? "Edit task" : "New task"}</DialogTitle>
+          <DialogTitle>{draft.editingId ? t3T("Edit task") : t3T("New task")}</DialogTitle>
           <DialogDescription>
-            Run a prompt automatically — on an interval or at a fixed time.
+            {t3T("Run a prompt automatically — on an interval or at a fixed time.")}
           </DialogDescription>
         </DialogHeader>
 
         <DialogPanel>
           <fieldset disabled={saving} className="space-y-5">
             {!connected ? (
-              <p className="text-sm text-destructive">Reconnect this environment before saving.</p>
+              <p className="text-sm text-destructive">
+                {t3T("Reconnect this environment before saving.")}
+              </p>
             ) : null}
-            <Field label="Runs on" htmlFor="scheduled-task-environment">
+            <Field label={t3T("Runs on")} htmlFor="scheduled-task-environment">
               <Select
                 value={environmentId}
                 disabled={task !== null || saving}
@@ -670,7 +685,7 @@ function ScheduledTaskEditorDialog({
                         kind={resolveEnvironmentMachineKind(environment?.serverConfig ?? null)}
                         className="size-4"
                       />
-                      {environment?.label ?? "Unavailable environment"}
+                      {environment?.label ?? t3T("Unavailable environment")}
                     </span>
                   </SelectValue>
                 </SelectTrigger>
@@ -694,13 +709,13 @@ function ScheduledTaskEditorDialog({
             ) : null}
             {editingTaskMissing ? (
               <p className="text-xs text-destructive" role="status">
-                This scheduled task no longer exists.
+                {t3T("This scheduled task no longer exists.")}
               </p>
             ) : null}
-            <Field label="Name" htmlFor="scheduled-task-title">
+            <Field label={t3T("Name")} htmlFor="scheduled-task-title">
               <Input
                 id="scheduled-task-title"
-                placeholder="e.g. Check for Sentry issues"
+                placeholder={t3T("e.g. Check for Sentry issues")}
                 value={draft.title}
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, title: event.target.value }))
@@ -709,7 +724,7 @@ function ScheduledTaskEditorDialog({
             </Field>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Project" htmlFor="scheduled-task-project">
+              <Field label={t3T("Project")} htmlFor="scheduled-task-project">
                 <Select
                   value={selectedProjectId}
                   onValueChange={(projectId) =>
@@ -717,7 +732,7 @@ function ScheduledTaskEditorDialog({
                   }
                 >
                   <SelectTrigger size="sm" id="scheduled-task-project">
-                    <SelectValue placeholder="Select a project">
+                    <SelectValue placeholder={t3T("Select a project")}>
                       {selectedProject?.title}
                     </SelectValue>
                   </SelectTrigger>
@@ -731,7 +746,7 @@ function ScheduledTaskEditorDialog({
                 </Select>
               </Field>
 
-              <Field label="Workspace" htmlFor="scheduled-task-workspace">
+              <Field label={t3T("Workspace")} htmlFor="scheduled-task-workspace">
                 <Select
                   value={draft.workspaceMode}
                   onValueChange={(value) =>
@@ -739,19 +754,21 @@ function ScheduledTaskEditorDialog({
                   }
                 >
                   <SelectTrigger size="sm" id="scheduled-task-workspace">
-                    <SelectValue>{WORKSPACE_MODE_LABELS[draft.workspaceMode]}</SelectValue>
+                    <SelectValue>{t3T(WORKSPACE_MODE_LABELS[draft.workspaceMode])}</SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
-                    <SelectItem value="worktree">Create a new worktree</SelectItem>
-                    <SelectItem value="root">Use the project checkout</SelectItem>
-                    <SelectItem value="existing_worktree">Use a specific checkout</SelectItem>
+                    <SelectItem value="worktree">{t3T("Create a new worktree")}</SelectItem>
+                    <SelectItem value="root">{t3T("Use the project checkout")}</SelectItem>
+                    <SelectItem value="existing_worktree">
+                      {t3T("Use a specific checkout")}
+                    </SelectItem>
                   </SelectPopup>
                 </Select>
               </Field>
             </div>
 
             {draft.workspaceMode === "worktree" ? (
-              <Field label="Base branch" htmlFor="scheduled-task-base-ref">
+              <Field label={t3T("Base branch")} htmlFor="scheduled-task-base-ref">
                 <WorktreeBaseBranchPicker
                   key={`${environmentId}:${selectedProjectId}`}
                   id="scheduled-task-base-ref"
@@ -768,7 +785,7 @@ function ScheduledTaskEditorDialog({
               </Field>
             ) : null}
             {draft.workspaceMode === "existing_worktree" ? (
-              <Field label="Checkout path" htmlFor="scheduled-task-checkout">
+              <Field label={t3T("Checkout path")} htmlFor="scheduled-task-checkout">
                 <Input
                   id="scheduled-task-checkout"
                   value={draft.existingWorktreePath}
@@ -783,11 +800,11 @@ function ScheduledTaskEditorDialog({
               </Field>
             ) : null}
 
-            <Field label="Prompt" htmlFor="scheduled-task-prompt">
+            <Field label={t3T("Prompt")} htmlFor="scheduled-task-prompt">
               <Textarea
                 id="scheduled-task-prompt"
                 className="max-h-64 overflow-y-auto"
-                placeholder="What should the agent do each time this runs?"
+                placeholder={t3T("What should the agent do each time this runs?")}
                 value={draft.prompt}
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, prompt: event.target.value }))
@@ -795,7 +812,7 @@ function ScheduledTaskEditorDialog({
               />
             </Field>
 
-            <Field label="Model">
+            <Field label={t3T("Model")}>
               <ProviderModelPicker
                 disabled={saving || !connected}
                 activeInstanceId={activeInstanceId}
@@ -815,14 +832,15 @@ function ScheduledTaskEditorDialog({
               {task?.schedule.type === "interval" &&
               task.schedule.everyMs < MIN_SCHEDULED_TASK_INTERVAL_MS ? (
                 <p className="text-sm text-muted-foreground" role="status">
-                  This task uses a legacy interval below one minute. Saving updates it to at least
-                  one minute.
+                  {t3T(
+                    "This task uses a legacy interval below one minute. Saving updates it to at least one minute.",
+                  )}
                 </p>
               ) : null}
               <div className="flex items-center justify-between gap-2">
-                <Label>Schedule</Label>
+                <Label>{t3T("Schedule")}</Label>
                 <ToggleGroup
-                  aria-label="Schedule type"
+                  aria-label={t3T("Schedule type")}
                   value={[draft.scheduleMode]}
                   onValueChange={(values) => {
                     const mode = values[0];
@@ -830,15 +848,15 @@ function ScheduledTaskEditorDialog({
                       setDraft((current) => ({ ...current, scheduleMode: mode }));
                   }}
                 >
-                  <Toggle value="fixed">At a time</Toggle>
-                  <Toggle value="interval">Every interval</Toggle>
+                  <Toggle value="fixed">{t3T("At a time")}</Toggle>
+                  <Toggle value="interval">{t3T("Every interval")}</Toggle>
                 </ToggleGroup>
               </div>
 
               {draft.scheduleMode === "fixed" ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="scheduled-task-time">Run at</Label>
+                    <Label htmlFor="scheduled-task-time">{t3T("Run at")}</Label>
                     <Input
                       type="time"
                       id="scheduled-task-time"
@@ -849,13 +867,13 @@ function ScheduledTaskEditorDialog({
                         setDraft((current) => ({ ...current, timeOfDay: event.target.value }))
                       }
                     />
-                    <span className="text-xs text-muted-foreground">on</span>
+                    <span className="text-xs text-muted-foreground">{t3T("on")}</span>
                   </div>
                   <ToggleGroup
                     multiple
                     variant="outline"
                     size="sm"
-                    aria-label="Days to run"
+                    aria-label={t3T("Days to run")}
                     value={[...draft.weekdays].map(String)}
                     onValueChange={(values) => {
                       if (values.length === 0) return;
@@ -866,15 +884,15 @@ function ScheduledTaskEditorDialog({
                     }}
                   >
                     {WEEKDAY_ORDER.map((day) => (
-                      <Toggle key={day} value={String(day)} aria-label={WEEKDAY_LABELS[day]}>
-                        {WEEKDAY_SHORT[day]}
+                      <Toggle key={day} value={String(day)} aria-label={t3T(WEEKDAY_LABELS[day])}>
+                        {t3T(WEEKDAY_SHORT[day])}
                       </Toggle>
                     ))}
                   </ToggleGroup>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="scheduled-task-interval">Run every</Label>
+                  <Label htmlFor="scheduled-task-interval">{t3T("Run every")}</Label>
                   <Input
                     type="number"
                     id="scheduled-task-interval"
@@ -887,19 +905,19 @@ function ScheduledTaskEditorDialog({
                       setDraft((current) => ({ ...current, intervalMinutes: event.target.value }))
                     }
                   />
-                  <span className="text-xs text-muted-foreground">minutes</span>
+                  <span className="text-xs text-muted-foreground">{t3T("minutes")}</span>
                 </div>
               )}
             </div>
 
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0 space-y-1">
-                <Label htmlFor="scheduled-task-enabled">Enabled</Label>
+                <Label htmlFor="scheduled-task-enabled">{t3T("Enabled")}</Label>
                 <p
                   id="scheduled-task-enabled-description"
                   className="text-sm text-muted-foreground"
                 >
-                  Disabled tasks stay saved but do not run.
+                  {t3T("Disabled tasks stay saved but do not run.")}
                 </p>
               </div>
               <Switch
@@ -914,14 +932,14 @@ function ScheduledTaskEditorDialog({
 
         <DialogFooter>
           <DialogClose render={<Button variant="outline" size="sm" disabled={saving} />}>
-            Cancel
+            {t3T("Cancel")}
           </DialogClose>
           <Button
             size="sm"
             disabled={saving || editingTaskMissing || !connected || !tasksQuery.data}
             onClick={() => void submit()}
           >
-            {draft.editingId ? "Save task" : "Create task"}
+            {draft.editingId ? t3T("Save task") : t3T("Create task")}
           </Button>
         </DialogFooter>
       </DialogPopup>

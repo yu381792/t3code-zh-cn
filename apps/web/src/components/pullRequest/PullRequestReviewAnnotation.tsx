@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * Pull-request-specific annotations: conversations already on the host and comments queued for
  * the review being written. New comment composition uses the shared diff annotation.
@@ -65,6 +66,8 @@ export function PendingReviewCommentCard({
   comment: PendingReviewComment;
   onRemove: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <div
       className={cn(CARD_CLASS, "border-dashed")}
@@ -73,12 +76,12 @@ export function PendingReviewCommentCard({
     >
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <MessageSquareIcon className="size-3.5" />
-        <span>Pending — sent when you submit the review</span>
+        <span>{t3T("Pending — sent when you submit the review")}</span>
         <Button
           size="icon-xs"
           variant="ghost"
           className="ml-auto"
-          aria-label="Discard this comment"
+          aria-label={t3T("Discard this comment")}
           onClick={onRemove}
         >
           <Trash2Icon className="size-3.5" />
@@ -133,6 +136,8 @@ export function ReviewThreadCard({
   onToggleResolved: () => void;
   onReacted: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   // A resolved thread is finished work, so it opens collapsed and stays one line until asked for.
   const [expanded, setExpanded] = useState(!thread.isResolved);
   const [replying, setReplying] = useState(false);
@@ -230,10 +235,10 @@ export function ReviewThreadCard({
           aria-expanded={expanded}
           onClick={() => setExpanded((current) => !current)}
         >
-          {thread.isResolved ? "Resolved" : "Open"} · {commentCount}{" "}
-          {commentCount === 1 ? "comment" : "comments"}
+          {thread.isResolved ? t3T("Resolved") : t3T("Open")} · {commentCount}{" "}
+          {commentCount === 1 ? t3T("comment") : t3T("comments")}
         </button>
-        {thread.isOutdated ? <span>outdated</span> : null}
+        {thread.isOutdated ? <span>{t3T("outdated")}</span> : null}
         {onFix ? (
           <Button
             size="xs"
@@ -243,7 +248,7 @@ export function ReviewThreadCard({
             onClick={onFix}
           >
             <HammerIcon className="size-3" />
-            {fixPending ? "Preparing..." : fixLabel}
+            {fixPending ? t3T("Preparing...") : fixLabel}
           </Button>
         ) : null}
         {canResolve ? (
@@ -254,7 +259,7 @@ export function ReviewThreadCard({
             disabled={pending}
             onClick={onToggleResolved}
           >
-            {thread.isResolved ? "Unresolve" : "Resolve"}
+            {thread.isResolved ? t3T("Unresolve") : t3T("Resolve")}
           </Button>
         ) : null}
       </div>
@@ -283,7 +288,7 @@ export function ReviewThreadCard({
                     value={comment.body}
                     cwd={workspaceRoot}
                     environmentId={environmentId}
-                    label="Edit comment"
+                    label={t3T("Edit comment")}
                     saving={savingEdit}
                     onSave={(body) => void saveEdit(comment.id, body)}
                     onCancel={() => setEditingId(null)}
@@ -298,7 +303,7 @@ export function ReviewThreadCard({
                     />
                     {canEditComment(comment) ? (
                       <PullRequestEditButton
-                        aria-label="Edit comment"
+                        aria-label={t3T("Edit comment")}
                         onClick={() => setEditingId(comment.id)}
                       />
                     ) : null}
@@ -315,7 +320,7 @@ export function ReviewThreadCard({
                 disabled={loadingMore}
                 onClick={() => void loadMore()}
               >
-                {loadingMore ? "Loading..." : "Load more comments"}
+                {loadingMore ? t3T("Loading...") : t3T("Load more comments")}
               </Button>
             </div>
           ) : null}
@@ -327,8 +332,8 @@ export function ReviewThreadCard({
                   autoFocus
                   size="sm"
                   value={reply}
-                  placeholder="Reply"
-                  aria-label="Reply to this conversation"
+                  placeholder={t3T("Reply")}
+                  aria-label={t3T("Reply to this conversation")}
                   onChange={(event) => setReply(event.target.value)}
                   onKeyDown={submitKeys({
                     value: reply,
@@ -339,20 +344,20 @@ export function ReviewThreadCard({
                 />
                 <div className="mt-2 flex justify-end gap-2">
                   <Button size="xs" variant="ghost" onClick={() => setReplying(false)}>
-                    Cancel
+                    {t3T("Cancel")}
                   </Button>
                   <Button
                     size="xs"
                     disabled={pending || reply.trim().length === 0}
                     onClick={() => void send()}
                   >
-                    Reply
+                    {t3T("Reply")}
                   </Button>
                 </div>
               </div>
             ) : (
               <Button size="xs" variant="ghost" className="mt-2" onClick={() => setReplying(true)}>
-                Reply
+                {t3T("Reply")}
               </Button>
             )
           ) : null}

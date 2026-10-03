@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { CheckIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import type { EnvironmentId, ServerProvider } from "@t3tools/contracts";
@@ -115,6 +116,8 @@ function EnvironmentUpdateRow({
   readonly status: ProviderUpdateRowStatus;
   readonly onUpdate: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   let trailing: ReactNode;
   switch (status.kind) {
     case "loading":
@@ -127,14 +130,14 @@ function EnvironmentUpdateRow({
     case "unchanged":
       trailing = (
         <Button size="xs" variant="outline" onClick={onUpdate}>
-          Retry
+          {t3T("Retry")}
         </Button>
       );
       break;
     default:
       trailing = (
         <Button size="xs" variant="outline" onClick={onUpdate}>
-          Update
+          {t3T("Update")}
         </Button>
       );
       break;

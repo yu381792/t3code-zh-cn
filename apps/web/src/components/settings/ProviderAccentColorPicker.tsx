@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { PlusIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -16,6 +18,8 @@ function ProviderCustomColorPanel(props: {
   readonly value: string;
   readonly onCommit: (value: string) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const { onCommit } = props;
   const [hsv, setHsv] = useState(() => hexToHsv(props.value));
   const currentColor = hsvToHex(hsv.h, hsv.s, hsv.v);
@@ -32,14 +36,14 @@ function ProviderCustomColorPanel(props: {
   return (
     <div className="w-56 bg-popover">
       <ColorSaturationValuePlane
-        label="Accent color"
+        label={t3T("Accent color")}
         value={hsv}
         onChange={commitHsv}
         variant="edge"
       />
       <div className="grid gap-3 p-3">
         <ColorHueSlider
-          label="Accent color hue"
+          label={t3T("Accent color hue")}
           value={hsv.h}
           onChange={(h) => commitHsv({ ...hsv, h })}
         />
@@ -56,7 +60,7 @@ function ProviderCustomColorPanel(props: {
           }}
           onBlur={() => setHexDraft(null)}
           font="mono"
-          aria-label="Custom hex accent color"
+          aria-label={t3T("Custom hex accent color")}
           spellCheck={false}
         />
       </div>
@@ -70,6 +74,8 @@ function ProviderCustomColorPicker(props: {
   readonly onCommit: (value: string) => void;
   readonly onClear: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const normalized = normalizeProviderAccentColor(props.value);
 
   return (
@@ -81,10 +87,13 @@ function ProviderCustomColorPicker(props: {
             size="icon-sm"
             variant="ghost-muted"
             style={normalized ? { backgroundColor: normalized } : undefined}
-            aria-label={`${normalized ? "Change" : "Add"} accent color for ${props.displayName}`}
+            aria-label={t3T("{0} accent color for {1}", [
+              normalized ? "Change" : "Add",
+              props.displayName,
+            ])}
           >
             {normalized ? (
-              <span className="sr-only">Change accent color</span>
+              <span className="sr-only">{t3T("Change accent color")}</span>
             ) : (
               <PlusIcon aria-hidden />
             )}
@@ -108,7 +117,7 @@ function ProviderCustomColorPicker(props: {
                   onClick={props.onClear}
                 >
                   <XIcon className="size-3.5" aria-hidden />
-                  Clear color
+                  {t3T("Clear color")}
                 </Button>
               }
             />
@@ -128,6 +137,8 @@ export function ProviderAccentColorPicker(props: {
   /** `inline` renders only the swatch row, for callers that supply their own label. */
   readonly layout?: "stacked" | "inline";
 }) {
+  const t3T = useUiTranslate();
+
   const {
     commitDelayMs = 0,
     description,
@@ -209,7 +220,7 @@ export function ProviderAccentColorPicker(props: {
 
   return (
     <div className="grid gap-2">
-      <span className="text-xs font-medium text-foreground">Accent color</span>
+      <span className="text-xs font-medium text-foreground">{t3T("Accent color")}</span>
       {picker}
       {description ? <span className="text-xs text-muted-foreground">{description}</span> : null}
     </div>

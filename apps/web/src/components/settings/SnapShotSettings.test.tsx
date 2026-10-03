@@ -13,6 +13,7 @@ vi.mock("react", async (original) => {
   const { reactHookHarness } = await import("../../test/reactHookHarness");
   return {
     ...actual,
+    useSyncExternalStore: reactHookHarness.useSyncExternalStore,
     useCallback: reactHookHarness.useCallback,
     useMemo: reactHookHarness.useMemo,
     useRef: reactHookHarness.useRef,

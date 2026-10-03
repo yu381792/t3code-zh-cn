@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type {
   EnvironmentId,
   OrchestrationV2ProjectedTurnItem,
@@ -37,6 +38,8 @@ function StructuredValue({ value }: { readonly value: unknown }) {
 }
 
 export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspectorProps) {
+  const t3T = useUiTranslate();
+
   const { item } = props.projectedItem;
   const support = useV2ItemSupport({
     environmentId: props.environmentId,
@@ -64,7 +67,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
           <StructuredValue value={item.input} />
           {item.exitCode !== undefined ? (
             <p className={item.exitCode === 0 ? "text-success" : "text-destructive"}>
-              Process exited with code {item.exitCode}
+              {t3T("Process exited with code")} {item.exitCode}
             </p>
           ) : null}
         </div>
@@ -88,7 +91,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
                 variant="outline"
                 onClick={() => props.onOpenTurnDiff(item.runId!, item.fileName)}
               >
-                Open diff
+                {t3T("Open diff")}
               </Button>
             ) : null}
           </div>
@@ -143,7 +146,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
                   </a>
                 ) : (
                   <p className="font-medium text-foreground">
-                    {result.title ?? result.url ?? "Search result"}
+                    {result.title ?? result.url ?? t3T("Search result")}
                   </p>
                 )}
                 {result.snippet ? <p className="text-muted-foreground">{result.snippet}</p> : null}
@@ -156,7 +159,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
       {item.type === "dynamic_tool" ? (
         <div>
           <p className="mb-1 text-3xs font-medium tracking-wide uppercase text-muted-foreground">
-            Input
+            {t3T("Input")}
           </p>
           <StructuredValue value={item.input} />
         </div>
@@ -180,7 +183,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
       {item.type === "checkpoint" ? (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground">
-            {support.checkpoint?.status ?? item.status} · {item.files.length} files
+            {support.checkpoint?.status ?? item.status} · {item.files.length} {t3T("files")}
           </span>
           {props.onRollbackCheckpoint && support.checkpoint?.status === "ready" ? (
             <Button
@@ -194,7 +197,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
               }
             >
               <RotateCcwIcon className="size-3" />
-              Roll back
+              {t3T("Roll back")}
             </Button>
           ) : null}
         </div>
@@ -203,13 +206,13 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
       {item.type === "fork" ? (
         <Button size="xs" variant="outline" onClick={() => props.onOpenThread(item.targetThreadId)}>
           <GitBranchIcon className="size-3" />
-          Open fork
+          {t3T("Open fork")}
         </Button>
       ) : null}
 
       {item.type === "subagent" && item.childThreadId !== null ? (
         <Button size="xs" variant="outline" onClick={() => props.onOpenThread(item.childThreadId!)}>
-          Open subagent thread
+          {t3T("Open subagent thread")}
         </Button>
       ) : null}
 
@@ -223,7 +226,7 @@ export const V2ItemInspector = memo(function V2ItemInspector(props: V2ItemInspec
           </p>
           {support.contextTransfer ? (
             <p>
-              Transfer {support.contextTransfer.type.replaceAll("_", " ")} ·{" "}
+              {t3T("Transfer")} {support.contextTransfer.type.replaceAll("_", " ")} ·{" "}
               {support.contextTransfer.status}
             </p>
           ) : null}

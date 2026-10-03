@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
@@ -47,15 +48,17 @@ export function readAntigravityAuthMethod(config: unknown): AntigravityAuthMetho
 
 /** Setup state belongs to the selected environment and is never saved in client settings. */
 export function ProviderSetupSection(props: ProviderSetupSectionProps) {
+  const t3T = useUiTranslate();
+
   return (
     <section
-      aria-label="Antigravity setup"
+      aria-label={t3T("Antigravity setup")}
       className="@container/setup divide-y divide-border/50 text-xs"
     >
       <SettingsRow
         className="@max-lg/setup:[&>div:first-child]:flex @max-lg/setup:[&>div:first-child]:items-stretch @max-lg/setup:[&>div:first-child]:gap-3"
-        title="Environment"
-        description="Device that runs this provider."
+        title={t3T("Environment")}
+        description={t3T("Device that runs this provider.")}
         control={
           <div className="flex min-w-0 flex-col gap-2 sm:items-end">
             <span className="text-muted-foreground [overflow-wrap:anywhere]">
@@ -63,18 +66,21 @@ export function ProviderSetupSection(props: ProviderSetupSectionProps) {
             </span>
             {!props.enabled && !props.readOnly ? (
               <Button size="sm" variant="outline" onClick={props.onEnable}>
-                Enable Antigravity
+                {t3T("Enable Antigravity")}
               </Button>
             ) : null}
           </div>
         }
       />
       {props.readOnly ? (
-        <SettingsRow title="Setup unavailable" description="Provider setup is read-only." />
+        <SettingsRow
+          title={t3T("Setup unavailable")}
+          description={t3T("Provider setup is read-only.")}
+        />
       ) : props.provider?.setup === undefined ? (
         <SettingsRow
-          title="Update required"
-          description="Update this environment to manage Antigravity."
+          title={t3T("Update required")}
+          description={t3T("Update this environment to manage Antigravity.")}
         />
       ) : (
         <ProviderSetupActions
@@ -106,6 +112,8 @@ function ProviderSetupActions({
   readonly provider: ServerProvider;
   readonly authMethod: AntigravityAuthMethod;
 }) {
+  const t3T = useUiTranslate();
+
   const target = { environmentId, input: { instanceId } };
   const authQuery = useEnvironmentQuery(serverEnvironment.providerAuthState(target));
   const installQuery = useEnvironmentQuery(serverEnvironment.providerInstallState(target));
@@ -188,19 +196,21 @@ function ProviderSetupActions({
   return (
     <div className="divide-y divide-border/50">
       <SettingsRow
-        title="Runtime"
+        title={t3T("Runtime")}
         className="@max-lg/setup:[&>div:first-child]:flex @max-lg/setup:[&>div:first-child]:items-stretch @max-lg/setup:[&>div:first-child]:gap-3"
-        description="Install and manage Antigravity."
+        description={t3T("Install and manage Antigravity.")}
         status={
           <div className="space-y-2">
             {usesCustomBinary ? (
               <p className="text-muted-foreground">
-                Uses the custom binary path below. Installation keeps that path.
+                {t3T("Uses the custom binary path below. Installation keeps that path.")}
               </p>
             ) : null}
             {!installed && !provider.setup?.canInstall ? (
               <p className="text-muted-foreground">
-                Automatic installation unavailable. Set a binary path or use another environment.
+                {t3T(
+                  "Automatic installation unavailable. Set a binary path or use another environment.",
+                )}
               </p>
             ) : null}
           </div>
@@ -215,7 +225,7 @@ function ProviderSetupActions({
               installation.totalBytes !== null &&
               installation.totalBytes > 0 ? (
                 <progress
-                  aria-label="Antigravity download"
+                  aria-label={t3T("Antigravity download")}
                   className="block h-1 w-full accent-foreground"
                   value={installation.downloadedBytes}
                   max={installation.totalBytes}
@@ -244,7 +254,7 @@ function ProviderSetupActions({
                       );
                     }}
                   >
-                    Cancel installation
+                    {t3T("Cancel installation")}
                   </Button>
                 ) : !installActive && provider.setup?.canInstall ? (
                   <Button
@@ -258,13 +268,13 @@ function ProviderSetupActions({
                     {installation?.installedVersion
                       ? installation.version &&
                         installation.version !== installation.installedVersion
-                        ? "Update Antigravity"
-                        : "Reinstall Antigravity"
+                        ? t3T("Update Antigravity")
+                        : t3T("Reinstall Antigravity")
                       : installation?.phase === "failed" || installation?.phase === "cancelled"
-                        ? "Retry installation"
+                        ? t3T("Retry installation")
                         : installed
-                          ? "Install managed runtime"
-                          : "Install Antigravity"}
+                          ? t3T("Install managed runtime")
+                          : t3T("Install Antigravity")}
                   </Button>
                 ) : null}
               </div>
@@ -276,7 +286,7 @@ function ProviderSetupActions({
                         size="icon-sm"
                         variant="ghost"
                         className="col-start-1 row-start-1"
-                        aria-label="Remove downloaded runtime"
+                        aria-label={t3T("Remove downloaded runtime")}
                         disabled={actionsDisabled || authActive}
                         onClick={() => void removeRuntime()}
                       />
@@ -284,7 +294,7 @@ function ProviderSetupActions({
                   >
                     <Trash2Icon className="size-3.5" />
                   </TooltipTrigger>
-                  <TooltipPopup>Remove downloaded runtime</TooltipPopup>
+                  <TooltipPopup>{t3T("Remove downloaded runtime")}</TooltipPopup>
                 </Tooltip>
               ) : null}
             </div>
@@ -318,7 +328,7 @@ function ProviderSetupActions({
                 installQuery.refresh();
               }}
             >
-              Retry setup status
+              {t3T("Retry setup status")}
             </Button>
           ) : null}
         </div>

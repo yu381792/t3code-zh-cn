@@ -1,4 +1,17 @@
 import type { DesktopUpdateState } from "@t3tools/contracts";
+// These unit tests invoke elements directly; mounted language subscriptions are
+// covered separately by i18n/translate.test.tsx.
+vi.mock("~/i18n/translate", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("~/i18n/translate")>();
+  return {
+    ...actual,
+    useTranslate: () => (source: unknown, values?: readonly unknown[]) =>
+      typeof source === "string"
+        ? actual.translate(source, values ?? actual.getInterfaceLanguage())
+        : source,
+  };
+});
+
 import { isValidElement, type MouseEvent, type ReactElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 

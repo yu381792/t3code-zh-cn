@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { parseChangeRequestUrl } from "@t3tools/shared/changeRequestUrl";
 import { useAtomValue } from "@effect/atom-react";
 import { usePullRequestStack } from "~/state/usePullRequestStack";
@@ -361,6 +363,8 @@ function PullRequestBaseFreshnessWarning({
   /** What the warning is about, drawn in the same amber before the mark: the base branch. */
   readonly children?: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const behind =
     freshness.behindBy === null
       ? ""
@@ -390,7 +394,9 @@ function PullRequestBaseFreshnessWarning({
       </PopoverTrigger>
       <PopoverPopup align="start" side="bottom" className="max-w-80" padding="compact">
         <p className="text-xs text-foreground">{summary}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">Changes can be cleanly merged.</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {t3T("Changes can be cleanly merged.")}
+        </p>
         {/* Each way the host offers and this reader may take, as its own button: a split button
             would need a menu inside a popover, and two buttons say the same thing in one layer. */}
         {freshness.methods.length > 0 ? (
@@ -404,7 +410,7 @@ function PullRequestBaseFreshnessWarning({
                 onClick={() => onUpdate(method)}
               >
                 <PullRequestGlyph.merged aria-hidden className="size-3" />
-                {method === "rebase" ? "Update with rebase" : "Update branch"}
+                {method === "rebase" ? t3T("Update with rebase") : t3T("Update branch")}
               </Button>
             ))}
           </span>
@@ -476,6 +482,8 @@ export function PullRequestDetailPanel({
    */
   onBack?: (() => void) | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   const environmentConfigs = useServerConfigs();
   const projects = useProjects();
   const project = projects.find(
@@ -1552,11 +1560,13 @@ export function PullRequestDetailPanel({
                   <Button
                     size="xs"
                     variant="outline"
-                    aria-label={handoff?.startsWith("checkout") ? "Checking out..." : "Check out"}
+                    aria-label={
+                      handoff?.startsWith("checkout") ? t3T("Checking out...") : t3T("Check out")
+                    }
                   >
                     <GitBranchIcon aria-hidden className="size-3.5" />
                     <span className="@max-[35rem]/pr-header:hidden">
-                      {handoff?.startsWith("checkout") ? "Checking out..." : "Check out"}
+                      {handoff?.startsWith("checkout") ? t3T("Checking out...") : t3T("Check out")}
                     </span>
                     <ChevronDownIcon aria-hidden className="size-3.5 text-muted-foreground" />
                   </Button>
@@ -1564,24 +1574,24 @@ export function PullRequestDetailPanel({
               />
             }
           />
-          <TooltipPopup>Check out this pull request</TooltipPopup>
+          <TooltipPopup>{t3T("Check out this pull request")}</TooltipPopup>
         </Tooltip>
         <MenuPopup align="end" side="bottom">
           <MenuItem onClick={() => startCheckout("worktree")}>
             <GitBranchIcon className="mt-1 size-3.5 shrink-0 self-start" />
             <span className="flex min-w-0 flex-col">
-              <span>In a separate worktree</span>
+              <span>{t3T("In a separate worktree")}</span>
               <span className="text-xs text-muted-foreground">
-                Its own folder and thread. Nothing you have open moves.
+                {t3T("Its own folder and thread. Nothing you have open moves.")}
               </span>
             </span>
           </MenuItem>
           <MenuItem onClick={() => startCheckout("local")}>
             <FolderGit2Icon className="mt-1 size-3.5 shrink-0 self-start" />
             <span className="flex min-w-0 flex-col">
-              <span>In this repository</span>
+              <span>{t3T("In this repository")}</span>
               <span className="text-xs text-muted-foreground">
-                Switches the branch you are working in, like `gh pr checkout`.
+                {t3T("Switches the branch you are working in, like `gh pr checkout`.")}
               </span>
             </span>
           </MenuItem>
@@ -1607,18 +1617,18 @@ export function PullRequestDetailPanel({
               variant="destructive-outline"
               disabled={handoff !== null || (attachTarget === null && checkoutRoot === null)}
               onClick={startResolveConflicts}
-              aria-label={handoff === "conflicts" ? "Preparing..." : "Resolve conflicts"}
+              aria-label={handoff === "conflicts" ? t3T("Preparing...") : t3T("Resolve conflicts")}
             >
               <PullRequestGlyph.conflicting aria-hidden className="size-3.5" />
               <span className="@max-[30rem]/pr-header:hidden">
-                {handoff === "conflicts" ? "Preparing..." : "Resolve conflicts"}
+                {handoff === "conflicts" ? t3T("Preparing...") : t3T("Resolve conflicts")}
               </span>
             </Button>
           </span>
         }
       />
       <TooltipPopup side="top">
-        {handoff === "conflicts" ? "Preparing..." : "Resolve conflicts"}
+        {handoff === "conflicts" ? t3T("Preparing...") : t3T("Resolve conflicts")}
       </TooltipPopup>
     </Tooltip>
   );
@@ -1693,13 +1703,13 @@ export function PullRequestDetailPanel({
                           variant="ghost-muted"
                           onClick={onBack}
                           className="-ml-1.5"
-                          aria-label="Back to this thread's pull requests"
+                          aria-label={t3T("Back to this thread's pull requests")}
                         >
                           <ArrowLeftIcon aria-hidden className="size-3.5" />
                         </Button>
                       }
                     />
-                    <TooltipPopup side="top">Back to pull requests</TooltipPopup>
+                    <TooltipPopup side="top">{t3T("Back to pull requests")}</TooltipPopup>
                   </Tooltip>
                 ) : null}
                 <Tooltip>
@@ -1721,7 +1731,9 @@ export function PullRequestDetailPanel({
                     }
                   />
                   <TooltipPopup side="top">
-                    {repositoryUrl ? `Open ${detail.repository} repository` : detail.repository}
+                    {repositoryUrl
+                      ? t3T("Open {0} repository", [detail.repository])
+                      : detail.repository}
                   </TooltipPopup>
                 </Tooltip>
                 <Tooltip>
@@ -1735,7 +1747,7 @@ export function PullRequestDetailPanel({
                           "inline-flex shrink-0 cursor-pointer items-center gap-0.5 font-medium underline-offset-2 hover:underline",
                           statePresentation.toneClassName,
                         )}
-                        aria-label={`Open pull request #${detail.number} on host`}
+                        aria-label={t3T("Open pull request #{0} on host", [detail.number])}
                       >
                         #{detail.number}
                         <ExternalLinkIcon aria-hidden className="size-2.5" />
@@ -1769,13 +1781,13 @@ export function PullRequestDetailPanel({
                           tabIndex={condensed ? 0 : -1}
                           onClick={onBack}
                           className="-ml-1.5"
-                          aria-label="Back to this thread's pull requests"
+                          aria-label={t3T("Back to this thread's pull requests")}
                         >
                           <ArrowLeftIcon aria-hidden className="size-3.5" />
                         </Button>
                       }
                     />
-                    <TooltipPopup side="top">Back to pull requests</TooltipPopup>
+                    <TooltipPopup side="top">{t3T("Back to pull requests")}</TooltipPopup>
                   </Tooltip>
                 ) : null}
                 <Tooltip>
@@ -1790,7 +1802,7 @@ export function PullRequestDetailPanel({
                           "inline-flex shrink-0 cursor-pointer items-center gap-0.5 font-medium underline-offset-2 hover:underline",
                           statePresentation.toneClassName,
                         )}
-                        aria-label={`Open pull request #${detail.number} on host`}
+                        aria-label={t3T("Open pull request #{0} on host", [detail.number])}
                       >
                         #{detail.number}
                         <ExternalLinkIcon aria-hidden className="size-2.5" />
@@ -1818,7 +1830,7 @@ export function PullRequestDetailPanel({
             <TooltipProvider delay={150} closeDelay={150} timeout={400}>
               {!nativeStack && supportsStackActions && nativeStackQuery.error ? (
                 <Button variant="ghost" size="xs" onClick={nativeStackQuery.refresh}>
-                  Retry stack lookup
+                  {t3T("Retry stack lookup")}
                 </Button>
               ) : null}
               {nativeStack ? (
@@ -1875,8 +1887,8 @@ export function PullRequestDetailPanel({
                     }
                   />
                   <TooltipPopup side="top">
-                    {armedAutoMergeLabel}: the host will merge this on its own once its requirements
-                    are met
+                    {armedAutoMergeLabel}
+                    {t3T(": the host will merge this on its own once its requirements are met")}
                   </TooltipPopup>
                 </Tooltip>
               ) : null}
@@ -1892,15 +1904,17 @@ export function PullRequestDetailPanel({
                           variant="default"
                           disabled={actionPending}
                           onClick={() => void perform("ready")}
-                          aria-label="Ready for review"
+                          aria-label={t3T("Ready for review")}
                         >
                           <PullRequestGlyph.pullRequest aria-hidden className="size-3.5" />
-                          <span className="@max-[30rem]/pr-header:hidden">Ready for review</span>
+                          <span className="@max-[30rem]/pr-header:hidden">
+                            {t3T("Ready for review")}
+                          </span>
                         </Button>
                       </span>
                     }
                   />
-                  <TooltipPopup side="top">Ready for review</TooltipPopup>
+                  <TooltipPopup side="top">{t3T("Ready for review")}</TooltipPopup>
                 </Tooltip>
               ) : primaryAction === "enable-auto-merge" ? (
                 <Tooltip>
@@ -1916,14 +1930,14 @@ export function PullRequestDetailPanel({
                           }
                           aria-label={
                             pendingAction === "enable-auto-merge"
-                              ? "Enabling..."
+                              ? t3T("Enabling...")
                               : pendingAutoMergeLabel
                           }
                         >
                           <PullRequestGlyph.merged aria-hidden className="size-3.5" />
                           <span className="@max-[30rem]/pr-header:hidden">
                             {pendingAction === "enable-auto-merge"
-                              ? "Enabling..."
+                              ? t3T("Enabling...")
                               : pendingAutoMergeLabel}
                           </span>
                         </Button>
@@ -1931,7 +1945,9 @@ export function PullRequestDetailPanel({
                     }
                   />
                   <TooltipPopup side="top">
-                    {pendingAction === "enable-auto-merge" ? "Enabling..." : pendingAutoMergeLabel}
+                    {pendingAction === "enable-auto-merge"
+                      ? t3T("Enabling...")
+                      : pendingAutoMergeLabel}
                   </TooltipPopup>
                 </Tooltip>
               ) : primaryAction === "auto-merge-armed" ? (
@@ -1950,8 +1966,8 @@ export function PullRequestDetailPanel({
                     }
                   />
                   <TooltipPopup side="top">
-                    {armedAutoMergeLabel}: the host will merge this on its own once its requirements
-                    are met
+                    {armedAutoMergeLabel}
+                    {t3T(": the host will merge this on its own once its requirements are met")}
                   </TooltipPopup>
                 </Tooltip>
               ) : primaryAction === "merge" ? (
@@ -1965,19 +1981,21 @@ export function PullRequestDetailPanel({
                           disabled={actionPending}
                           onClick={() => setConfirmation({ open: true, action: "merge" })}
                           aria-label={
-                            pendingAction === "merge" ? "Merging..." : selectedMergeMethodLabel
+                            pendingAction === "merge" ? t3T("Merging...") : selectedMergeMethodLabel
                           }
                         >
                           <PullRequestGlyph.merged aria-hidden className="size-3.5" />
                           <span className="@max-[30rem]/pr-header:hidden">
-                            {pendingAction === "merge" ? "Merging..." : selectedMergeMethodLabel}
+                            {pendingAction === "merge"
+                              ? t3T("Merging...")
+                              : selectedMergeMethodLabel}
                           </span>
                         </Button>
                       </span>
                     }
                   />
                   <TooltipPopup side="top">
-                    {pendingAction === "merge" ? "Merging..." : selectedMergeMethodLabel}
+                    {pendingAction === "merge" ? t3T("Merging...") : selectedMergeMethodLabel}
                   </TooltipPopup>
                 </Tooltip>
               ) : (primaryAction === "merged" || primaryAction === "closed") &&
@@ -1985,7 +2003,7 @@ export function PullRequestDetailPanel({
                 <Badge size="control" variant="outline">
                   <span className={cn("flex items-center gap-1", statePresentation.toneClassName)}>
                     <statePresentation.Icon className="size-3.5" />
-                    {statePresentation.label}
+                    <LocalizedUiText source={statePresentation.label} />
                   </span>
                 </Badge>
               ) : null}
@@ -1997,7 +2015,9 @@ export function PullRequestDetailPanel({
                         render={
                           <Button
                             aria-label={
-                              refreshing ? "Refreshing pull request" : "More pull request actions"
+                              refreshing
+                                ? t3T("Refreshing pull request")
+                                : t3T("More pull request actions")
                             }
                             size="icon-xs"
                             variant="ghost-muted"
@@ -2016,7 +2036,7 @@ export function PullRequestDetailPanel({
                     }
                   />
                   <TooltipPopup>
-                    {refreshing ? "Refreshing pull request" : "More pull request actions"}
+                    {refreshing ? t3T("Refreshing pull request") : t3T("More pull request actions")}
                   </TooltipPopup>
                 </Tooltip>
                 <MenuPopup align="end" side="bottom">
@@ -2033,31 +2053,33 @@ export function PullRequestDetailPanel({
                   />
                   <MenuItem disabled={refreshing} onClick={() => void refreshFromHost()}>
                     <RefreshIcon size="sm" refreshing={refreshing} />
-                    Refresh
+                    {t3T("Refresh")}
                   </MenuItem>
                   <MenuItem disabled={handoff !== null} onClick={askAboutPullRequest}>
                     <MessageCircleQuestionIcon className="mt-1 size-3.5 shrink-0 self-start" />
                     <span className="flex min-w-0 flex-col">
-                      <span>{handoff === "ask" ? "Opening..." : "Ask a question"}</span>
+                      <span>{handoff === "ask" ? t3T("Opening...") : t3T("Ask a question")}</span>
                       <span className="text-xs text-muted-foreground">
                         {attachTarget !== null
-                          ? "Adds the pull request to this thread's composer."
-                          : "Opens a thread that knows which pull request you mean."}
+                          ? t3T("Adds the pull request to this thread's composer.")
+                          : t3T("Opens a thread that knows which pull request you mean.")}
                       </span>
                     </span>
                   </MenuItem>
                   <MenuItem disabled={handoff !== null} onClick={explainPullRequest}>
                     <BookOpenIcon className="mt-1 size-3.5 shrink-0 self-start" />
                     <span className="flex min-w-0 flex-col">
-                      <span>{handoff === "explain" ? "Opening..." : "Explain this PR"}</span>
+                      <span>
+                        {handoff === "explain" ? t3T("Opening...") : t3T("Explain this PR")}
+                      </span>
                       <span className="text-xs text-muted-foreground">
-                        A walk through the diff and what to read closely.
+                        {t3T("A walk through the diff and what to read closely.")}
                       </span>
                     </span>
                   </MenuItem>
                   <MenuItem disabled={handoff !== null} onClick={startFixFindings}>
                     <HammerIcon className="size-3.5" />
-                    {handoff === "findings" ? "Preparing..." : handoffLabels.fixFindings}
+                    {handoff === "findings" ? t3T("Preparing...") : handoffLabels.fixFindings}
                   </MenuItem>
                   {pickableEnvironments.length > 0 ? (
                     <ActOnEnvironmentPicker
@@ -2083,7 +2105,7 @@ export function PullRequestDetailPanel({
                           ) : (
                             <PullRequestGlyph.draft className="size-3.5" />
                           )}
-                          {detail.isDraft ? "Ready for review" : "Convert to draft"}
+                          {detail.isDraft ? t3T("Ready for review") : t3T("Convert to draft")}
                         </MenuItem>
                       ) : null}
                       {showsMergeNow ? (
@@ -2092,7 +2114,7 @@ export function PullRequestDetailPanel({
                           onClick={() => setConfirmation({ open: true, action: "merge" })}
                         >
                           <PullRequestGlyph.merged className="size-3.5" />
-                          Merge now
+                          {t3T("Merge now")}
                         </MenuItem>
                       ) : null}
                       {/* The same merge, left with the host to carry out once its requirements
@@ -2104,7 +2126,7 @@ export function PullRequestDetailPanel({
                           onClick={() => void perform("disable-auto-merge")}
                         >
                           <PullRequestGlyph.merged className="size-3.5" />
-                          Disable auto-merge
+                          {t3T("Disable auto-merge")}
                         </MenuItem>
                       ) : showsAutoMerge ? (
                         <MenuItem
@@ -2114,7 +2136,7 @@ export function PullRequestDetailPanel({
                           }
                         >
                           <PullRequestGlyph.merged className="size-3.5" />
-                          Enable auto-merge
+                          {t3T("Enable auto-merge")}
                         </MenuItem>
                       ) : null}
                       {/* A preference for the merge action rather than a second action, so it
@@ -2149,7 +2171,7 @@ export function PullRequestDetailPanel({
                                     icon and the label need their own row to share a line. */}
                                 <span className="flex min-w-0 items-center gap-2">
                                   <PullRequestGlyph.merged className="size-3.5" />
-                                  <span>{PULL_REQUEST_MERGE_METHOD_LABELS[method]}</span>
+                                  <span>{t3T(PULL_REQUEST_MERGE_METHOD_LABELS[method])}</span>
                                 </span>
                               </MenuRadioItem>
                             ))}
@@ -2171,14 +2193,14 @@ export function PullRequestDetailPanel({
                   </MenuItem>
                   <MenuItem onClick={() => copyReference(detail.url, "PR link")}>
                     <LinkIcon className="size-3.5" />
-                    Copy link
+                    {t3T("Copy link")}
                     <MenuShortcut>
                       {shortcutLabelForCommand(keybindings, "thread.copyReference")}
                     </MenuShortcut>
                   </MenuItem>
                   <MenuItem onClick={() => copyReference(`#${reference.number}`, "PR number")}>
                     <CopyIcon className="size-3.5" />
-                    Copy PR number
+                    {t3T("Copy PR number")}
                     <MenuShortcut>
                       {shortcutLabelForCommand(keybindings, "pullRequest.copyNumber")}
                     </MenuShortcut>
@@ -2192,7 +2214,7 @@ export function PullRequestDetailPanel({
                         onClick={() => setConfirmation({ open: true, action: "close" })}
                       >
                         <PullRequestGlyph.closed className="size-3.5" />
-                        Close pull request
+                        {t3T("Close pull request")}
                       </MenuItem>
                     </>
                   ) : detail.state === "closed" && can("reopen") ? (
@@ -2200,7 +2222,7 @@ export function PullRequestDetailPanel({
                       <MenuSeparator />
                       <MenuItem disabled={actionPending} onClick={() => void perform("reopen")}>
                         <PullRequestGlyph.reopen className="size-3.5" />
-                        Reopen pull request
+                        {t3T("Reopen pull request")}
                       </MenuItem>
                     </>
                   ) : detail.state === "merged" && can("revert") ? (
@@ -2211,7 +2233,7 @@ export function PullRequestDetailPanel({
                         onClick={() => setConfirmation({ open: true, action: "revert" })}
                       >
                         <RotateCcwIcon className="size-3.5" />
-                        Revert changes
+                        {t3T("Revert changes")}
                       </MenuItem>
                     </>
                   ) : null}
@@ -2223,7 +2245,7 @@ export function PullRequestDetailPanel({
             <Button
               size="icon-xs"
               variant="ghost"
-              aria-label="Collapse pull request panel"
+              aria-label={t3T("Collapse pull request panel")}
               onClick={onClose}
             >
               <PanelRightIcon className="size-3.5" />
@@ -2277,7 +2299,7 @@ export function PullRequestDetailPanel({
                       >
                         {isStackedPullRequest ? (
                           <PullRequestGlyph.stack
-                            aria-label="Stacked pull request"
+                            aria-label={t3T("Stacked pull request")}
                             className="size-3 shrink-0"
                           />
                         ) : null}
@@ -2292,7 +2314,7 @@ export function PullRequestDetailPanel({
                             <span className="inline-flex min-w-0 max-w-[40%] shrink-0 items-center gap-1">
                               {isStackedPullRequest ? (
                                 <PullRequestGlyph.stack
-                                  aria-label="Stacked pull request"
+                                  aria-label={t3T("Stacked pull request")}
                                   className="size-3 shrink-0"
                                 />
                               ) : null}
@@ -2304,13 +2326,13 @@ export function PullRequestDetailPanel({
                         />
                         <TooltipPopup side="top">
                           {isStackedPullRequest
-                            ? `Stacked on ${detail.baseBranch}`
+                            ? t3T("Stacked on {0}", [detail.baseBranch])
                             : detail.baseBranch}
                         </TooltipPopup>
                       </Tooltip>
                     )}
                     <ArrowLeftIcon
-                      aria-label="receives changes from"
+                      aria-label={t3T("receives changes from")}
                       className="size-3 shrink-0 opacity-60"
                     />
                     <Tooltip>
@@ -2327,9 +2349,10 @@ export function PullRequestDetailPanel({
                   <span className="ml-auto inline-flex shrink-0 items-center justify-end gap-2 text-2xs">
                     <span
                       className="inline-flex items-center gap-1 tabular-nums"
-                      aria-label={`${detail.changedFiles.toLocaleString()} changed ${
-                        detail.changedFiles === 1 ? "file" : "files"
-                      }`}
+                      aria-label={t3T("{0} changed {1}", [
+                        detail.changedFiles.toLocaleString(),
+                        detail.changedFiles === 1 ? "file" : "files",
+                      ])}
                     >
                       <FileDiffIcon aria-hidden className="size-3" />
                       {detail.changedFiles.toLocaleString()}
@@ -2382,7 +2405,7 @@ export function PullRequestDetailPanel({
                     </Tooltip>
                     {canEditPullRequestChangeRequest(detail) ? (
                       <PullRequestEditButton
-                        aria-label="Edit title"
+                        aria-label={t3T("Edit title")}
                         onClick={() => setTitleScope({ pullRequestKey, text: detail.title })}
                       />
                     ) : null}
@@ -2396,7 +2419,7 @@ export function PullRequestDetailPanel({
                       size="sm"
                       disabled={titleSaving}
                       value={titleDraft}
-                      aria-label="Pull request title"
+                      aria-label={t3T("Pull request title")}
                       onChange={(event) =>
                         setTitleScope({ pullRequestKey, text: event.target.value })
                       }
@@ -2417,7 +2440,7 @@ export function PullRequestDetailPanel({
                         disabled={titleSaving}
                         onClick={() => setTitleScope(null)}
                       >
-                        Cancel
+                        {t3T("Cancel")}
                       </Button>
                       <Button
                         size="xs"
@@ -2425,7 +2448,7 @@ export function PullRequestDetailPanel({
                         disabled={titleSaving || titleDraft.trim().length === 0}
                         onClick={() => void saveTitle(titleDraft)}
                       >
-                        {titleSaving ? "Saving..." : "Save"}
+                        {titleSaving ? t3T("Saving...") : t3T("Save")}
                       </Button>
                     </div>
                   </div>
@@ -2433,7 +2456,9 @@ export function PullRequestDetailPanel({
                 <div className="mt-2 flex min-h-5 min-w-0 items-center gap-2 text-xs text-muted-foreground">
                   <PullRequestMetaLine className="min-w-0 whitespace-nowrap">
                     <PullRequestActorLabel actor={detail.author} profileUrl={authorProfileUrl} />
-                    <span>updated {formatRelativeTimeLabel(detail.updatedAt)}</span>
+                    <span>
+                      {t3T("updated")} {formatRelativeTimeLabel(detail.updatedAt)}
+                    </span>
                   </PullRequestMetaLine>
                   {checkoutCommand ? (
                     <PullRequestCopyableCode
@@ -2464,7 +2489,7 @@ export function PullRequestDetailPanel({
                       >
                         {isStackedPullRequest ? (
                           <PullRequestGlyph.stack
-                            aria-label="Stacked pull request"
+                            aria-label={t3T("Stacked pull request")}
                             className="size-3 shrink-0"
                           />
                         ) : null}
@@ -2479,7 +2504,7 @@ export function PullRequestDetailPanel({
                             <span className="inline-flex min-w-0 max-w-[40%] shrink-0 items-center gap-1">
                               {isStackedPullRequest ? (
                                 <PullRequestGlyph.stack
-                                  aria-label="Stacked pull request"
+                                  aria-label={t3T("Stacked pull request")}
                                   className="size-3 shrink-0"
                                 />
                               ) : null}
@@ -2491,13 +2516,13 @@ export function PullRequestDetailPanel({
                         />
                         <TooltipPopup side="top">
                           {isStackedPullRequest
-                            ? `Stacked on ${detail.baseBranch}`
+                            ? t3T("Stacked on {0}", [detail.baseBranch])
                             : detail.baseBranch}
                         </TooltipPopup>
                       </Tooltip>
                     )}
                     <ArrowLeftIcon
-                      aria-label="receives changes from"
+                      aria-label={t3T("receives changes from")}
                       className="size-3.5 shrink-0 opacity-60"
                     />
                     <PullRequestCopyableCode
@@ -2512,7 +2537,7 @@ export function PullRequestDetailPanel({
                     <span className="inline-flex min-w-16 items-center justify-end gap-1.5 tabular-nums">
                       <FileDiffIcon className="size-3.5" />
                       {detail.changedFiles.toLocaleString()}{" "}
-                      {detail.changedFiles === 1 ? "file" : "files"}
+                      {detail.changedFiles === 1 ? t3T("file") : t3T("files")}
                     </span>
                     <PullRequestDiffStat
                       additions={detail.additions}
@@ -2529,7 +2554,7 @@ export function PullRequestDetailPanel({
         {detail ? (
           <nav
             className="col-span-2 flex min-w-0 flex-wrap items-center gap-2 border-t border-border/60 px-4 py-2"
-            aria-label="Pull request tabs"
+            aria-label={t3T("Pull request tabs")}
           >
             <ToggleGroup
               className="shrink-0"
@@ -2573,15 +2598,15 @@ export function PullRequestDetailPanel({
                             }
                             aria-label={
                               pendingAction === "approve-workflows"
-                                ? "Approving..."
-                                : "Approve workflows to run"
+                                ? t3T("Approving...")
+                                : t3T("Approve workflows to run")
                             }
                           >
                             <PlayIcon aria-hidden className="size-3.5" />
                             <span>
                               {pendingAction === "approve-workflows"
-                                ? "Approving..."
-                                : "Approve workflows to run"}
+                                ? t3T("Approving...")
+                                : t3T("Approve workflows to run")}
                             </span>
                           </Button>
                         </span>
@@ -2589,14 +2614,14 @@ export function PullRequestDetailPanel({
                     />
                     <TooltipPopup side="top">
                       {pendingAction === "approve-workflows"
-                        ? "Approving..."
-                        : "Approve workflows to run"}
+                        ? t3T("Approving...")
+                        : t3T("Approve workflows to run")}
                     </TooltipPopup>
                   </Tooltip>
                 ) : (
                   <span
                     className="flex h-4 min-w-0 flex-wrap content-start items-center justify-end gap-x-1.5 overflow-hidden text-xs text-muted-foreground"
-                    aria-label={checksSummary ? `Checks: ${checksSummary}` : "Checks"}
+                    aria-label={checksSummary ? t3T("Checks: {0}", [checksSummary]) : t3T("Checks")}
                   >
                     {checksState !== null ? (
                       <PullRequestChecksPopover
@@ -2624,7 +2649,7 @@ export function PullRequestDetailPanel({
                     className="inline-flex items-center gap-1"
                     aria-label={
                       activityError
-                        ? "Comments unavailable"
+                        ? t3T("Comments unavailable")
                         : `${detail.commentCount.toLocaleString()} ${
                             detail.commentCount === 1 ? "comment" : "comments"
                           }`
@@ -2641,7 +2666,7 @@ export function PullRequestDetailPanel({
                     className="inline-flex items-center gap-1"
                     aria-label={
                       activityError
-                        ? "Commits unavailable"
+                        ? t3T("Commits unavailable")
                         : `${detail.commits.length.toLocaleString()} ${
                             detail.commits.length === 1 ? "commit" : "commits"
                           }`
@@ -2664,7 +2689,7 @@ export function PullRequestDetailPanel({
                       <PullRequestReviewOutcomeIcon outcome="approved" className="size-3" />
                       {approvalCount.toLocaleString()}
                       <span className="sr-only">
-                        {approvalCount === 1 ? "approval" : "approvals"}
+                        {approvalCount === 1 ? t3T("approval") : t3T("approvals")}
                       </span>
                     </span>
                   ) : null}
@@ -2674,15 +2699,15 @@ export function PullRequestDetailPanel({
                   variant="ghost-muted"
                   aria-label={
                     timelineOrder === "newest"
-                      ? "Show oldest activity first"
-                      : "Show newest activity first"
+                      ? t3T("Show oldest activity first")
+                      : t3T("Show newest activity first")
                   }
                   onClick={() =>
                     setTimelineOrder((value) => (value === "newest" ? "oldest" : "newest"))
                   }
                 >
                   <ArrowDownUpIcon aria-hidden className="size-3" />
-                  {timelineOrder === "newest" ? "Newest first" : "Oldest first"}
+                  {timelineOrder === "newest" ? t3T("Newest first") : t3T("Oldest first")}
                 </Button>
               </div>
             ) : null}
@@ -2769,7 +2794,9 @@ export function PullRequestDetailPanel({
             ) : null}
             {mountedTabs.has("code") ? (
               <div className={cn("absolute inset-0", tab !== "code" && "invisible")}>
-                <Suspense fallback={<DiffPanelLoadingState label="Loading pull request diff..." />}>
+                <Suspense
+                  fallback={<DiffPanelLoadingState label={t3T("Loading pull request diff...")} />}
+                >
                   <PullRequestCodeTab
                     onAddToAgentSelection={addSelectionToAgent}
                     environmentId={environmentId}
@@ -2823,33 +2850,46 @@ export function PullRequestDetailPanel({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {confirmAction === "merge"
-                ? "Merge pull request?"
+                ? t3T("Merge pull request?")
                 : confirmAction === "enable-auto-merge"
-                  ? "Enable auto-merge?"
+                  ? t3T("Enable auto-merge?")
                   : confirmAction === "revert"
-                    ? "Revert these changes?"
+                    ? t3T("Revert these changes?")
                     : confirmAction === "approve-workflows"
-                      ? "Approve workflows to run?"
-                      : "Close pull request?"}
+                      ? t3T("Approve workflows to run?")
+                      : t3T("Close pull request?")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmAction === "merge"
-                ? `This merges #${reference.number} using ${selectedMergeMethod}.`
+                ? t3T("This merges #{0} using {1}.", [reference.number, selectedMergeMethod])
                 : confirmAction === "enable-auto-merge"
                   ? // The host merges this as soon as it considers the pull request ready, which
                     // may be immediately — there is no telling from here whether anything is
                     // still outstanding.
-                    `This merges #${reference.number} using ${selectedMergeMethod} as soon as the host considers it ready, which may be immediately.`
+                    t3T(
+                      "This merges #{0} using {1} as soon as the host considers it ready, which may be immediately.",
+                      [reference.number, selectedMergeMethod],
+                    )
                   : confirmAction === "revert"
-                    ? `This opens a new pull request that reverses the changes merged by #${reference.number}.`
+                    ? t3T(
+                        "This opens a new pull request that reverses the changes merged by #{0}.",
+                        [reference.number],
+                      )
                     : confirmAction === "approve-workflows"
-                      ? `This allows ${workflowApprovalsRequired} ${workflowApprovalsRequired === 1 ? "workflow" : "workflows"} from #${reference.number} to run. Review the code and workflow changes first.`
-                      : `This closes #${reference.number} without merging it.`}
+                      ? t3T(
+                          "This allows {0} {1} from #{2} to run. Review the code and workflow changes first.",
+                          [
+                            workflowApprovalsRequired,
+                            workflowApprovalsRequired === 1 ? "workflow" : "workflows",
+                            reference.number,
+                          ],
+                        )
+                      : t3T("This closes #{0} without merging it.", [reference.number])}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogClose render={<Button variant="outline" size="sm" />}>
-              Cancel
+              {t3T("Cancel")}
             </AlertDialogClose>
             <Button
               size="sm"
@@ -2869,12 +2909,12 @@ export function PullRequestDetailPanel({
               {confirmAction === "merge"
                 ? selectedMergeMethodLabel
                 : confirmAction === "enable-auto-merge"
-                  ? "Enable auto-merge"
+                  ? t3T("Enable auto-merge")
                   : confirmAction === "revert"
-                    ? "Create revert PR"
+                    ? t3T("Create revert PR")
                     : confirmAction === "approve-workflows"
-                      ? "Approve and run"
-                      : "Close"}
+                      ? t3T("Approve and run")
+                      : t3T("Close")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>

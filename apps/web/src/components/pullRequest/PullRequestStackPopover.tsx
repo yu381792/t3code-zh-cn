@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Tooltip, TooltipTrigger, TooltipPopup } from "../ui/tooltip";
 import type { EnvironmentId, PullRequestRef, PullRequestStackMembership } from "@t3tools/contracts";
 import { useState } from "react";
@@ -19,6 +20,8 @@ function StackBody({
   onSelect: (reference: PullRequestRef) => void;
   stackNumber: number;
 }) {
+  const t3T = useUiTranslate();
+
   const query = usePullRequestStack(environmentId, reference);
   if (query.data !== null) {
     return (
@@ -28,7 +31,9 @@ function StackBody({
           notice={query.notice}
           stale={!!query.error}
         />
-        {query.error ? <MenuItem onClick={query.refresh}>Retry stack refresh</MenuItem> : null}
+        {query.error ? (
+          <MenuItem onClick={query.refresh}>{t3T("Retry stack refresh")}</MenuItem>
+        ) : null}
         <PullRequestStackLayers stack={query.data} reference={reference} onSelect={onSelect} />
       </>
     );
@@ -38,7 +43,9 @@ function StackBody({
       <PullRequestStackHeader number={stackNumber} />
       <MenuGroupLabel>
         {query.error ??
-          (query.isPending ? "Loading stack…" : "This pull request is no longer in a stack.")}
+          (query.isPending
+            ? t3T("Loading stack…")
+            : t3T("This pull request is no longer in a stack."))}
       </MenuGroupLabel>
     </>
   );
@@ -55,6 +62,8 @@ export function PullRequestStackPopover({
   membership: PullRequestStackMembership;
   onSelect: (reference: PullRequestRef) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   return (
     <Menu open={open} onOpenChange={setOpen}>
@@ -70,7 +79,11 @@ export function PullRequestStackPopover({
                   className="inline-flex shrink-0 cursor-pointer items-center gap-1 text-xs font-normal text-muted-foreground"
                 />
               }
-              aria-label={`Stack ${membership.number}, layer ${membership.position} of ${membership.size}`}
+              aria-label={t3T("Stack {0}, layer {1} of {2}", [
+                membership.number,
+                membership.position,
+                membership.size,
+              ])}
               onClick={(event) => event.stopPropagation()}
               onKeyDown={(event) => event.stopPropagation()}
             >
@@ -80,7 +93,9 @@ export function PullRequestStackPopover({
           }
         />
         <TooltipPopup>
-          View stack #{membership.number}, layer {membership.position} of {membership.size}
+          {t3T("View stack #")}
+          {membership.number}
+          {t3T(", layer")} {membership.position} {t3T("of")} {membership.size}
         </TooltipPopup>
       </Tooltip>
       <MenuPopup

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { TerminalIcon } from "lucide-react";
 
 import type { ContextPresentationCapability } from "../contextPresentationRegistry";
@@ -14,6 +15,8 @@ interface TerminalContextInlineChipProps {
 }
 
 export function TerminalContextInlineChip(props: TerminalContextInlineChipProps) {
+  const t3T = useUiTranslate();
+
   const { label, terminalLabel, lineStart, lineEnd, text, detailsMode, expired = false } = props;
 
   if (!expired && text.length > 0 && detailsMode === "popover") {
@@ -31,12 +34,14 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
               {terminalLabel}
             </span>
             <span className="ml-auto shrink-0 text-secondary-label text-xs">
-              {lineStart === lineEnd ? `Line ${lineStart}` : `Lines ${lineStart}–${lineEnd}`}
+              {lineStart === lineEnd
+                ? t3T("Line {0}", [lineStart])
+                : t3T("Lines {0}–{1}", [lineStart, lineEnd])}
             </span>
           </div>
           <pre
             className="max-h-80 overflow-auto whitespace-pre bg-muted p-3 font-mono text-foreground text-xs leading-relaxed outline-none [tab-size:4] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-            aria-label="Captured terminal output"
+            aria-label={t3T("Captured terminal output")}
             tabIndex={0}
           >
             {text}
@@ -52,11 +57,13 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
       {...(expired ? { state: "invalid" as const } : {})}
       icon={<TerminalIcon />}
       label={label}
-      aria-label={`Terminal excerpt, ${label}${expired ? ", expired" : ""}`}
+      aria-label={t3T("Terminal excerpt, {0}{1}", [label, expired ? ", expired" : ""])}
       data-terminal-context-expired={expired ? "true" : undefined}
       tooltip={
         expired
-          ? `Terminal context expired. Remove and re-add ${label} to include it in your message.`
+          ? t3T("Terminal context expired. Remove and re-add {0} to include it in your message.", [
+              label,
+            ])
           : detailsMode === "none"
             ? undefined
             : text

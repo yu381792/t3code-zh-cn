@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "../../i18n/translate";
 import { formatPercent, formatTokens, formatUsd } from "@t3tools/shared/usageFormat";
 import { isModelCostUnknown, type ModelTotals } from "@t3tools/shared/usageMerge";
 import { useMemo } from "react";
@@ -53,6 +54,8 @@ export function UsageModelDialog({
   readonly onSetPrice: () => void;
   readonly onClose: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const usage = useMemo(
     () =>
       mergeAnsweredUsage(
@@ -92,14 +95,14 @@ export function UsageModelDialog({
           </div>
           <DialogDescription>
             {presentation.label}
-            {costUnknown ? "" : ` · ${formatPercent(model.costShare)} of cost`}
+            {costUnknown ? "" : t3T(" · {0} of cost", [formatPercent(model.costShare)])}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <div className="flex flex-col gap-8">
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label} className="flex min-w-0 flex-col gap-0.5">
+                <div key={t3T(stat.label)} className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-xs text-muted-foreground">{stat.label}</span>
                   <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
                 </div>
@@ -122,19 +125,19 @@ export function UsageModelDialog({
             <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
               {costUnknown ? null : (
                 <UsageShareBar
-                  label="Cost by type"
+                  label={t3T("Cost by type")}
                   segments={costTypeSegments(usage.categoryCost)}
                   format={formatUsd}
                 />
               )}
               <UsageShareBar
-                label="Tokens by type"
+                label={t3T("Tokens by type")}
                 segments={tokenTypeSegments(model.tokens)}
                 format={formatTokens}
               />
               {usage.speedCost.fast + usage.speedCost.ultrafast > 0 ? (
                 <UsageShareBar
-                  label="Cost by speed"
+                  label={t3T("Cost by speed")}
                   segments={speedCostSegments(usage.speedCost)}
                   format={formatUsd}
                   aside={<SpeedPremium premiumUsd={usage.speedCost.premium} />}
@@ -146,9 +149,10 @@ export function UsageModelDialog({
         {model.unpricedTokens > 0 ? (
           <DialogFooter variant="bare" className="items-center sm:justify-between">
             <span className="text-xs text-muted-foreground">
-              {formatTokens(model.unpricedTokens)} tokens have no known price
+              {formatTokens(model.unpricedTokens)}
+              {t3T("tokens have no known price")}
             </span>
-            <Button onClick={onSetPrice}>Set price</Button>
+            <Button onClick={onSetPrice}>{t3T("Set price")}</Button>
           </DialogFooter>
         ) : null}
       </DialogPopup>
@@ -158,9 +162,12 @@ export function UsageModelDialog({
 
 /** What the faster speeds cost above standard rates, beside the speed bar. */
 export function SpeedPremium({ premiumUsd }: { readonly premiumUsd: number }) {
+  const t3T = useUiTranslate();
+
   return (
     <span className="text-xs text-muted-foreground">
-      Premium <span className="text-foreground tabular-nums">{formatUsd(premiumUsd)}</span>
+      {t3T("Premium")}
+      <span className="text-foreground tabular-nums">{formatUsd(premiumUsd)}</span>
     </span>
   );
 }

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { BookmarkIcon } from "lucide-react";
 import { memo } from "react";
 
@@ -19,6 +20,8 @@ export const ComposerStashBadge = memo(function ComposerStashBadge(props: {
   pulsing: boolean;
   onToggleMenu: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   if (props.count === 0) return null;
   const count = (
     <ComposerBanner.Count
@@ -43,7 +46,7 @@ export const ComposerStashBadge = memo(function ComposerStashBadge(props: {
       <ComposerBanner.Row
         render={<button type="button" />}
         data-prompt-stash-badge="true"
-        aria-label={`Stashed prompts: ${props.count}. Open stash.`}
+        aria-label={t3T("Stashed prompts: {0}. Open stash.", [props.count])}
         aria-expanded={props.menuOpen}
         className={cn(
           "transition-colors duration-200",
@@ -58,7 +61,7 @@ export const ComposerStashBadge = memo(function ComposerStashBadge(props: {
         <ComposerBanner.Icon>
           <BookmarkIcon />
         </ComposerBanner.Icon>
-        <ComposerBanner.Content>Stash</ComposerBanner.Content>
+        <ComposerBanner.Content>{t3T("Stash")}</ComposerBanner.Content>
         <ComposerBanner.Actions>{count}</ComposerBanner.Actions>
       </ComposerBanner.Row>
     </ComposerBanner.Root>

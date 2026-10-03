@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { DeviceToolVersions } from "../device/DeviceToolVersions";
 import { Tooltip, TooltipTrigger, TooltipPopup } from "../ui/tooltip";
 import { AppleIcon, AndroidIcon } from "../Icons";
@@ -21,6 +22,8 @@ import { useHostConnectionChecks } from "./useHostConnectionChecks";
 import { deviceHostConnectionKey } from "./deviceHostConnectionChecks";
 
 export function DeviceHostsSettings(props: { environmentId: EnvironmentId | null }) {
+  const t3T = useUiTranslate();
+
   const { scope, environments, connectedEnvironments } = useSettingsScope();
   const projectScope = scope.kind === "project" || scope.kind === "checkout";
   const update = useAtomCommand(serverEnvironment.updateSettings, { reportFailure: false });
@@ -77,10 +80,12 @@ export function DeviceHostsSettings(props: { environmentId: EnvironmentId | null
   return (
     <SettingsRow
       id="device-hosts"
-      title="Device hosts"
+      title={t3T("Device hosts")}
       serverScoped
       settingKeys={["deviceHosts"]}
-      description="Add remote machines with simulator or emulator runtimes installed, and the selected environments will connect over SSH and set up device tools automatically."
+      description={t3T(
+        "Add remote machines with simulator or emulator runtimes installed, and the selected environments will connect over SSH and set up device tools automatically.",
+      )}
       control={
         <Button
           size="sm"
@@ -91,14 +96,14 @@ export function DeviceHostsSettings(props: { environmentId: EnvironmentId | null
             setEditing({ id: randomUUID(), label: "", target: "" });
           }}
         >
-          <PlusIcon className="size-3.5" /> Add host
+          <PlusIcon className="size-3.5" /> {t3T("Add host")}
         </Button>
       }
     >
       <div className="pt-3 pb-2">
         {!props.environmentId ? (
           <p className="text-sm text-muted-foreground">
-            Connect a selected environment to manage device hosts.
+            {t3T("Connect a selected environment to manage device hosts.")}
           </p>
         ) : (
           <>
@@ -177,13 +182,15 @@ function DeviceHostList({
   checks: ReturnType<typeof useHostConnectionChecks>["checks"];
   testConnection: ReturnType<typeof useHostConnectionChecks>["testConnection"];
 }) {
+  const t3T = useUiTranslate();
+
   const { state } = useDeviceState(environmentId);
   const retry = useAtomCommand(deviceEnvironment.list);
   const [retrying, setRetrying] = useState<string | null>(null);
   return (
     <>
       {hosts.length === 0 ? (
-        <p className="py-2 text-sm text-muted-foreground">No device hosts.</p>
+        <p className="py-2 text-sm text-muted-foreground">{t3T("No device hosts.")}</p>
       ) : null}
       {hosts.map((host) => {
         const status = state.hostStatuses[host.id];
@@ -223,7 +230,9 @@ function DeviceHostList({
                             tabIndex={0}
                             role="img"
                             aria-label={
-                              platform.platform === "ios" ? "iOS available" : "Android available"
+                              platform.platform === "ios"
+                                ? t3T("iOS available")
+                                : t3T("Android available")
                             }
                             className="shrink-0 text-muted-foreground"
                           />
@@ -236,7 +245,9 @@ function DeviceHostList({
                         )}
                       </TooltipTrigger>
                       <TooltipPopup>
-                        {platform.platform === "ios" ? "iOS available" : "Android available"}
+                        {platform.platform === "ios"
+                          ? t3T("iOS available")
+                          : t3T("Android available")}
                       </TooltipPopup>
                     </Tooltip>
                   ))}
@@ -251,12 +262,14 @@ function DeviceHostList({
                 }
               />
               {check?.status === "local" ? (
-                <p className="mt-1 text-xs text-muted-foreground">Already available locally</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t3T("Already available locally")}
+                </p>
               ) : null}
               {error ? (
                 <div className="mt-1" role="status">
                   <details className="text-xs text-destructive">
-                    <summary>Connection failed</summary>
+                    <summary>{t3T("Connection failed")}</summary>
                     <p className="mt-1 whitespace-pre-wrap break-words">{error}</p>
                   </details>
                 </div>
@@ -278,7 +291,7 @@ function DeviceHostList({
                     size="icon-sm"
                     variant="ghost-muted"
                     disabled={busy}
-                    aria-label={host.label + " options"}
+                    aria-label={host.label + t3T(" options")}
                   />
                 }
               >
@@ -290,10 +303,10 @@ function DeviceHostList({
                     onEdit(host);
                   }}
                 >
-                  Edit
+                  {t3T("Edit")}
                 </MenuItem>
                 <MenuItem variant="destructive" onClick={() => onRemove(host)}>
-                  Remove
+                  {t3T("Remove")}
                 </MenuItem>
               </MenuPopup>
             </Menu>
@@ -311,7 +324,7 @@ function DeviceHostList({
                   );
                 }}
               >
-                {retrying === host.id ? "Retrying…" : "Retry"}
+                {retrying === host.id ? t3T("Retrying…") : t3T("Retry")}
               </Button>
             ) : (
               <Button
@@ -320,7 +333,7 @@ function DeviceHostList({
                 disabled={busy || progress !== null}
                 onClick={() => void testConnection(host)}
               >
-                Test connection
+                {t3T("Test connection")}
               </Button>
             )}
           </div>

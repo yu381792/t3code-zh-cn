@@ -1,5 +1,6 @@
-import { isValidElement, type ReactElement, type ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
+import { createElement, Fragment, type ReactNode } from "react";
+import { act, create, type ReactTestRenderer, type ReactTestInstance } from "react-test-renderer";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import type { DesktopUpdateState } from "@t3tools/contracts";
 
 const testState = vi.hoisted(() => ({
@@ -12,25 +13,22 @@ vi.mock("./ui/toast", () => ({
 
 import { showDesktopUpdateDownloadedToast } from "./desktopUpdate.toast";
 
-type ClickableElement = ReactElement<{ readonly onClick?: () => void }>;
+const renderedDescriptions: ReactTestRenderer[] = [];
+const previousActEnvironment = Reflect.get(globalThis, "IS_REACT_ACT_ENVIRONMENT");
 
-/** Walks the rendered description, invoking function components, to find the link button. */
-function findReleaseNotesLink(node: ReactNode): ClickableElement | null {
-  if (Array.isArray(node)) {
-    for (const child of node) {
-      const found = findReleaseNotesLink(child);
-      if (found) return found;
-    }
+/** Mount the description normally so links can use React hooks. */
+async function findReleaseNotesLink(node: ReactNode): Promise<ReactTestInstance | null> {
+  let renderer: ReactTestRenderer | undefined;
+  await act(async () => {
+    renderer = create(createElement(Fragment, null, node));
+  });
+  renderedDescriptions.push(renderer!);
+  try {
+    return renderer!.root.findAllByType("button")[0] ?? null;
+  } catch {
+    // A fragment containing only text has no TestInstance root.
     return null;
   }
-  if (!isValidElement(node)) return null;
-  const element = node as ReactElement<{ readonly children?: ReactNode }>;
-  if (element.type === "button") return element as ClickableElement;
-  if (typeof element.type === "function") {
-    const render = element.type as (props: unknown) => ReactNode;
-    return findReleaseNotesLink(render(element.props));
-  }
-  return findReleaseNotesLink(element.props.children);
 }
 
 function getDescription(): ReactNode {
@@ -63,13 +61,21 @@ function downloadedState(overrides: Partial<DesktopUpdateState> = {}): DesktopUp
 describe("showDesktopUpdateDownloadedToast", () => {
   beforeEach(() => {
     testState.addToast.mockReset();
+    Reflect.set(globalThis, "IS_REACT_ACT_ENVIRONMENT", true);
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      renderedDescriptions.splice(0).forEach((renderer) => renderer.unmount());
+    });
+    Reflect.set(globalThis, "IS_REACT_ACT_ENVIRONMENT", previousActEnvironment);
   });
 
   it("opens the downloaded version's release notes", async () => {
     const openExternal = vi.fn().mockResolvedValue(true);
 
     showDesktopUpdateDownloadedToast({ openExternal }, downloadedState());
-    const link = findReleaseNotesLink(getDescription());
+    const link = await findReleaseNotesLink(getDescription());
     link?.props.onClick?.();
     await vi.waitFor(() => {
       expect(openExternal).toHaveBeenCalledWith(
@@ -87,7 +93,7 @@ describe("showDesktopUpdateDownloadedToast", () => {
       { openExternal },
       downloadedState({ downloadedVersion: null }),
     );
-    findReleaseNotesLink(getDescription())?.props.onClick?.();
+    (await findReleaseNotesLink(getDescription()))?.props.onClick?.();
 
     await vi.waitFor(() => {
       expect(openExternal).toHaveBeenCalledWith(
@@ -96,13 +102,13 @@ describe("showDesktopUpdateDownloadedToast", () => {
     });
   });
 
-  it("omits the link when the updater reports no version at all", () => {
+  it("omits the link when the updater reports no version at all", async () => {
     showDesktopUpdateDownloadedToast(
       { openExternal: vi.fn() },
       downloadedState({ availableVersion: null, downloadedVersion: null }),
     );
 
-    expect(findReleaseNotesLink(getDescription())).toBeNull();
+    expect(await findReleaseNotesLink(getDescription())).toBeNull();
   });
 
   it.each([
@@ -110,7 +116,7 @@ describe("showDesktopUpdateDownloadedToast", () => {
     ["rejects", vi.fn().mockRejectedValue(new Error("open failed"))],
   ])("shows an error when opening release notes %s", async (_description, openExternal) => {
     showDesktopUpdateDownloadedToast({ openExternal }, downloadedState());
-    findReleaseNotesLink(getDescription())?.props.onClick?.();
+    (await findReleaseNotesLink(getDescription()))?.props.onClick?.();
 
     await vi.waitFor(() => {
       expect(testState.addToast).toHaveBeenLastCalledWith({

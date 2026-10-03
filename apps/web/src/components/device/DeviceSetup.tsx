@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { DeviceHostUpdates } from "./DeviceHostUpdates";
 import type { DevicePlatform, DeviceServiceState, EnvironmentId } from "@t3tools/contracts";
 import { Check, CircleAlert } from "lucide-react";
@@ -55,6 +56,8 @@ export function DeviceSetup(props: {
   readonly state: DeviceServiceState;
   readonly onComplete?: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const configure = useAtomCommand(deviceEnvironment.configure);
   const list = useAtomCommand(deviceEnvironment.list, { reportFailure: false });
   const [pending, setPending] = useState<"hub" | "check" | "agent" | "complete" | null>(null);
@@ -78,8 +81,10 @@ export function DeviceSetup(props: {
   return (
     <>
       <WizardHeader
-        title="Set up devices"
-        description="Review what runs on this environment before using simulators and emulators."
+        title={t3T("Set up devices")}
+        description={t3T(
+          "Review what runs on this environment before using simulators and emulators.",
+        )}
       >
         <WizardSteps
           steps={["Device hub", "Simulators", "Agent access"]}
@@ -93,13 +98,13 @@ export function DeviceSetup(props: {
         <DeviceHostUpdates state={props.state} environmentId={props.environmentId} />
         {step === 0 ? (
           <section className="space-y-3 text-sm">
-            <h3 className="font-medium">Enable the device hub</h3>
+            <h3 className="font-medium">{t3T("Enable the device hub")}</h3>
             <div className="flex items-start justify-between gap-4">
               <p className="text-muted-foreground">{deviceHubDescription}</p>
               <Switch
                 checked={enabled}
                 disabled={busy || pending !== null}
-                aria-label="Enable device hub"
+                aria-label={t3T("Enable device hub")}
                 onCheckedChange={(checked) =>
                   void update("hub", {
                     enabled: Boolean(checked),
@@ -117,7 +122,7 @@ export function DeviceSetup(props: {
 
         {step === 1 ? (
           <section className="space-y-3 text-sm">
-            <h3 className="font-medium">Check simulator support</h3>
+            <h3 className="font-medium">{t3T("Check simulator support")}</h3>
             <DevicePlatformSetup
               state={props.state}
               checking={pending === "check"}
@@ -134,13 +139,13 @@ export function DeviceSetup(props: {
 
         {step === 2 ? (
           <section className="space-y-3 text-sm">
-            <h3 className="font-medium">Allow agent control</h3>
+            <h3 className="font-medium">{t3T("Allow agent control")}</h3>
             <div className="flex items-start justify-between gap-4">
               <p className="text-muted-foreground">{agentDeviceDescription}</p>
               <Switch
                 checked={props.state.agentAccessEnabled}
                 disabled={!enabled || busy || pending !== null}
-                aria-label="Allow agents to control devices"
+                aria-label={t3T("Allow agents to control devices")}
                 onCheckedChange={(checked) =>
                   void update("agent", { agentAccessEnabled: Boolean(checked) })
                 }
@@ -148,7 +153,7 @@ export function DeviceSetup(props: {
             </div>
             <AgentDeviceSetupStatus state={props.state} pending={pending === "agent"} />
             <p className="text-xs text-muted-foreground">
-              Leave this off to keep manual device controls without giving agents access.
+              {t3T("Leave this off to keep manual device controls without giving agents access.")}
             </p>
           </section>
         ) : null}
@@ -161,14 +166,14 @@ export function DeviceSetup(props: {
 
       <WizardFooter>
         {step === 0 ? (
-          <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+          <DialogClose render={<Button variant="outline" />}>{t3T("Cancel")}</DialogClose>
         ) : (
           <Button
             variant="outline"
             disabled={busy || pending !== null}
             onClick={() => setStep(step - 1)}
           >
-            Back
+            {t3T("Back")}
           </Button>
         )}
         {step < 2 ? (
@@ -176,14 +181,14 @@ export function DeviceSetup(props: {
             disabled={props.state.hostStatus !== "ready" || pending !== null}
             onClick={() => setStep(step + 1)}
           >
-            Continue
+            {t3T("Continue")}
           </Button>
         ) : (
           <Button
             disabled={props.state.hostStatus !== "ready" || pending !== null}
             onClick={() => void update("complete", { onboardingCompleted: true })}
           >
-            {pending === "complete" ? "Saving…" : "Done"}
+            {pending === "complete" ? t3T("Saving…") : t3T("Done")}
           </Button>
         )}
       </WizardFooter>
@@ -200,6 +205,8 @@ export function DeviceHubSetupStatus({
   readonly pending: boolean;
   readonly compact?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   if (!pending && state.hostStatus !== "ready") return null;
   return (
     <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -207,16 +214,16 @@ export function DeviceHubSetupStatus({
       {pending
         ? state.hostStatus === "installing"
           ? compact
-            ? "Installing…"
-            : "Installing device hub…"
+            ? t3T("Installing…")
+            : t3T("Installing device hub…")
           : state.hostStatus === "starting"
             ? compact
-              ? "Starting…"
-              : "Starting device hub…"
+              ? t3T("Starting…")
+              : t3T("Starting device hub…")
             : compact
-              ? "Updating…"
-              : "Updating device hub…"
-        : "Device hub is ready."}
+              ? t3T("Updating…")
+              : t3T("Updating device hub…")
+        : t3T("Device hub is ready.")}
     </p>
   );
 }
@@ -227,16 +234,20 @@ function DevicePlatformSetup(props: {
   readonly disabled: boolean;
   readonly onCheck: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <div className="space-y-3">
       <PlatformStatus platform="iOS" status={platformSetupStatus(props.state, "ios")} />
       <PlatformStatus platform="Android" status={platformSetupStatus(props.state, "android")} />
       <p className="text-xs text-muted-foreground">
-        You can use either platform. Fixing a missing platform does not block the other one.
+        {t3T(
+          "You can use either platform. Fixing a missing platform does not block the other one.",
+        )}
       </p>
       <Button size="compact" variant="outline" disabled={props.disabled} onClick={props.onCheck}>
         {props.checking ? <Spinner size="xs" /> : null}
-        {props.checking ? "Checking…" : "Check again"}
+        {props.checking ? t3T("Checking…") : t3T("Check again")}
       </Button>
     </div>
   );
@@ -247,6 +258,8 @@ export function AgentDeviceSetupStatus(props: {
   readonly pending: boolean;
   readonly compact?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   if (props.pending) {
     const label =
       props.state.hostStatus === "installing"
@@ -275,7 +288,7 @@ export function AgentDeviceSetupStatus(props: {
     return (
       <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground">
         <Check className="size-3 text-success" />
-        Agent tools are ready.
+        {t3T("Agent tools are ready.")}
       </p>
     );
   }
@@ -287,6 +300,8 @@ export function PlatformStatus(props: {
   readonly status: { readonly ready: boolean; readonly message: string };
   readonly compact?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const Icon = props.status.ready ? Check : CircleAlert;
   return (
     <div
@@ -301,7 +316,7 @@ export function PlatformStatus(props: {
       <div className={cn(props.compact && props.status.ready && "flex items-center gap-2")}>
         <p className="font-medium">{props.platform}</p>
         <p className="text-xs text-muted-foreground">
-          {props.compact && props.status.ready ? "Ready" : props.status.message}
+          {props.compact && props.status.ready ? t3T("Ready") : props.status.message}
         </p>
       </div>
     </div>

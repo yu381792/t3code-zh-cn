@@ -1,3 +1,4 @@
+import { translate } from "../../i18n/translate";
 import { isElectron } from "~/env";
 import { isMacPlatform, isWindowsPlatform, normalizeSearchText } from "~/lib/utils";
 import { STATIC_KEYBINDING_COMMANDS, type KeybindingCommand } from "@t3tools/contracts";
@@ -346,6 +347,15 @@ export const SETTINGS_SEARCH_ITEMS = [
     title: "Time format",
     to: "/settings/general",
     searchTerms: ["timestamp clock locale system browser os 12 hour 24 hour"],
+  },
+
+  {
+    id: "interface-language",
+    title: "Interface language",
+    to: "/settings/general",
+    searchTerms: [
+      "language locale english chinese simplified chinese menu ui translation 中文 汉化 简体中文 语言",
+    ],
   },
   {
     id: "response-streaming",
@@ -995,7 +1005,7 @@ export function searchableSetting(id: SettingsSearchItemId): {
   readonly title: string;
 } {
   const { id: anchorId, title } = SEARCH_ITEMS_BY_ID.get(id)!;
-  return { id: anchorId, title };
+  return { id: anchorId, title: translate(title) };
 }
 
 export function filterAvailableSettingsSearchItems(
@@ -1033,7 +1043,9 @@ export function searchSettings(
       const title = normalizeSearchText(item.title);
       const fields = [
         title,
+        normalizeSearchText(translate(item.title, "zh-CN")),
         normalizeSearchText(SETTINGS_SECTION_LABELS[item.to]),
+        normalizeSearchText(translate(SETTINGS_SECTION_LABELS[item.to], "zh-CN")),
         ...(item.searchTerms ?? []).map(normalizeSearchText),
       ];
       if (!queryTokens.every((token) => fields.some((field) => field.includes(token)))) return [];

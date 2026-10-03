@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { type ResolvedKeybindingsConfig } from "@t3tools/contracts";
 import { ChevronRightIcon } from "lucide-react";
 import { shortcutLabelForCommand } from "../keybindings";
@@ -26,13 +27,15 @@ interface CommandPaletteResultsProps {
 }
 
 export function CommandPaletteResults(props: CommandPaletteResultsProps) {
+  const t3T = useUiTranslate();
+
   if (props.groups.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-muted-foreground">
         {props.emptyStateMessage ??
           (props.isActionsOnly
-            ? "No matching actions."
-            : "No matching commands, projects, or threads.")}
+            ? t3T("No matching actions.")
+            : t3T("No matching commands, projects, or threads."))}
       </div>
     );
   }
@@ -41,7 +44,7 @@ export function CommandPaletteResults(props: CommandPaletteResultsProps) {
     <CommandList>
       {props.groups.map((group) => (
         <CommandGroup items={group.items} key={group.value}>
-          {group.label ? <CommandGroupLabel>{group.label}</CommandGroupLabel> : null}
+          {group.label ? <CommandGroupLabel>{t3T(group.label)}</CommandGroupLabel> : null}
           <CommandCollection>
             {(item) =>
               item.disabled ? (
@@ -66,6 +69,7 @@ export function CommandPaletteResults(props: CommandPaletteResultsProps) {
 function DisabledCommandPaletteResultRow(props: {
   item: CommandPaletteActionItem | CommandPaletteSubmenuItem;
 }) {
+  const t3T = useUiTranslate();
   return (
     <div className="flex min-h-8 select-none items-center gap-2 rounded-sm px-2 py-1.5 text-base opacity-64 sm:min-h-7 sm:text-sm">
       {props.item.icon}
@@ -73,14 +77,14 @@ function DisabledCommandPaletteResultRow(props: {
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-center gap-1.5 text-sm text-foreground">
             {props.item.titleLeadingContent}
-            <span className="truncate">{props.item.title}</span>
+            <span className="truncate">{t3T(props.item.title)}</span>
           </span>
           {props.item.threadContentMatch ? (
             <ThreadSearchMatchExcerpt match={props.item.threadContentMatch} />
           ) : null}
           {props.item.description ? (
             <span className="min-w-0 text-muted-foreground/70 text-xs">
-              {props.item.description}
+              {t3T(props.item.description)}
             </span>
           ) : null}
         </span>

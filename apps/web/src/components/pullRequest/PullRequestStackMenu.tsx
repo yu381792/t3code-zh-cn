@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Tooltip, TooltipTrigger, TooltipPopup } from "../ui/tooltip";
 import type {
   EnvironmentId,
@@ -50,6 +51,8 @@ export function PullRequestStackMenu({
   onSelect?: ((reference: PullRequestRef) => void) | undefined;
   onActed: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<"merge" | "update-branch" | null>(null);
   const [pending, setPending] = useState(false);
@@ -130,7 +133,11 @@ export function PullRequestStackMenu({
                   <Button
                     variant="ghost"
                     size="xs"
-                    aria-label={`Stack ${stack.number}, layer ${position} of ${stack.layers.length}`}
+                    aria-label={t3T("Stack {0}, layer {1} of {2}", [
+                      stack.number,
+                      position,
+                      stack.layers.length,
+                    ])}
                   />
                 }
               >
@@ -141,14 +148,16 @@ export function PullRequestStackMenu({
             }
           />
           <TooltipPopup>
-            View stack #{stack.number}, layer {position} of {stack.layers.length}
+            {t3T("View stack #")}
+            {stack.number}
+            {t3T(", layer")} {position} {t3T("of")} {stack.layers.length}
             {notice ? ` · ${notice}` : null}
           </TooltipPopup>
         </Tooltip>
         <MenuPopup align="start">
           <MenuGroup>
             <PullRequestStackHeader number={stack.number} notice={notice} stale={!!onRetry} />
-            {onRetry ? <MenuItem onClick={onRetry}>Retry stack refresh</MenuItem> : null}
+            {onRetry ? <MenuItem onClick={onRetry}>{t3T("Retry stack refresh")}</MenuItem> : null}
             <PullRequestStackLayers
               stack={stack}
               reference={reference}
@@ -169,7 +178,8 @@ export function PullRequestStackMenu({
               {canMerge ? (
                 <MenuItem disabled={mergeDisabled} onClick={() => setConfirmation("merge")}>
                   <PullRequestGlyph.merged aria-hidden />
-                  Merge stack ({mergeLayers.length})
+                  {t3T("Merge stack (")}
+                  {mergeLayers.length})
                 </MenuItem>
               ) : null}
               {canRebase ? (
@@ -178,12 +188,12 @@ export function PullRequestStackMenu({
                   onClick={() => setConfirmation("update-branch")}
                 >
                   <RefreshCwIcon aria-hidden />
-                  Rebase stack
+                  {t3T("Rebase stack")}
                 </MenuItem>
               ) : null}
               {mergeHasClosed || mergeLayers.some((layer) => layer.isDraft) ? (
                 <p className="px-2 py-1 text-xs text-muted-foreground">
-                  Every layer being merged must be open and ready for review.
+                  {t3T("Every layer being merged must be open and ready for review.")}
                 </p>
               ) : null}
             </>
@@ -202,14 +212,15 @@ export function PullRequestStackMenu({
                   onClick={() => setConfirmation("merge")}
                 >
                   <PullRequestGlyph.merged aria-hidden className="size-3.5" />
-                  Merge stack
+                  {t3T("Merge stack")}
                 </Button>
               </span>
             }
           />
           <TooltipPopup>
-            Merge stack through #{reference.number} into {stack.base} ({mergeLayers.length}{" "}
-            {mergeLayers.length === 1 ? "pull request" : "pull requests"})
+            {t3T("Merge stack through #")}
+            {reference.number} {t3T("into")} {stack.base} ({mergeLayers.length}{" "}
+            {mergeLayers.length === 1 ? t3T("pull request") : t3T("pull requests")})
           </TooltipPopup>
         </Tooltip>
       ) : null}
@@ -223,13 +234,19 @@ export function PullRequestStackMenu({
           <DialogHeader>
             <DialogTitle>
               {confirmation === "merge"
-                ? `Merge ${mergeLayers.length} pull requests?`
-                : `Rebase ${unmerged.length} pull requests?`}
+                ? t3T("Merge {0} pull requests?", [mergeLayers.length])
+                : t3T("Rebase {0} pull requests?", [unmerged.length])}
             </DialogTitle>
             <DialogDescription>
               {confirmation === "merge"
-                ? `Merge #${reference.number} and its unmerged layers below into ${stack.base} using ${mergeMethod}. GitHub checks their rules before merging or queueing them and rebases the remaining stack after merging.`
-                : `Rebase the remote branches from bottom to top onto ${stack.base}. This rewrites branch history and may restart checks. If a layer fails, earlier updates remain.`}
+                ? t3T(
+                    "Merge #{0} and its unmerged layers below into {1} using {2}. GitHub checks their rules before merging or queueing them and rebases the remaining stack after merging.",
+                    [reference.number, stack.base, mergeMethod],
+                  )
+                : t3T(
+                    "Rebase the remote branches from bottom to top onto {0}. This rewrites branch history and may restart checks. If a layer fails, earlier updates remain.",
+                    [stack.base],
+                  )}
             </DialogDescription>
           </DialogHeader>
           <DialogPanel>
@@ -246,10 +263,14 @@ export function PullRequestStackMenu({
           </DialogPanel>
           <DialogFooter>
             <Button variant="outline" disabled={pending} onClick={() => setConfirmation(null)}>
-              Cancel
+              {t3T("Cancel")}
             </Button>
             <Button disabled={pending} onClick={() => void run()}>
-              {pending ? "Working…" : confirmation === "merge" ? "Merge stack" : "Rebase stack"}
+              {pending
+                ? t3T("Working…")
+                : confirmation === "merge"
+                  ? t3T("Merge stack")
+                  : t3T("Rebase stack")}
             </Button>
           </DialogFooter>
         </DialogPopup>

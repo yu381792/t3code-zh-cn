@@ -1,3 +1,5 @@
+import { translateUiMessage } from "~/i18n/messages";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import { PullRequestGlyph } from "../pullRequest/pullRequestIcons";
 /**
@@ -96,6 +98,8 @@ export function ThreadDetailsPrRow({
   /** An action changed the pull request on the host, so the vcs status behind the row is stale. */
   onActed?: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const serverConfigs = useServerConfigs();
   const supportsPullRequests =
     serverConfigs.get(environmentId)?.environment.capabilities.pullRequests === true;
@@ -226,7 +230,9 @@ export function ThreadDetailsPrRow({
   // detail rows, so the two read as one family.
   const rowTooltip =
     detail === null || statePresentation === null ? (
-      <TooltipPopup side="top">{status?.tooltip ?? `Pull request #${number}`}</TooltipPopup>
+      <TooltipPopup side="top">
+        {status?.tooltip ?? t3T("Pull request #{0}", [number])}
+      </TooltipPopup>
     ) : (
       <TooltipPopup
         side="top"
@@ -274,7 +280,7 @@ export function ThreadDetailsPrRow({
               <div className="flex min-w-0 items-start gap-2 text-destructive">
                 <TriangleAlertIcon aria-hidden className="mt-0.5 size-3 shrink-0 stroke-current" />
                 <div className="min-w-0 flex-1 wrap-break-word leading-5">
-                  Merge conflicts with {detail.baseBranch}
+                  {t3T("Merge conflicts with")} {detail.baseBranch}
                 </div>
               </div>
             ) : null}
@@ -282,7 +288,7 @@ export function ThreadDetailsPrRow({
               <FileDiffIcon className="size-3 shrink-0 stroke-muted-foreground" />
               <div className="min-w-0 flex items-baseline gap-1 truncate text-foreground/75">
                 {detail.changedFiles.toLocaleString()}{" "}
-                {detail.changedFiles === 1 ? "file" : "files"}
+                {detail.changedFiles === 1 ? t3T("file") : t3T("files")}
                 <PullRequestDiffStat additions={detail.additions} deletions={detail.deletions} />
               </div>
             </div>
@@ -390,10 +396,10 @@ export function ThreadDetailsPrRow({
                     />
                   }
                 >
-                  {trailingAction.pending ? trailingAction.pendingLabel : trailingAction.label}
+                  {t3T(trailingAction.pending ? trailingAction.pendingLabel : trailingAction.label)}
                   {trailingAction.suffix}
                 </TooltipTrigger>
-                <TooltipPopup side="top">{trailingAction.tooltip}</TooltipPopup>
+                <TooltipPopup side="top">{translateUiMessage(trailingAction.tooltip)}</TooltipPopup>
               </Tooltip>
             </>
           ) : null}
@@ -421,14 +427,15 @@ export function ThreadDetailsPrRow({
         <AlertDialog open={confirmingMerge} onOpenChange={(open) => setConfirmingMerge(open)}>
           <AlertDialogPopup>
             <AlertDialogHeader>
-              <AlertDialogTitle>Merge pull request?</AlertDialogTitle>
+              <AlertDialogTitle>{t3T("Merge pull request?")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This merges #{number} using {selectedMergeMethod}.
+                {t3T("This merges #")}
+                {number} {t3T("using")} {selectedMergeMethod}.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogClose render={<Button variant="outline" size="sm" />}>
-                Cancel
+                {t3T("Cancel")}
               </AlertDialogClose>
               <Button
                 size="sm"
@@ -438,7 +445,7 @@ export function ThreadDetailsPrRow({
                   void perform("merge", selectedMergeMethod);
                 }}
               >
-                Merge
+                {t3T("Merge")}
               </Button>
             </AlertDialogFooter>
           </AlertDialogPopup>

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadHoverCardPopup } from "../ThreadHoverCard";
 import { AgentElapsed } from "./AgentElapsed";
 import { projectedSubagentsToRuntime } from "@t3tools/client-runtime/state/subagentRuntime";
@@ -71,6 +72,8 @@ export function V2LifecycleRow(props: {
   readonly runs: ReadonlyArray<HandoffTimelineRun>;
   readonly onOpenThread: (threadId: ThreadId) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const { item } = props;
   if (item.type === "run_interrupt_request") {
     return (
@@ -79,7 +82,7 @@ export function V2LifecycleRow(props: {
           <span aria-hidden="true" className="font-mono">
             ■
           </span>
-          <span className="font-medium">Interrupt requested</span>
+          <span className="font-medium">{t3T("Interrupt requested")}</span>
           <span aria-hidden="true" className="opacity-50">
             ·
           </span>
@@ -94,7 +97,7 @@ export function V2LifecycleRow(props: {
   if (item.type === "run_interrupt_result") {
     return (
       <TimelineSystemDivider
-        label="Run interrupted"
+        label={t3T("Run interrupted")}
         detail={item.message}
         tone="danger"
         icon={XIcon}
@@ -122,7 +125,7 @@ export function V2LifecycleRow(props: {
     const { from: fromEndpoints, to } = resolveHandoffEndpoints(item, props.runs);
     return (
       <TimelineSystemDivider
-        label="Context handoff"
+        label={t3T("Context handoff")}
         icon={ArrowRightLeftIcon}
         showDetailSeparator={false}
         tone={item.status === "failed" ? "danger" : "neutral"}
@@ -159,7 +162,9 @@ export function V2LifecycleRow(props: {
     const relatedThreadId = item.source.type === "run" ? item.source.threadId : item.targetThreadId;
     return (
       <TimelineSystemDivider
-        label={item.source.type === "run" ? "Forked from conversation" : "Conversation fork"}
+        label={
+          item.source.type === "run" ? t3T("Forked from conversation") : t3T("Conversation fork")
+        }
         icon={GitForkIcon}
         actionLabel={item.source.type === "run" ? "Open source conversation" : "Open fork"}
         onAction={() => props.onOpenThread(relatedThreadId)}
@@ -177,15 +182,15 @@ export function V2LifecycleRow(props: {
             <MessageSquareIcon className="size-4 text-secondary-label" aria-hidden />
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {item.title ?? "Created thread"}
+            {item.title ?? t3T("Created thread")}
           </span>
           <Button
             size="xs"
             variant="outline"
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={t3T("Open {0}", [item.title ?? "created thread"])}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {t3T("Open chat")}
           </Button>
         </div>
       );
@@ -194,13 +199,18 @@ export function V2LifecycleRow(props: {
       <WorkLogRow
         data-v2-item-type={item.type}
         icon={<T3Wordmark className="size-4 text-icon-muted" aria-hidden />}
-        label={<>Created thread{item.title ? ` · ${item.title}` : ""}</>}
+        label={
+          <>
+            {t3T("Created thread")}
+            {item.title ? ` · ${item.title}` : ""}
+          </>
+        }
         trailing={
           <InlineButton
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={t3T("Open {0}", [item.title ?? "created thread"])}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {t3T("Open chat")}
           </InlineButton>
         }
       />
@@ -340,6 +350,8 @@ function SubagentTimelineLink(props: {
   readonly threadId: ThreadId | null;
   readonly onOpenThread: (threadId: ThreadId) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const agent = useAtomValue(
     environmentThreadDetails.threadAtom(props.parentRef),
     (thread) => thread?.projection.subagents.find((agent) => agent.id === props.subagentId) ?? null,
@@ -419,7 +431,7 @@ function SubagentTimelineLink(props: {
             <button
               type="button"
               data-v2-item-type="subagent"
-              aria-label={`Open ${props.title}`}
+              aria-label={t3T("Open {0}", [props.title])}
               aria-description={statusLabel}
               onClick={() => props.onOpenThread(threadId)}
               className={cn(

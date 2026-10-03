@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
 import { isAtomCommandInterrupted } from "@t3tools/client-runtime/state/runtime";
 import { useDebouncedValue } from "@tanstack/react-pacer";
@@ -45,6 +46,8 @@ export function PullRequestThreadDialog({
   onOpenChange,
   onPrepared,
 }: PullRequestThreadDialogProps) {
+  const t3T = useUiTranslate();
+
   const referenceInputRef = useRef<HTMLInputElement>(null);
   const [reference, setReference] = useState(initialReference ?? "");
   const [referenceDirty, setReferenceDirty] = useState(false);
@@ -198,11 +201,11 @@ export function PullRequestThreadDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <SourceControlIcon className="me-2 size-4" />
-            Checkout {terminology.singular}
+            {t3T("Checkout")} {terminology.singular}
           </DialogTitle>
           <DialogDescription>
-            Resolve a {sourceControlPresentation.providerName} {terminology.singular}, then create
-            the draft thread in the main repo or in a dedicated worktree.
+            {t3T("Resolve a")} {sourceControlPresentation.providerName} {terminology.singular}
+            {t3T(", then create the draft thread in the main repo or in a dedicated worktree.")}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
@@ -212,7 +215,7 @@ export function PullRequestThreadDialog({
             </span>
             <Input
               ref={referenceInputRef}
-              placeholder={`${terminology.shortLabel} URL, checkout command, or #42`}
+              placeholder={t3T("{0} URL, checkout command, or #42", [terminology.shortLabel])}
               value={reference}
               onChange={(event) => {
                 setReferenceDirty(true);
@@ -239,7 +242,7 @@ export function PullRequestThreadDialog({
                 <div className="min-w-0">
                   <p className="truncate font-medium text-sm">{resolvedPullRequest.title}</p>
                   <p className="truncate text-muted-foreground text-xs">
-                    #{resolvedPullRequest.number} · {resolvedPullRequest.headBranch} to{" "}
+                    #{resolvedPullRequest.number} · {resolvedPullRequest.headBranch} {t3T("to")}{" "}
                     {resolvedPullRequest.baseBranch}
                   </p>
                 </div>
@@ -253,7 +256,7 @@ export function PullRequestThreadDialog({
           {isResolving ? (
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Spinner size="sm" />
-              Resolving {terminology.singular}...
+              {t3T("Resolving")} {terminology.singular}...
             </div>
           ) : null}
 
@@ -267,7 +270,7 @@ export function PullRequestThreadDialog({
             onClick={() => onOpenChange(false)}
             disabled={preparePullRequestThreadAction.isPending}
           >
-            Cancel
+            {t3T("Cancel")}
           </Button>
           <Button
             type="button"
@@ -283,7 +286,7 @@ export function PullRequestThreadDialog({
               preparePullRequestThreadAction.isPending
             }
           >
-            {preparingMode === "local" ? "Preparing local..." : "Local"}
+            {preparingMode === "local" ? t3T("Preparing local...") : t3T("Local")}
           </Button>
           <Button
             type="button"
@@ -298,7 +301,7 @@ export function PullRequestThreadDialog({
               preparePullRequestThreadAction.isPending
             }
           >
-            {preparingMode === "worktree" ? "Preparing worktree..." : "Worktree"}
+            {preparingMode === "worktree" ? t3T("Preparing worktree...") : t3T("Worktree")}
           </Button>
         </DialogFooter>
       </DialogPopup>

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ChatCanvas } from "./chat/ChatCanvas";
 import { usageLimitRecoveryBannerItem } from "./chat/UsageLimitRecoveryBanner";
 import {
@@ -1503,6 +1504,8 @@ function releaseChatTimelineAnchor<T extends { readonly messageId: MessageId | n
 }
 
 export default function ChatView(props: ChatViewProps) {
+  const t3T = useUiTranslate();
+
   const {
     environmentId,
     threadId,
@@ -2451,7 +2454,7 @@ export default function ChatView(props: ChatViewProps) {
               )
             }
           >
-            Cancel
+            {t3T("Cancel")}
           </Button>
         ),
       };
@@ -2471,7 +2474,7 @@ export default function ChatView(props: ChatViewProps) {
             variant="ghost"
             onClick={() => void removeClonedProject({ environmentId, projectId })}
           >
-            Remove project
+            {t3T("Remove project")}
           </Button>
           <Button
             size="xs"
@@ -2482,7 +2485,7 @@ export default function ChatView(props: ChatViewProps) {
               )
             }
           >
-            Retry
+            {t3T("Retry")}
           </Button>
         </>
       ),
@@ -2494,6 +2497,7 @@ export default function ChatView(props: ChatViewProps) {
     removeClonedProject,
     retryProjectClone,
     runProjectCloneAction,
+    t3T,
   ]);
   const activeProjectDefaultModelSelection = activeProjectSettings.settings.defaultModelSelection;
   const handleNewThreadInActiveProject = useCallback(() => {
@@ -2953,12 +2957,12 @@ export default function ChatView(props: ChatViewProps) {
           size="xs"
           variant="ghost"
           disabled={disconnectingEnvironment}
-          title="Hide this server's threads. Switch it on again in Connections."
+          title={t3T("Hide this server's threads. Switch it on again in Connections.")}
           onClick={() =>
             void handleDisconnectActiveEnvironment(activeEnvironmentUnavailableState.environmentId)
           }
         >
-          Disconnect server
+          {t3T("Disconnect server")}
         </Button>
       ) : undefined;
     const environmentReconnecting =
@@ -2988,7 +2992,7 @@ export default function ChatView(props: ChatViewProps) {
                   )
                 }
               >
-                Reconnect
+                {t3T("Reconnect")}
               </Button>
             ) : null}
             {disconnectAction}
@@ -3025,7 +3029,7 @@ export default function ChatView(props: ChatViewProps) {
                     type="button"
                     className="block max-w-full cursor-help truncate rounded-sm text-left"
                   >
-                    Server update available
+                    {t3T("Server update available")}
                   </button>
                 }
               />
@@ -3056,7 +3060,7 @@ export default function ChatView(props: ChatViewProps) {
             desktopAppUpdate={versionMismatchDesktopAppUpdate}
             threadContinuation={versionMismatchThreadContinuation}
             targetVersion={versionMismatch.clientVersion}
-            label={updateFailed ? "Retry" : "Update"}
+            label={updateFailed ? t3T("Retry") : t3T("Update")}
             variant="ghost"
           />
         ),
@@ -3097,6 +3101,7 @@ export default function ChatView(props: ChatViewProps) {
     versionMismatchDesktopAppUpdate,
     versionMismatchThreadContinuation,
     versionMismatchServerLabel,
+    t3T,
   ]);
   const providerInstanceEntries = useMemo(
     () =>
@@ -6933,7 +6938,7 @@ export default function ChatView(props: ChatViewProps) {
                   ) : (
                     <InlineButton
                       tone="muted"
-                      aria-label={`Open subagent ${item.label}`}
+                      aria-label={t3T("Open subagent {0}", [item.label])}
                       onClick={() => onOpenRelatedThread(childThreadId)}
                     >
                       {item.label}
@@ -6949,7 +6954,7 @@ export default function ChatView(props: ChatViewProps) {
           disabled={isStoppingBackgroundWork}
           onClick={() => void handleStopBackgroundWork()}
         >
-          {isStoppingBackgroundWork ? "Stopping..." : "Stop"}
+          {isStoppingBackgroundWork ? t3T("Stopping...") : t3T("Stop")}
         </Button>
       ),
     };
@@ -6959,6 +6964,7 @@ export default function ChatView(props: ChatViewProps) {
     handleStopBackgroundWork,
     isStoppingBackgroundWork,
     onOpenRelatedThread,
+    t3T,
   ]);
   // A woken thread announces itself in the open view, not just the sidebar
   // pill. Dismissing marks the wake as seen (same acknowledgment as the
@@ -6999,11 +7005,11 @@ export default function ChatView(props: ChatViewProps) {
         >
           {isSnoozed
             ? isUnsnoozing
-              ? "Waking..."
-              : "Wake now"
+              ? t3T("Waking...")
+              : t3T("Wake now")
             : isUnsettling
-              ? "Un-settling..."
-              : "Un-settle"}
+              ? t3T("Un-settling...")
+              : t3T("Un-settle")}
         </Button>
       ),
     };
@@ -7015,6 +7021,7 @@ export default function ChatView(props: ChatViewProps) {
     handleUnsettleActiveThread,
     isUnsnoozing,
     isUnsettling,
+    t3T,
   ]);
   // Session-scoped dismissals, one key per (thread, snapshot). A set rather
   // than a single slot so dismissing the banner on one thread does not
@@ -7086,7 +7093,7 @@ export default function ChatView(props: ChatViewProps) {
           composerRef.current?.compactContext();
         }}
       >
-        Compact
+        {t3T("Compact")}
       </Button>
     );
     return {
@@ -7120,6 +7127,7 @@ export default function ChatView(props: ChatViewProps) {
     resumeCompactionKey,
     resumeCompactionPermanentlyDismissed,
     selectedProvider,
+    t3T,
   ]);
   const handleRestoreThreadBranch = useCallback(() => {
     if (gitStatusQuery.data?.hasWorkingTreeChanges) {
@@ -7200,7 +7208,9 @@ export default function ChatView(props: ChatViewProps) {
         icon: <GitBranchIcon />,
         title: (
           <span className="flex min-w-0 items-baseline gap-1.5">
-            <span className="shrink-0 font-normal text-muted-foreground">Branch changed — was</span>
+            <span className="shrink-0 font-normal text-muted-foreground">
+              {t3T("Branch changed — was")}
+            </span>
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -7210,8 +7220,8 @@ export default function ChatView(props: ChatViewProps) {
                 }
               />
               <TooltipPopup side="top">
-                This thread last ran on {localCheckoutBranchMismatch.threadBranch}. Sending will
-                continue on {localCheckoutBranchMismatch.currentBranch}.
+                {t3T("This thread last ran on")} {localCheckoutBranchMismatch.threadBranch}
+                {t3T(". Sending will continue on")} {localCheckoutBranchMismatch.currentBranch}.
               </TooltipPopup>
             </Tooltip>
           </span>
@@ -7223,7 +7233,7 @@ export default function ChatView(props: ChatViewProps) {
             disabled={isRestoringThreadBranch}
             onClick={handleRestoreThreadBranch}
           >
-            {isRestoringThreadBranch ? "Restoring..." : "Restore branch"}
+            {isRestoringThreadBranch ? t3T("Restoring...") : t3T("Restore branch")}
           </Button>
         ),
         dismissLabel: "Dismiss branch change notice",
@@ -7251,6 +7261,7 @@ export default function ChatView(props: ChatViewProps) {
     systemComposerBannerItems,
     usageLimitsBanner,
     wokeThreadBannerItem,
+    t3T,
   ]);
 
   useEffect(() => {
@@ -10307,7 +10318,7 @@ export default function ChatView(props: ChatViewProps) {
       <PullRequestDetailGhost />
     ) : renderedRightPanelSurface?.kind === "pull-request" && !supportsPullRequests ? (
       <PullRequestsUnavailableState
-        title="Pull requests unavailable"
+        title={t3T("Pull requests unavailable")}
         error="Update this environment's T3 Code server to browse pull requests."
       />
     ) : renderedRightPanelSurface?.kind === "pull-request" ? (
@@ -10643,7 +10654,7 @@ export default function ChatView(props: ChatViewProps) {
                   className="flex items-center gap-2 rounded-full border border-primary/25 bg-background/95 px-4 py-2.5 text-sm font-medium text-foreground shadow-lg"
                 >
                   <PaperclipIcon className="size-4 text-primary" aria-hidden="true" />
-                  Drop files to attach
+                  {t3T("Drop files to attach")}
                 </div>
               </div>
             ) : null}
@@ -10773,7 +10784,7 @@ export default function ChatView(props: ChatViewProps) {
                   style={{ bottom: scrollToEndClearance + 4 }}
                 >
                   <Button
-                    aria-label="Scroll to end"
+                    aria-label={t3T("Scroll to end")}
                     onPointerDown={(event) => event.preventDefault()}
                     onClick={() => {
                       composerRef.current?.restoreAfterTimelineReachedEnd();
@@ -10784,7 +10795,7 @@ export default function ChatView(props: ChatViewProps) {
                     variant="glass"
                   >
                     <ChevronDownIcon className="size-3.5" />
-                    Scroll to end
+                    {t3T("Scroll to end")}
                   </Button>
                 </div>
               )}
@@ -11120,19 +11131,22 @@ export default function ChatView(props: ChatViewProps) {
               <AlertDialogPopup>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    Switch to{" "}
+                    {t3T("Switch to")}{" "}
                     <code className="font-medium">
                       {localCheckoutBranchMismatch?.threadBranch ?? ""}
                     </code>
                     ?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    You have uncommitted changes. They'll carry over to the other branch, or block
-                    the switch if they conflict.
+                    {t3T(
+                      "You have uncommitted changes. They'll carry over to the other branch, or block the switch if they conflict.",
+                    )}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+                  <AlertDialogClose render={<Button variant="outline" />}>
+                    {t3T("Cancel")}
+                  </AlertDialogClose>
                   <Button
                     variant="default"
                     onClick={() => {
@@ -11140,7 +11154,7 @@ export default function ChatView(props: ChatViewProps) {
                       void handleSwitchCheckoutToThread();
                     }}
                   >
-                    Switch branch
+                    {t3T("Switch branch")}
                   </Button>
                 </AlertDialogFooter>
               </AlertDialogPopup>
@@ -11297,14 +11311,17 @@ export default function ChatView(props: ChatViewProps) {
       >
         <AlertDialogPopup>
           <AlertDialogHeader>
-            <AlertDialogTitle>Edit from here?</AlertDialogTitle>
+            <AlertDialogTitle>{t3T("Edit from here?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Rewind chat to before this message. Your prompt and attachments return to the
-              composer.
+              {t3T(
+                "Rewind chat to before this message. Your prompt and attachments return to the composer.",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {t3T("Cancel")}
+            </AlertDialogClose>
             <Button
               variant="destructive"
               onClick={() => {
@@ -11313,7 +11330,7 @@ export default function ChatView(props: ChatViewProps) {
                 void onRevertToTurnCount(pendingRevert.turnCount, pendingRevert.messageId, true);
               }}
             >
-              Revert files too
+              {t3T("Revert files too")}
             </Button>
             <Button
               onClick={() => {
@@ -11322,7 +11339,7 @@ export default function ChatView(props: ChatViewProps) {
                 void onRevertToTurnCount(pendingRevert.turnCount, pendingRevert.messageId, false);
               }}
             >
-              Revert and keep changes
+              {t3T("Revert and keep changes")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>

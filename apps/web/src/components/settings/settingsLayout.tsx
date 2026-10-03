@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { SettingsGroup } from "./SettingsGroup";
 import { InfoIcon, Undo2Icon } from "lucide-react";
 import { DEFAULT_SERVER_SETTINGS, type ServerSettings } from "@t3tools/contracts";
@@ -69,11 +70,13 @@ function SettingsSearchTargetProvider({
   onTargetHandled?: () => void;
   children: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const value = useMemo(
     () => ({ targetId, highlightTarget, onTargetHandled }),
     [highlightTarget, onTargetHandled, targetId],
   );
-  return <SettingsSearchTargetContext value={value}>{children}</SettingsSearchTargetContext>;
+  return <SettingsSearchTargetContext value={value}>{t3T(children)}</SettingsSearchTargetContext>;
 }
 
 function scrollAndFocusSettingsTarget(target: HTMLElement, highlight = true): void {
@@ -129,10 +132,12 @@ export function SettingsSearchTarget({
   children,
   ...targetProps
 }: ComponentPropsWithoutRef<"div">) {
+  const t3T = useUiTranslate();
+
   const targetRef = useSettingsSearchTarget<HTMLDivElement>(targetProps.id);
   return (
     <div {...targetProps} ref={targetRef} tabIndex={targetProps.id ? -1 : targetProps.tabIndex}>
-      {children}
+      {t3T(children)}
     </div>
   );
 }
@@ -142,17 +147,23 @@ export const SETTINGS_PICKER_TRIGGER_CLASSNAME = "min-w-0 max-w-none shrink-0";
 
 /** Info affordance explaining how a setting interacts with the shared background policy. */
 export function PolicyTooltip({ children }: { readonly children: string }) {
+  const t3T = useUiTranslate();
+
   return (
     <Tooltip>
       <TooltipTrigger
         delay={200}
         render={
-          <Button size="icon-micro" variant="ghost-muted" aria-label="Background policy details">
+          <Button
+            size="icon-micro"
+            variant="ghost-muted"
+            aria-label={t3T("Background policy details")}
+          >
             <InfoIcon className="size-3.5" />
           </Button>
         }
       />
-      <TooltipPopup side="top">{children}</TooltipPopup>
+      <TooltipPopup side="top">{t3T(children)}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -185,6 +196,7 @@ export function SettingsSection({
   variant?: "grouped" | "plain";
   children: ReactNode;
 }) {
+  const t3T = useUiTranslate();
   const targetRef = useSettingsSearchTarget<HTMLElement>(sectionProps.id);
 
   return (
@@ -195,7 +207,7 @@ export function SettingsSection({
       className={cn(!hideTitle && "space-y-2.5", className)}
     >
       {hideTitle ? (
-        <h2 className="sr-only">{title}</h2>
+        <h2 className="sr-only">{t3T(title)}</h2>
       ) : (
         <div
           data-settings-scroll-target
@@ -204,14 +216,14 @@ export function SettingsSection({
           <div className="min-w-0">
             <h2 className="flex min-h-7 items-center gap-2 text-sm font-normal text-foreground/70">
               {icon}
-              {title}
+              {t3T(title)}
             </h2>
           </div>
           <div className="flex min-h-7 min-w-7 items-center justify-end">{headerAction}</div>
         </div>
       )}
       <SettingsGroup data-settings-scroll-target={hideTitle ? "" : undefined} variant={variant}>
-        {children}
+        {t3T(children)}
       </SettingsGroup>
     </section>
   );
@@ -224,15 +236,17 @@ export function SettingsUnavailableGroup({
   children: ReactNode;
   message?: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   if (message === undefined) return children;
 
   return (
     <div className="border-border/60 bg-muted/20 py-1.5">
       <div className="flex items-start gap-2 px-3 py-2 text-xs leading-relaxed text-muted-foreground sm:px-4">
         <InfoIcon className="mt-0.5 size-3.5 shrink-0 text-warning" />
-        <p>{message}</p>
+        <p>{t3T(message)}</p>
       </div>
-      <div className="[&_h3]:opacity-64 [&_p]:opacity-64">{children}</div>
+      <div className="[&_h3]:opacity-64 [&_p]:opacity-64">{t3T(children)}</div>
     </div>
   );
 }
@@ -278,6 +292,8 @@ export function SettingsRow({
   mixed?: boolean;
   children?: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const targetRef = useSettingsSearchTarget<HTMLDivElement>(rowProps.id);
   const primarySettingsAvailable = usePrimarySettingsAvailable();
   const context = useOptionalSettingsScope();
@@ -340,8 +356,8 @@ export function SettingsRow({
   const renderedReset = unavailable ? null : isProjectScope && scopedKeys.length > 0 ? (
     source === "project" || source === "mixed" ? (
       <SettingResetButton
-        label={typeof title === "string" ? title : "override"}
-        tooltip="Reset to inherited value"
+        label={typeof title === "string" ? t3T(title) : t3T("override")}
+        tooltip={t3T("Reset to inherited value")}
         onClick={() => (onResetOverride ? onResetOverride() : clearOverrides(scopedKeys))}
       />
     ) : null
@@ -366,7 +382,7 @@ export function SettingsRow({
           {control}
         </div>
       </TooltipTrigger>
-      <TooltipPopup side="top">{message}</TooltipPopup>
+      <TooltipPopup side="top">{t3T(message)}</TooltipPopup>
     </Tooltip>
   );
   // A mixed selection keeps the real control with "Mixed" as its placeholder
@@ -435,7 +451,9 @@ export function SettingsRow({
       <div className="flex flex-col gap-3 @min-[32rem]/settings-row:grid @min-[32rem]/settings-row:grid-cols-[minmax(0,1fr)_minmax(10rem,auto)] @min-[32rem]/settings-row:items-center @min-[32rem]/settings-row:gap-8">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex min-h-5 items-center gap-1.5">
-            <h3 className="text-sm font-medium text-foreground">{title}</h3>
+            <h3 className="text-sm font-medium text-foreground">
+              {typeof title === "string" ? t3T(title) : t3T(title)}
+            </h3>
             {renderedInheritance ? (
               <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
                 {renderedInheritance}
@@ -447,7 +465,7 @@ export function SettingsRow({
           </div>
           {description ? (
             <p className="max-w-xl text-xs leading-normal text-muted-foreground/80">
-              {description}
+              {typeof description === "string" ? t3T(description) : t3T(description)}
             </p>
           ) : null}
           {renderedStatus ? (
@@ -462,10 +480,10 @@ export function SettingsRow({
       </div>
       {unavailable && children ? (
         <div inert className="opacity-50">
-          {children}
+          {t3T(children)}
         </div>
       ) : (
-        children
+        t3T(children)
       )}
     </div>
   );
@@ -482,6 +500,8 @@ export function SettingResetButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -489,7 +509,7 @@ export function SettingResetButton({
           <Button
             size="icon-micro"
             variant="ghost-muted"
-            aria-label={`Reset ${label} to default`}
+            aria-label={t3T("Reset {0} to default", [label])}
             disabled={disabled}
             onClick={(event) => {
               event.stopPropagation();
@@ -500,7 +520,7 @@ export function SettingResetButton({
           </Button>
         }
       />
-      <TooltipPopup side="top">{tooltip}</TooltipPopup>
+      <TooltipPopup side="top">{t3T(tooltip)}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -514,6 +534,8 @@ export function SettingsPageContainer({
   className?: string;
   width?: WorkspacePageWidth;
 }) {
+  const t3T = useUiTranslate();
+
   const navigate = useNavigate();
   const hash = useLocation({ select: (location) => location.hash });
   const highlightTarget = useLocation({
@@ -542,7 +564,7 @@ export function SettingsPageContainer({
       >
         <WorkspacePageContainer width={width} className={cn("gap-8", className)}>
           <SettingsScopeSentence />
-          {children}
+          {t3T(children)}
         </WorkspacePageContainer>
       </div>
     </SettingsSearchTargetProvider>

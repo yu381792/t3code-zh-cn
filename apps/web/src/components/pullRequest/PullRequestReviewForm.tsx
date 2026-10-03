@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * The review half of the floating composer: the summary and the verdict that sends it, together
  * with whatever line comments the review is holding. The count of those lives on the composer's
@@ -66,6 +68,8 @@ export function PullRequestReviewForm({
   onPendingChange: (pending: boolean) => void;
   onSubmitted: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [requestedVerdict, setRequestedVerdict] = useState<PullRequestReviewVerdict>("comment");
   const comments = usePendingReviewComments(reference);
   const reviewKey = pullRequestReviewKey(reference);
@@ -129,10 +133,10 @@ export function PullRequestReviewForm({
         value={body}
         placeholder={
           requestChangesSummaryRequired && verdicts.includes("request-changes")
-            ? "Summarize your review (required to request changes)"
-            : "Summarize your review (optional)"
+            ? t3T("Summarize your review (required to request changes)")
+            : t3T("Summarize your review (optional)")
         }
-        aria-label="Review summary"
+        aria-label={t3T("Review summary")}
         onChange={(event) => setSummary(reviewKey, event.target.value)}
       />
       <div className="mt-2 flex justify-between gap-2">
@@ -143,7 +147,7 @@ export function PullRequestReviewForm({
             if (value !== null) setRequestedVerdict(value);
           }}
         >
-          <SelectTrigger size="xs" className="w-auto min-w-0" aria-label="Review verdict">
+          <SelectTrigger size="xs" className="w-auto min-w-0" aria-label={t3T("Review verdict")}>
             <span className="flex items-center gap-1.5">
               {selectedVerdict?.icon}
               {selectedVerdict?.label}
@@ -154,7 +158,7 @@ export function PullRequestReviewForm({
               <SelectItem key={verdict.value} value={verdict.value}>
                 <span className="flex items-center gap-1.5">
                   {verdict.icon}
-                  {verdict.label}
+                  <LocalizedUiText source={verdict.label} />
                 </span>
               </SelectItem>
             ))}
@@ -167,7 +171,7 @@ export function PullRequestReviewForm({
             if (selectedVerdict !== undefined) void submit(selectedVerdict);
           }}
         >
-          {pending ? "Submitting..." : "Submit review"}
+          {pending ? t3T("Submitting...") : t3T("Submit review")}
         </Button>
       </div>
     </>

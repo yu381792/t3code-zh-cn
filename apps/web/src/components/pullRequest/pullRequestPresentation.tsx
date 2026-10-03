@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import type {
   PullRequestActor,
@@ -106,9 +108,13 @@ export function PullRequestReviewDecisionGlyph({
     <Tooltip>
       <TooltipTrigger render={<span className="inline-flex shrink-0" />}>
         <presentation.Icon aria-hidden className={cn("size-3.5", presentation.toneClassName)} />
-        <span className="sr-only">{presentation.label}</span>
+        <span className="sr-only">
+          <LocalizedUiText source={presentation.label} />
+        </span>
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -171,7 +177,9 @@ export function PullRequestStateGlyph({
           className={cn("size-4 shrink-0", presentation.toneClassName, className)}
         />
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -205,7 +213,9 @@ export function PullRequestConflictGlyph({
           className={cn("size-4 shrink-0", presentation.toneClassName, className)}
         />
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -408,7 +418,7 @@ export function PullRequestReviewOutcomeBadge({
   return (
     <Badge size="sm" variant={presentation.badgeVariant} className={className}>
       <presentation.Icon aria-hidden className="size-3" />
-      {presentation.label}
+      <LocalizedUiText source={presentation.label} />
     </Badge>
   );
 }
@@ -465,6 +475,8 @@ export function PullRequestActorLabel({
   tooltip?: boolean;
   profileUrl?: string | null;
 }) {
+  const t3T = useUiTranslate();
+
   const login = actor?.login ?? "ghost";
   const label = (
     <span className={cn("flex min-w-0 items-center", variant === "label" && "gap-1.5")}>
@@ -488,7 +500,7 @@ export function PullRequestActorLabel({
                   href={profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Open ${login}'s profile`}
+                  aria-label={t3T("Open {0}'s profile", [login])}
                 />
               }
             />
@@ -501,7 +513,7 @@ export function PullRequestActorLabel({
       </TooltipTrigger>
       <TooltipPopup side="top">
         {actor?.name && actor.name !== login ? `${actor.name} (@${login})` : login}
-        {profileUrl ? " · Open profile" : ""}
+        {profileUrl ? t3T(" · Open profile") : ""}
       </TooltipPopup>
     </Tooltip>
   );

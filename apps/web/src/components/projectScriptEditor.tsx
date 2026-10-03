@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type {
   ProjectScript,
   ProjectScriptIcon,
@@ -156,6 +157,8 @@ export function ProjectScriptEditorDialog({
   onDelete: (scriptId: string) => void;
   onClose: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const formId = React.useId();
   const [name, setName] = useState("");
   const [command, setCommand] = useState("");
@@ -302,16 +305,18 @@ export function ProjectScriptEditorDialog({
       >
         <DialogPopup>
           <DialogHeader>
-            <DialogTitle>{isEditing ? "Edit Action" : "Add Action"}</DialogTitle>
+            <DialogTitle>{isEditing ? t3T("Edit Action") : t3T("Add Action")}</DialogTitle>
             <DialogDescription>
-              Actions are project-scoped commands you can run from the top bar or keybindings.
+              {t3T(
+                "Actions are project-scoped commands you can run from the top bar or keybindings.",
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogPanel>
             <form id={formId} onSubmit={submit}>
               <fieldset className="space-y-4" disabled={isSaving}>
                 <div className="space-y-1.5">
-                  <Label htmlFor="script-name">Name</Label>
+                  <Label htmlFor="script-name">{t3T("Name")}</Label>
                   <div className="flex items-center gap-2">
                     <Popover onOpenChange={setIconPickerOpen} open={iconPickerOpen}>
                       <PopoverTrigger
@@ -320,7 +325,7 @@ export function ProjectScriptEditorDialog({
                             type="button"
                             variant="outline"
                             className="size-9 shrink-0"
-                            aria-label="Choose icon"
+                            aria-label={t3T("Choose icon")}
                           />
                         }
                       >
@@ -345,7 +350,7 @@ export function ProjectScriptEditorDialog({
                                 }}
                               >
                                 <ScriptIcon icon={entry.id} className="size-4" />
-                                <span>{entry.label}</span>
+                                <span>{t3T(entry.label)}</span>
                               </button>
                             );
                           })}
@@ -355,37 +360,39 @@ export function ProjectScriptEditorDialog({
                     <Input
                       id="script-name"
                       autoFocus
-                      placeholder="Test"
+                      placeholder={t3T("Test")}
                       value={name}
                       onChange={(event) => setName(event.target.value)}
                     />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="script-keybinding">Keybinding</Label>
+                  <Label htmlFor="script-keybinding">{t3T("Keybinding")}</Label>
                   <Input
                     id="script-keybinding"
-                    placeholder="Press shortcut"
+                    placeholder={t3T("Press shortcut")}
                     value={keybinding}
                     readOnly
                     onKeyDown={captureKeybinding}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Press a shortcut. Use <code>Backspace</code> to clear. Shortcuts are
-                    environment-wide. Projects using the same action share its shortcut.
+                    {t3T("Press a shortcut. Use")} <code>Backspace</code>{" "}
+                    {t3T(
+                      "to clear. Shortcuts are environment-wide. Projects using the same action share its shortcut.",
+                    )}
                   </p>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="script-command">Command</Label>
+                  <Label htmlFor="script-command">{t3T("Command")}</Label>
                   <Textarea
                     id="script-command"
-                    placeholder="bun test"
+                    placeholder={t3T("bun test")}
                     value={command}
                     onChange={(event) => setCommand(event.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="script-preview-url">Preview URL (optional)</Label>
+                  <Label htmlFor="script-preview-url">{t3T("Preview URL (optional)")}</Label>
                   <Input
                     id="script-preview-url"
                     placeholder="http://localhost:5173"
@@ -393,11 +400,11 @@ export function ProjectScriptEditorDialog({
                     onChange={(event) => setPreviewUrl(event.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Open this URL in the in-app preview when this action runs.
+                    {t3T("Open this URL in the in-app preview when this action runs.")}
                   </p>
                 </div>
                 <label className="flex items-center justify-between gap-3 rounded-md border border-border/70 px-3 py-2 text-sm dark:border-transparent dark:bg-white/[0.035]">
-                  <span>Run automatically on worktree creation</span>
+                  <span>{t3T("Run automatically on worktree creation")}</span>
                   <Switch
                     checked={runOnWorktreeCreate}
                     onCheckedChange={(checked) => setRunOnWorktreeCreate(Boolean(checked))}
@@ -408,7 +415,7 @@ export function ProjectScriptEditorDialog({
                     runOnWorktreeCreate ? "" : "opacity-60"
                   }`}
                 >
-                  <span>Wait for it to finish before the agent starts</span>
+                  <span>{t3T("Wait for it to finish before the agent starts")}</span>
                   <Switch
                     checked={waitForSetup}
                     disabled={!runOnWorktreeCreate}
@@ -420,7 +427,7 @@ export function ProjectScriptEditorDialog({
                     previewUrl.trim().length === 0 ? "opacity-60" : ""
                   }`}
                 >
-                  <span>Open preview automatically when this action runs</span>
+                  <span>{t3T("Open preview automatically when this action runs")}</span>
                   <Switch
                     checked={autoOpenPreview}
                     disabled={previewUrl.trim().length === 0}
@@ -440,14 +447,14 @@ export function ProjectScriptEditorDialog({
                 disabled={isSaving}
                 onClick={() => setDeleteConfirmOpen(true)}
               >
-                Delete
+                {t3T("Delete")}
               </Button>
             )}
             <Button type="button" variant="outline" onClick={close}>
-              Cancel
+              {t3T("Cancel")}
             </Button>
             <Button form={formId} type="submit" disabled={isSaving}>
-              {isSaving ? "Saving…" : isEditing ? "Save changes" : "Save action"}
+              {isSaving ? t3T("Saving…") : isEditing ? t3T("Save changes") : t3T("Save action")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -456,11 +463,16 @@ export function ProjectScriptEditorDialog({
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogPopup>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete action "{name}"?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>
+              {t3T('Delete action "')}
+              {name}"?
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t3T("This action cannot be undone.")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {t3T("Cancel")}
+            </AlertDialogClose>
             <Button
               variant="destructive"
               disabled={isSaving}
@@ -471,7 +483,7 @@ export function ProjectScriptEditorDialog({
                 onDelete(request.scriptId);
               }}
             >
-              Delete action
+              {t3T("Delete action")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>

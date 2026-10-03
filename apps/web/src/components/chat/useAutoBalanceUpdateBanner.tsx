@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import type { ServerUpdateState } from "@t3tools/client-runtime/state/server";
 import { Atom } from "effect/unstable/reactivity";
@@ -30,6 +31,8 @@ import { ComposerServerUpdateIcon } from "./ComposerServerUpdateStatus";
 export function useAutoBalanceUpdateBanner(
   environments: readonly EnvironmentPresentation[],
 ): ComposerBannerStackItem | null {
+  const t3T = useUiTranslate();
+
   const statesAtom = useMemo(
     () =>
       Atom.make((get) =>
@@ -98,7 +101,7 @@ export function useAutoBalanceUpdateBanner(
         <PopoverTrigger
           render={<InlineButton />}
           className="max-w-full"
-          aria-label={`${title}. View machines`}
+          aria-label={t3T("{0}. View machines", [title])}
         >
           <span className="min-w-0 truncate">{title}</span>
         </PopoverTrigger>
@@ -111,14 +114,14 @@ export function useAutoBalanceUpdateBanner(
                   <ServerUpdateProgress state={machine.state} />
                 ) : !machine.remoteUpdate ? (
                   <>
-                    <div className="text-muted-foreground">Manual update required</div>
+                    <div className="text-muted-foreground">{t3T("Manual update required")}</div>
                     <ServerUpdateAction {...machine} />
                   </>
                 ) : (
                   <div className="text-muted-foreground">
                     {machine.connected
-                      ? `Ready to update to ${machine.targetVersion}`
-                      : "Reconnect this machine to update"}
+                      ? t3T("Ready to update to {0}", [machine.targetVersion])
+                      : t3T("Reconnect this machine to update")}
                   </div>
                 )}
               </div>
@@ -136,10 +139,13 @@ export function useAutoBalanceUpdateBanner(
           variant="ghost"
           label={
             failed > 0
-              ? "Retry"
+              ? t3T("Retry")
               : targets.length === machines.length
-                ? "Update all"
-                : `Update ${targets.length} ${targets.length === 1 ? "machine" : "machines"}`
+                ? t3T("Update all")
+                : t3T("Update {0} {1}", [
+                    targets.length,
+                    targets.length === 1 ? t3T("machine") : t3T("machines"),
+                  ])
           }
         />
       ) : undefined,

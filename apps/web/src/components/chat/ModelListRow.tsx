@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { type ProviderDriverKind, type ProviderInstanceId } from "@t3tools/contracts";
 import { memo } from "react";
 import { CheckIcon, StarIcon } from "lucide-react";
@@ -43,6 +44,8 @@ export const ModelListRow = memo(function ModelListRow(props: {
   disabledReason?: string | null;
   onToggleFavorite: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const providerLabel = props.model.subProvider
     ? `${props.providerDisplayName} · ${props.model.subProvider}`
     : props.providerDisplayName;
@@ -72,14 +75,14 @@ export const ModelListRow = memo(function ModelListRow(props: {
           {props.showNewBadge ? (
             <span
               className="shrink-0 rounded border border-update/35 bg-update/15 px-0.5 py-px text-3xs font-bold uppercase leading-none tracking-wide text-update-foreground"
-              aria-label="New model"
+              aria-label={t3T("New model")}
             >
-              New
+              {t3T("New")}
             </span>
           ) : null}
           {props.unavailable ? (
             <Badge variant="outline" size="sm">
-              Unavailable
+              {t3T("Unavailable")}
             </Badge>
           ) : null}
         </div>
@@ -120,7 +123,9 @@ export const ModelListRow = memo(function ModelListRow(props: {
                   event.stopPropagation();
                 }}
                 disabled={Boolean(props.disabledReason)}
-                aria-label={props.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={
+                  props.isFavorite ? t3T("Remove from favorites") : t3T("Add to favorites")
+                }
               >
                 <StarIcon
                   className={cn(
@@ -132,7 +137,7 @@ export const ModelListRow = memo(function ModelListRow(props: {
             }
           />
           <TooltipPopup side="top" align="center">
-            {props.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            {props.isFavorite ? t3T("Remove from favorites") : t3T("Add to favorites")}
           </TooltipPopup>
         </Tooltip>
       </div>

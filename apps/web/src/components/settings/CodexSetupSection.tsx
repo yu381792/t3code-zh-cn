@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
@@ -56,6 +57,8 @@ interface CodexSetupSectionProps {
 
 /** Welcome and provider settings run the same environment-owned setup flow. */
 export function CodexSetupSection(props: CodexSetupSectionProps) {
+  const t3T = useUiTranslate();
+
   const [requested, setRequested] = useState(false);
   const existingState = getOnboardingProviderState(props.provider);
   const existingReady = props.enabled && existingState === "ready";
@@ -65,15 +68,15 @@ export function CodexSetupSection(props: CodexSetupSectionProps) {
   const content =
     props.mode === "existing" && props.presentation === "onboarding" ? (
       <CodexWelcomeCard
-        title={props.displayName || props.provider?.displayName || "Codex"}
+        title={props.displayName || props.provider?.displayName || t3T("Codex")}
         description={
           existingReady ? (
             props.provider?.auth.email?.trim() ? (
               <>
-                Signed in as{" "}
+                {t3T("Signed in as")}{" "}
                 <RedactedSensitiveText
                   value={props.provider.auth.email.trim()}
-                  ariaLabel="Toggle account email visibility"
+                  ariaLabel={t3T("Toggle account email visibility")}
                   revealTooltip="Click to reveal email"
                   hideTooltip="Click to hide email"
                   className="break-all"
@@ -81,24 +84,24 @@ export function CodexSetupSection(props: CodexSetupSectionProps) {
                 .
               </>
             ) : (
-              "Connected with your Codex CLI."
+              t3T("Connected with your Codex CLI.")
             )
           ) : existingChecking ? (
-            "Checking your Codex CLI..."
+            t3T("Checking your Codex CLI...")
           ) : props.provider?.installed ? (
             existingSummary.headline
           ) : (
-            "Code with your ChatGPT subscription."
+            t3T("Code with your ChatGPT subscription.")
           )
         }
         control={
           existingReady ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground">
               <CheckIcon className="size-3.5" />
-              Ready
+              {t3T("Ready")}
             </span>
           ) : existingChecking ? (
-            <span className="text-xs text-muted-foreground">Checking...</span>
+            <span className="text-xs text-muted-foreground">{t3T("Checking...")}</span>
           ) : existingAuthenticated ? (
             <span className="text-xs text-muted-foreground">{existingSummary.headline}</span>
           ) : (
@@ -110,14 +113,14 @@ export function CodexSetupSection(props: CodexSetupSectionProps) {
                 props.onModeChange("managed");
               }}
             >
-              Continue with ChatGPT
+              {t3T("Continue with ChatGPT")}
             </ChatGptConnectionButton>
           )
         }
         secondaryControl={
           !existingAuthenticated && !existingReady && !existingChecking ? (
             <Button size="sm" variant="ghost-muted" onClick={() => props.onModeChange("existing")}>
-              Use existing CLI
+              {t3T("Use existing CLI")}
             </Button>
           ) : null
         }
@@ -125,21 +128,21 @@ export function CodexSetupSection(props: CodexSetupSectionProps) {
     ) : props.mode === "existing" ? null : props.provider?.setup === undefined ? (
       props.presentation === "onboarding" ? (
         <CodexWelcomeCard
-          title={props.displayName || props.provider?.displayName || "Codex"}
+          title={props.displayName || props.provider?.displayName || t3T("Codex")}
           description={<CodexSignInDescription />}
           control={
             <Button size="sm" variant="outline" className="min-w-44" disabled>
-              Open sign-in page
+              {t3T("Open sign-in page")}
             </Button>
           }
           secondaryControl={
             <Button size="sm" variant="ghost-muted" disabled>
-              Cancel
+              {t3T("Cancel")}
             </Button>
           }
         />
       ) : (
-        <SettingsRow title="ChatGPT account" description="Preparing sign-in." />
+        <SettingsRow title={t3T("ChatGPT account")} description={t3T("Preparing sign-in.")} />
       )
     ) : (
       <ManagedCodexSetup
@@ -209,6 +212,8 @@ function ManagedCodexSetup({
   readonly onAutoStartConsumed: () => void;
   readonly allowExistingCli?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const target = { environmentId, input: { instanceId } };
   const authQuery = useEnvironmentQuery(serverEnvironment.providerAuthState(target));
   const installQuery = useEnvironmentQuery(serverEnvironment.providerInstallState(target));
@@ -588,10 +593,10 @@ function ManagedCodexSetup({
   ) : authenticated ? (
     provider?.auth.email?.trim() ? (
       <>
-        Signed in as{" "}
+        {t3T("Signed in as")}{" "}
         <RedactedSensitiveText
           value={provider.auth.email.trim()}
-          ariaLabel="Toggle account email visibility"
+          ariaLabel={t3T("Toggle account email visibility")}
           revealTooltip="Click to reveal email"
           hideTooltip="Click to hide email"
         />
@@ -634,24 +639,28 @@ function ManagedCodexSetup({
       }}
     >
       {finishingSignIn
-        ? "Finishing sign-in..."
+        ? t3T("Finishing sign-in...")
         : handoffQuery.data?.phase === "finished"
           ? transferFailed
-            ? "Retry connection"
-            : "Finishing sign-in..."
+            ? t3T("Retry connection")
+            : t3T("Finishing sign-in...")
           : auth?.phase === "waiting"
             ? remoteWeb
-              ? "Open ChatGPT sign-in"
-              : "Open sign-in page"
+              ? t3T("Open ChatGPT sign-in")
+              : t3T("Open sign-in page")
             : presentation === "onboarding"
-              ? "Open sign-in page"
-              : "Signing in..."}
+              ? t3T("Open sign-in page")
+              : t3T("Signing in...")}
     </Button>
   );
   const callbackCompletion =
     !handoff && auth?.phase === "waiting" && url ? (
       <div className="flex w-full flex-col gap-3 text-xs leading-relaxed text-muted-foreground">
-        <p>If sign-in doesn't return to T3 Code, paste the URL from the final localhost page.</p>
+        <p>
+          {t3T(
+            "If sign-in doesn't return to T3 Code, paste the URL from the final localhost page.",
+          )}
+        </p>
         <form
           className="flex flex-col gap-2 sm:flex-row sm:items-center"
           onSubmit={(event) => {
@@ -671,10 +680,10 @@ function ManagedCodexSetup({
         >
           <div className="min-w-0 flex-1">
             <Input
-              aria-label="ChatGPT sign-in redirect URL"
+              aria-label={t3T("ChatGPT sign-in redirect URL")}
               type="password"
               autoComplete="off"
-              placeholder="Paste the URL from the sign-in tab"
+              placeholder={t3T("Paste the URL from the sign-in tab")}
               value={callbackUrl}
               maxLength={16_384}
               disabled={pending || readOnly}
@@ -688,7 +697,7 @@ function ManagedCodexSetup({
             type="submit"
             disabled={pending || readOnly || !callbackUrl.trim()}
           >
-            Connect
+            {t3T("Connect")}
           </Button>
         </form>
         {!remoteWeb ? (
@@ -698,16 +707,16 @@ function ManagedCodexSetup({
               variant="ghost-muted"
               onClick={() => void ensureLocalApi().shell.openExternal(url)}
             >
-              Try sign-in in your browser
+              {t3T("Try sign-in in your browser")}
               <ExternalLinkIcon className="size-3.5" />
             </Button>
           </div>
         ) : null}
         {handoffUrl ? (
           <details>
-            <summary className="cursor-pointer">Other ways to connect</summary>
+            <summary className="cursor-pointer">{t3T("Other ways to connect")}</summary>
             <Button className="mt-2" size="sm" variant="outline" render={<a href={handoffUrl} />}>
-              Use T3 desktop for automatic return
+              {t3T("Use T3 desktop for automatic return")}
             </Button>
           </details>
         ) : null}
@@ -724,7 +733,7 @@ function ManagedCodexSetup({
   ) : callbackCompletion ? (
     <div className="space-y-3 text-xs leading-relaxed text-muted-foreground">
       <CodexSignInDescription
-        label="Having trouble signing in?"
+        label={t3T("Having trouble signing in?")}
         expanded={callbackHelpOpen}
         controls={callbackHelpId}
         onToggle={() => setCallbackHelpOpen((open) => !open)}
@@ -765,17 +774,17 @@ function ManagedCodexSetup({
       <>
         {accountPicker}
         <CodexWelcomeCard
-          title={displayName || provider?.displayName || "Codex"}
+          title={displayName || provider?.displayName || t3T("Codex")}
           description={
             installActive ? (
               runtimeDescription
             ) : authenticated ? (
               provider?.auth.email?.trim() ? (
                 <>
-                  Signed in as{" "}
+                  {t3T("Signed in as")}{" "}
                   <RedactedSensitiveText
                     value={provider.auth.email.trim()}
-                    ariaLabel="Toggle account email visibility"
+                    ariaLabel={t3T("Toggle account email visibility")}
                     revealTooltip="Click to reveal email"
                     hideTooltip="Click to hide email"
                     className="break-all"
@@ -783,7 +792,7 @@ function ManagedCodexSetup({
                   .
                 </>
               ) : (
-                "Connected to ChatGPT."
+                t3T("Connected to ChatGPT.")
               )
             ) : callbackCompletion && !needsManualCallback ? (
               <CodexSignInDescription
@@ -800,14 +809,14 @@ function ManagedCodexSetup({
             ) : authActive || auth?.phase === "failed" || auth?.phase === "cancelled" ? (
               accountDescription
             ) : (
-              "Code with your ChatGPT subscription."
+              t3T("Code with your ChatGPT subscription.")
             )
           }
           control={
             authenticated && !busy ? (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground">
                 <CheckIcon className="size-3.5" />
-                Ready
+                {t3T("Ready")}
               </span>
             ) : authActive ? (
               waitingControl
@@ -825,10 +834,10 @@ function ManagedCodexSetup({
                 }}
               >
                 {installActive || pending
-                  ? "Setting up..."
+                  ? t3T("Setting up...")
                   : hasSavedAccount
-                    ? "Reconnect account"
-                    : "Continue with ChatGPT"}
+                    ? t3T("Reconnect account")
+                    : t3T("Continue with ChatGPT")}
               </ChatGptConnectionButton>
             )
           }
@@ -851,7 +860,7 @@ function ManagedCodexSetup({
                     );
                 }}
               >
-                Cancel
+                {t3T("Cancel")}
               </Button>
             ) : !authActive && !authenticated && hasSavedAccount ? (
               <Button
@@ -860,7 +869,7 @@ function ManagedCodexSetup({
                 disabled={unavailable || busy}
                 onClick={() => void setup("chatgpt-change-account")}
               >
-                Use a different account
+                {t3T("Use a different account")}
               </Button>
             ) : !authActive && !authenticated && allowExistingCli ? (
               <Button
@@ -869,7 +878,7 @@ function ManagedCodexSetup({
                 disabled={readOnly || busy}
                 onClick={() => onModeChange("existing")}
               >
-                Use existing CLI
+                {t3T("Use existing CLI")}
               </Button>
             ) : null
           }
@@ -886,10 +895,10 @@ function ManagedCodexSetup({
   }
 
   return (
-    <section aria-label="Codex setup" className="divide-y divide-border/50">
+    <section aria-label={t3T("Codex setup")} className="divide-y divide-border/50">
       {accountPicker}
       <SettingsRow
-        title="ChatGPT account"
+        title={t3T("ChatGPT account")}
         description={accountDescription}
         control={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -908,7 +917,7 @@ function ManagedCodexSetup({
                       onSignInCancelled?.();
                     }}
                   >
-                    Cancel
+                    {t3T("Cancel")}
                   </Button>
                 )}
               </>
@@ -928,7 +937,7 @@ function ManagedCodexSetup({
                   );
                 }}
               >
-                Cancel
+                {t3T("Cancel")}
               </Button>
             ) : authenticated ? (
               <>
@@ -938,7 +947,7 @@ function ManagedCodexSetup({
                   disabled={unavailable || busy}
                   onClick={() => setAccountPickerOpen(true)}
                 >
-                  Change account
+                  {t3T("Change account")}
                 </Button>
                 <Button
                   size="sm"
@@ -946,7 +955,7 @@ function ManagedCodexSetup({
                   disabled={unavailable || busy}
                   onClick={() => void run(() => logoutAuth(target))}
                 >
-                  Disconnect
+                  {t3T("Disconnect")}
                 </Button>
               </>
             ) : (
@@ -964,10 +973,10 @@ function ManagedCodexSetup({
                   }}
                 >
                   {pending
-                    ? "Setting up..."
+                    ? t3T("Setting up...")
                     : hasSavedAccount
-                      ? "Reconnect account"
-                      : "Continue with ChatGPT"}
+                      ? t3T("Reconnect account")
+                      : t3T("Continue with ChatGPT")}
                 </ChatGptConnectionButton>
                 {hasSavedAccount ? (
                   <Button
@@ -976,7 +985,7 @@ function ManagedCodexSetup({
                     disabled={unavailable || busy}
                     onClick={() => void setup("chatgpt-change-account")}
                   >
-                    Use a different account
+                    {t3T("Use a different account")}
                   </Button>
                 ) : null}
               </>
@@ -1000,7 +1009,7 @@ function ManagedCodexSetup({
           {error ??
             (installation?.phase === "failed"
               ? installation.message
-              : "Could not read Codex setup status. Reconnect and try again.")}
+              : t3T("Could not read Codex setup status. Reconnect and try again."))}
         </p>
       ) : null}
     </section>
@@ -1017,6 +1026,8 @@ export function CodexManagedRuntimeFields({
   readonly instanceId: ProviderInstanceId;
   readonly provider: ServerProvider | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   const installation = useEnvironmentQuery(
     serverEnvironment.providerInstallState({
       environmentId,
@@ -1027,49 +1038,51 @@ export function CodexManagedRuntimeFields({
   return (
     <>
       <SettingsRow
-        title="Binary path"
-        description="Selected by T3 Code."
+        title={t3T("Binary path")}
+        description={t3T("Selected by T3 Code.")}
         control={
           <div className="w-full sm:w-80">
             <Input
-              aria-label="Codex binary path"
+              aria-label={t3T("Codex binary path")}
               value={executablePath}
               title={executablePath}
-              placeholder={installation.error ? "Could not read runtime path" : "Not installed"}
+              placeholder={
+                installation.error ? t3T("Could not read runtime path") : t3T("Not installed")
+              }
               disabled
             />
           </div>
         }
       />
       <SettingsRow
-        title="CODEX_HOME path"
-        description="Shared Codex config, sessions, and state."
+        title={t3T("CODEX_HOME path")}
+        description={t3T("Shared Codex config, sessions, and state.")}
         control={
           <div className="w-full sm:w-80">
             <Input
-              aria-label="Codex home path"
+              aria-label={t3T("Codex home path")}
               value={provider?.runtimePaths?.homePath ?? ""}
               title={provider?.runtimePaths?.homePath}
-              placeholder="Unavailable"
+              placeholder={t3T("Unavailable")}
               disabled
             />
           </div>
         }
       />
       <SettingsRow
-        title="Shadow home path"
+        title={t3T("Shadow home path")}
         description={
           provider?.runtimePaths?.shadowHomePath
-            ? "Account-specific home sharing the Codex state above."
-            : "This instance uses the shared Codex home directly."
+            ? t3T("Account-specific home sharing the Codex state above.")
+            : t3T("This instance uses the shared Codex home directly.")
         }
         control={
           <div className="w-full sm:w-80">
             <Input
-              aria-label="Codex shadow home path"
+              aria-label={t3T("Codex shadow home path")}
               value={provider?.runtimePaths?.shadowHomePath ?? ""}
               title={provider?.runtimePaths?.shadowHomePath ?? undefined}
-              placeholder={provider?.runtimePaths ? "Not used" : "Unavailable"}
+              placeholder={provider?.runtimePaths ? t3T("Not used") : t3T("Unavailable")}
               disabled
             />
           </div>
@@ -1090,12 +1103,14 @@ function CodexSignInDescription({
   readonly controls?: string;
   readonly onToggle?: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   if (!onToggle) return <div className="leading-relaxed">{label}</div>;
   return (
     <button
       type="button"
       className="inline-flex items-center gap-1.5 rounded-sm text-left leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      aria-label="Having trouble signing in?"
+      aria-label={t3T("Having trouble signing in?")}
       aria-expanded={expanded}
       aria-controls={controls}
       onClick={onToggle}

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   ENVIRONMENT_MACHINE_KINDS,
   isEnvironmentMachineKind,
@@ -85,6 +86,8 @@ export function EnvironmentIconMenu({
   readonly environmentId: EnvironmentId;
   readonly serverConfig: ServerConfig | null;
 }) {
+  const t3T = useUiTranslate();
+
   const updateSettings = useUpdateEnvironmentSettings(environmentId);
   const operateAccess = useEnvironmentOperateAccess(environmentId);
   const lock = resolveEnvironmentIconPickerLock({ serverConfig, operateAccess });
@@ -97,7 +100,7 @@ export function EnvironmentIconMenu({
     <MenuSub>
       <MenuSubTrigger>
         <EnvironmentMachineIcon kind={resolved} />
-        Icon
+        {t3T("Icon")}
       </MenuSubTrigger>
       <MenuSubPopup>
         {lock !== null ? (
@@ -120,11 +123,11 @@ export function EnvironmentIconMenu({
               <span className="flex min-w-0 items-center gap-2">
                 <EnvironmentMachineIcon kind={kind} className="size-3.5 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">
-                  {ENVIRONMENT_MACHINE_KIND_LABELS[kind]}
+                  {t3T(ENVIRONMENT_MACHINE_KIND_LABELS[kind])}
                 </span>
                 {kind === detected ? (
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {serverConfig?.environment.platform.machine ? "detected" : "default"}
+                    {serverConfig?.environment.platform.machine ? t3T("detected") : t3T("default")}
                   </span>
                 ) : null}
               </span>

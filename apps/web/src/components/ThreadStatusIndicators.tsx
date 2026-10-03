@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   scopeProjectRef,
   scopedThreadKey,
@@ -346,6 +348,8 @@ export function ThreadPullRequestsMiniList({
   pullRequests: ReadonlyArray<ThreadPullRequestLink>;
   onOpenPullRequest?: (event: MouseEvent<HTMLAnchorElement>, url: string) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const lines = useMemo(
     () =>
       pullRequestListLines(resolveThreadPullRequestChains(visibleThreadPullRequests(pullRequests))),
@@ -372,7 +376,7 @@ export function ThreadPullRequestsMiniList({
           >
             {line.stack ? (
               <span className="ml-auto shrink-0 pl-1 text-3xs">
-                {line.stack.kind === "native" ? "stack" : "chain"} · {line.stack.size}
+                {line.stack.kind === "native" ? t3T("stack") : t3T("chain")} · {line.stack.size}
               </span>
             ) : null}
           </ThreadPullRequestMiniListItem>
@@ -838,7 +842,9 @@ export function ThreadStatusLabel({
             }`}
           />
         </TooltipTrigger>
-        <TooltipPopup side="top">{status.label}</TooltipPopup>
+        <TooltipPopup side="top">
+          <LocalizedUiText source={status.label} />
+        </TooltipPopup>
       </Tooltip>
     );
   }
@@ -858,9 +864,13 @@ export function ThreadStatusLabel({
             status.pulse ? "animate-status-pulse" : ""
           }`}
         />
-        <span className="hidden md:inline">{status.label}</span>
+        <span className="hidden md:inline">
+          <LocalizedUiText source={status.label} />
+        </span>
       </TooltipTrigger>
-      <TooltipPopup side="top">{status.label}</TooltipPopup>
+      <TooltipPopup side="top">
+        <LocalizedUiText source={status.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -877,6 +887,8 @@ export function ThreadRowLeadingStatus({
   thread: SidebarThreadSummary;
   snapshot?: ThreadChangeRequestSnapshot | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   const { leaseLiveStatus, rowRef } = useSidebarRowSubscriptionLease(false);
   // Observe the containing title even when this thread has no badge yet.
   const statusRef = useCallback(
@@ -966,7 +978,7 @@ export function ThreadRowLeadingStatus({
       {pendingLink ? (
         <PullRequestGlyph.pullRequest
           className="size-3 text-muted-foreground"
-          aria-label={`PR #${pendingLink.number}, status pending`}
+          aria-label={t3T("PR #{0}, status pending", [pendingLink.number])}
         />
       ) : null}
       {threadStatus ? <ThreadStatusLabel status={threadStatus} /> : null}
@@ -980,6 +992,8 @@ export function ThreadRowLeadingStatus({
  * environment indicator, matching the sidebar's trailing indicators.
  */
 export function ThreadRowTrailingStatus({ thread }: { thread: SidebarThreadSummary }) {
+  const t3T = useUiTranslate();
+
   const runningTerminalIds = useThreadRunningTerminalIds({
     environmentId: thread.environmentId,
     threadId: thread.id,
@@ -1016,7 +1030,9 @@ export function ThreadRowTrailingStatus({ thread }: { thread: SidebarThreadSumma
               onAnimationStart={synchronizeTerminalPulse}
             />
           </TooltipTrigger>
-          <TooltipPopup side="top">{terminalStatus.label}</TooltipPopup>
+          <TooltipPopup side="top">
+            <LocalizedUiText source={terminalStatus.label} />
+          </TooltipPopup>
         </Tooltip>
       ) : null}
       {isRemoteThread ? (
@@ -1024,7 +1040,7 @@ export function ThreadRowTrailingStatus({ thread }: { thread: SidebarThreadSumma
           <TooltipTrigger
             render={
               <span
-                aria-label={threadEnvironmentLabel ?? "Remote"}
+                aria-label={threadEnvironmentLabel ?? t3T("Remote")}
                 className="inline-flex items-center justify-center"
               />
             }

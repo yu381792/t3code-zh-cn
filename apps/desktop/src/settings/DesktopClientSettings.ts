@@ -64,6 +64,7 @@ export class DesktopClientSettings extends Context.Service<
   DesktopClientSettings,
   {
     readonly get: Effect.Effect<Option.Option<ClientSettings>, DesktopClientSettingsReadError>;
+    readonly subscribeInterfaceLanguage?: (listener: () => void) => () => void;
     readonly set: (
       settings: ClientSettings,
     ) => Effect.Effect<void, DesktopClientSettingsWriteError>;
@@ -175,8 +176,16 @@ export const make = Effect.gen(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const crypto = yield* Crypto.Crypto;
+  const languageListeners = new Set<() => void>();
+  let previousLanguage: ClientSettings["interfaceLanguage"] | undefined;
 
   return DesktopClientSettings.of({
+    subscribeInterfaceLanguage: (listener) => {
+      languageListeners.add(listener);
+      return () => {
+        languageListeners.delete(listener);
+      };
+    },
     get: readClientSettings(fileSystem, environment.clientSettingsPath).pipe(
       Effect.withSpan("desktop.clientSettings.get"),
     ),
@@ -198,6 +207,14 @@ export const make = Effect.gen(function* () {
             settingsPath: environment.clientSettingsPath,
             settings,
             suffix,
+          }),
+        ),
+        Effect.tap(() =>
+          Effect.sync(() => {
+            if (previousLanguage !== settings.interfaceLanguage) {
+              previousLanguage = settings.interfaceLanguage;
+              for (const listener of languageListeners) listener();
+            }
           }),
         ),
         Effect.withSpan("desktop.clientSettings.set"),

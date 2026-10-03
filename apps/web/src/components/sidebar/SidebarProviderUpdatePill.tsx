@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import { useNavigate } from "@tanstack/react-router";
 import { useAtomValue } from "@effect/atom-react";
@@ -40,6 +42,8 @@ function latestProviderCheckedAt(
 }
 
 export function SidebarProviderUpdatePill() {
+  const t3T = useUiTranslate();
+
   const navigate = useNavigate();
   const providers = useAtomValue(primaryServerProvidersAtom);
   const [dismissedKeys, setDismissedKeys] = useState<ReadonlySet<string>>(() => new Set());
@@ -182,11 +186,15 @@ export function SidebarProviderUpdatePill() {
               ) : (
                 <DownloadIcon className="size-3.5 shrink-0" />
               )}
-              <span className="min-w-0 wrap-break-word">{displayedView.title}</span>
+              <span className="min-w-0 wrap-break-word">
+                <LocalizedUiText source={displayedView.title} />
+              </span>
             </button>
           }
         />
-        <TooltipPopup side="top">{displayedView.description}</TooltipPopup>
+        <TooltipPopup side="top">
+          <LocalizedUiText source={displayedView.description} />
+        </TooltipPopup>
       </Tooltip>
       {displayedView.dismissible && (
         <Tooltip>
@@ -194,7 +202,7 @@ export function SidebarProviderUpdatePill() {
             render={
               <button
                 type="button"
-                aria-label="Dismiss provider update notice"
+                aria-label={t3T("Dismiss provider update notice")}
                 className="relative z-[1] mr-1 flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-70 outline-none hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => startExit(displayedView.key, null, displayedView.key)}
               >
@@ -202,7 +210,7 @@ export function SidebarProviderUpdatePill() {
               </button>
             }
           />
-          <TooltipPopup side="top">Dismiss until provider status changes</TooltipPopup>
+          <TooltipPopup side="top">{t3T("Dismiss until provider status changes")}</TooltipPopup>
         </Tooltip>
       )}
     </div>

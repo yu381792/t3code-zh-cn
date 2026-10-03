@@ -382,7 +382,8 @@
     "./codexAuthHandoff": {
       "types": "./src/codexAuthHandoff.ts",
       "import": "./src/codexAuthHandoff.ts"
-    }
+    },
+    "./i18n": "./src/i18n.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

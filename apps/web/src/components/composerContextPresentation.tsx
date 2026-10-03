@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import ChatMarkdown from "./ChatMarkdown";
 import { ReadOnlySourcePreview } from "./files/AttachmentFilePreview";
 import type { PreviewAnnotationPayload, ThreadContextRecord } from "@t3tools/contracts";
@@ -208,6 +209,8 @@ function FileContextChip(props: {
   record: ComposerFileAttachment;
   upload: AttachmentUploadState | undefined;
 }) {
+  const t3T = useUiTranslate();
+
   const actions = use(ComposerContextActionsContext);
   const { resolvedTheme } = useTheme();
   const needsReattach = composerFileNeedsReattach(props.record);
@@ -232,7 +235,9 @@ function FileContextChip(props: {
       }
       tooltip={
         needsReattach
-          ? `${props.record.name} was not saved with this draft. Attach it again to send it.`
+          ? t3T("{0} was not saved with this draft. Attach it again to send it.", [
+              props.record.name,
+            ])
           : attachmentTooltip(props.record, props.upload)
       }
     />
@@ -294,18 +299,20 @@ function ComposerPreviewAnnotationDetails({
 }: {
   annotation: PreviewAnnotationPayload;
 }) {
+  const t3T = useUiTranslate();
+
   const summary = previewAnnotationTooltip(annotation);
   return (
     <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
       {annotation.screenshot?.dataUrl ? (
         <img
           src={annotation.screenshot.dataUrl}
-          alt="Annotated preview crop"
+          alt={t3T("Annotated preview crop")}
           className="max-h-64 w-full border-border/70 border-b bg-muted object-contain"
         />
       ) : (
         <div className="border-border/70 border-b bg-muted/40 px-3 py-2 text-secondary-label text-xs">
-          Screenshot unavailable
+          {t3T("Screenshot unavailable")}
         </div>
       )}
       <div className="whitespace-pre-wrap wrap-break-word px-3 py-2.5 text-sm text-foreground">
@@ -316,10 +323,12 @@ function ComposerPreviewAnnotationDetails({
 }
 
 function UnresolvedContextChip(props: { label: string }) {
+  const t3T = useUiTranslate();
+
   return (
     <UnresolvedChip
       label={props.label}
-      tooltip="This context is no longer available. Remove it or attach it again."
+      tooltip={t3T("This context is no longer available. Remove it or attach it again.")}
     />
   );
 }

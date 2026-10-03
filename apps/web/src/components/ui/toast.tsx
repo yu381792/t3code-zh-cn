@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+import { translateUiMessage } from "~/i18n/messages";
+
 import { Spinner } from "~/components/ui/spinner";
 
 import { Toast } from "@base-ui/react/toast";
@@ -119,8 +122,9 @@ function handleToastDismissClick(
 }
 
 function CopyErrorButton({ text }: { text: string }) {
+  const t3T = useUiTranslate();
   const { copyToClipboard, isCopied } = useCopyToClipboard({ target: "error-message" });
-  const label = isCopied ? "Copied error" : "Copy error";
+  const label = isCopied ? t3T("Copied error") : t3T("Copy error");
 
   return (
     <Tooltip>
@@ -153,9 +157,10 @@ function ToastExpandableSection({
   children: ReactNode;
   labels: { expand?: string; collapse?: string };
 }) {
+  const t3T = useUiTranslate();
   const [open, setOpen] = useState(false);
-  const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const expandLabel = t3T(labels.expand ?? "Show details");
+  const collapseLabel = t3T(labels.collapse ?? "Hide details");
 
   return (
     <div className="min-w-0">
@@ -186,6 +191,7 @@ function ToastDescriptionAndExpandable({
   toastDescription: unknown;
   toastType: unknown;
 }) {
+  const t3T = useUiTranslate();
   const expandableContent = toastData?.expandableContent;
   const labels = toastData?.expandableLabels ?? {};
   const descriptionTrigger = toastData?.expandableDescriptionTrigger ?? false;
@@ -208,8 +214,8 @@ function ToastDescriptionAndExpandable({
     );
   }
 
-  const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const expandLabel = t3T(labels.expand ?? "Show details");
+  const collapseLabel = t3T(labels.collapse ?? "Hide details");
 
   const toggle = () => setOpen((v) => !v);
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -337,6 +343,7 @@ function ToastBodyContent({
   toastDescription,
   toastType,
 }: ToastBodyContentProps) {
+  const t3T = useUiTranslate();
   const additionalActions = toastData?.additionalActions ?? [];
   const secondaryActionProps = toastData?.secondaryActionProps;
   const leadingIcon = toastData?.leadingIcon;
@@ -391,7 +398,9 @@ function ToastBodyContent({
               size="xs"
               type="button"
               variant={secondaryActionVariant}
-            />
+            >
+              {t3T(props.children)}
+            </Button>
           ))}
           {secondaryActionProps ? (
             <Button
@@ -400,14 +409,16 @@ function ToastBodyContent({
               size="xs"
               type="button"
               variant={secondaryActionVariant}
-            />
+            >
+              {t3T(secondaryActionRest.children)}
+            </Button>
           ) : null}
           {hasVisibleToastAction(actionProps) ? (
             <Toast.Action
               className={cn(buttonVariants({ size: "xs", variant: actionVariant }), "shrink-0")}
               data-slot="toast-action"
             >
-              {actionProps?.children}
+              {t3T(actionProps?.children)}
             </Toast.Action>
           ) : null}
         </div>
@@ -539,6 +550,8 @@ function ToastProvider({ children, position = "top-right", ...props }: ToastProv
 }
 
 function Toasts({ position }: { position: ToastPosition }) {
+  const t3T = useUiTranslate();
+
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
   const isTop = position.startsWith("top");
@@ -655,7 +668,14 @@ function Toasts({ position }: { position: ToastPosition }) {
                     ? ["left", isTop ? "up" : "down"]
                     : ["right", isTop ? "up" : "down"]
               }
-              toast={toast}
+              toast={{
+                ...toast,
+                title: translateUiMessage(toast.title),
+                description: translateUiMessage(toast.description),
+                actionProps: toast.actionProps
+                  ? { ...toast.actionProps, children: t3T(toast.actionProps.children) }
+                  : undefined,
+              }}
             >
               <ThreadToastVisibleAutoDismiss
                 dismissAfterVisibleMs={toast.data?.dismissAfterVisibleMs}
@@ -663,7 +683,7 @@ function Toasts({ position }: { position: ToastPosition }) {
               />
               <div className={toastCornerDismissClass}>
                 <button
-                  aria-label="Dismiss notification"
+                  aria-label={t3T("Dismiss notification")}
                   className={toastCornerOrbClass}
                   data-slot="toast-close"
                   onClick={() =>
@@ -712,6 +732,8 @@ function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
 }
 
 function AnchoredToasts() {
+  const t3T = useUiTranslate();
+
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
 
@@ -736,7 +758,14 @@ function AnchoredToasts() {
                 data-slot="toast-positioner"
                 key={toast.id}
                 sideOffset={positionerProps.sideOffset ?? 4}
-                toast={toast}
+                toast={{
+                  ...toast,
+                  title: translateUiMessage(toast.title),
+                  description: translateUiMessage(toast.description),
+                  actionProps: toast.actionProps
+                    ? { ...toast.actionProps, children: t3T(toast.actionProps.children) }
+                    : undefined,
+                }}
               >
                 <Toast.Root
                   className={cn(
@@ -744,7 +773,14 @@ function AnchoredToasts() {
                     tooltipStyle ? "rounded-md" : "rounded-lg",
                   )}
                   data-slot="toast-popup"
-                  toast={toast}
+                  toast={{
+                    ...toast,
+                    title: translateUiMessage(toast.title),
+                    description: translateUiMessage(toast.description),
+                    actionProps: toast.actionProps
+                      ? { ...toast.actionProps, children: t3T(toast.actionProps.children) }
+                      : undefined,
+                  }}
                 >
                   {tooltipStyle ? (
                     <Toast.Content className="pointer-events-auto px-2 py-1">
@@ -754,7 +790,7 @@ function AnchoredToasts() {
                     <>
                       <div className={toastCornerDismissClass}>
                         <button
-                          aria-label="Dismiss notification"
+                          aria-label={t3T("Dismiss notification")}
                           className={toastCornerOrbClass}
                           data-slot="toast-close"
                           onClick={() =>

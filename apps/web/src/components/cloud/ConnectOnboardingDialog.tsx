@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAuth } from "@clerk/react";
 import { AuthAdministrativeScopes, AuthRelayWriteScope } from "@t3tools/contracts";
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +39,8 @@ export function ConnectOnboardingDialog() {
 type OnboardingStep = "publish" | "devices";
 
 function ConfiguredConnectOnboardingDialog() {
+  const t3T = useUiTranslate();
+
   // Mirrors ManagedRelayAuthProvider: a pending Clerk session must not read as
   // signed-out, or its later activation would look like a fresh sign-in.
   const { isLoaded, isSignedIn, userId } = useAuth({ treatPendingAsSignedOut: false });
@@ -210,17 +213,18 @@ function ConfiguredConnectOnboardingDialog() {
     >
       <WizardPopup>
         <WizardHeader
-          title="Set up T3 Connect"
+          title={t3T("Set up T3 Connect")}
           description={
             <>
-              Mesh your devices together — publish this environment and connect the rest, all in one
-              place.
+              {t3T(
+                "Mesh your devices together — publish this environment and connect the rest, all in one place.",
+              )}
             </>
           }
         >
           {steps.length > 1 ? (
             <WizardSteps
-              steps={steps.map((id) => STEP_LABELS[id])}
+              steps={steps.map((id) => t3T(STEP_LABELS[id]))}
               currentStep={steps.indexOf(step)}
               isStepDisabled={() => isApplying}
               onStepChange={(index) => {
@@ -251,25 +255,25 @@ function ConfiguredConnectOnboardingDialog() {
                 checked={dontShowAgain}
                 onCheckedChange={(checked) => setDontShowAgain(checked === true)}
               />
-              Don&apos;t show this again
+              {t3T("Don't show this again")}
             </label>
           }
         >
           {step === "publish" ? (
             <>
               <Button variant="ghost" disabled={isApplying} onClick={() => setStep("devices")}>
-                Not now
+                {t3T("Not now")}
               </Button>
               <Button
                 disabled={isApplying || (controller.linkState.isPending && linkStateData === null)}
                 onClick={() => void applyPublishSelection()}
               >
-                {isApplying ? "Enabling…" : "Continue"}
+                {isApplying ? t3T("Enabling…") : t3T("Continue")}
               </Button>
             </>
           ) : (
             <Button disabled={isApplying} onClick={complete}>
-              Done
+              {t3T("Done")}
             </Button>
           )}
         </WizardFooter>
@@ -298,19 +302,25 @@ function PublishStep({
   readonly onExposeEnvironmentChange: (enabled: boolean) => void;
   readonly onPublishAgentActivityChange: (enabled: boolean) => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <div className="space-y-3">
       <div className="rounded-lg border">
         <OnboardingToggleRow
-          title="Publish this environment"
-          description="Make this environment available to your other devices through T3 Connect."
+          title={t3T("Publish this environment")}
+          description={t3T(
+            "Make this environment available to your other devices through T3 Connect.",
+          )}
           checked={exposeEnvironment}
           disabled={disabled}
           onCheckedChange={onExposeEnvironmentChange}
         />
         <OnboardingToggleRow
-          title="Publish agent activity"
-          description="Send activity from this environment to your mobile clients for push notifications and Live Activities."
+          title={t3T("Publish agent activity")}
+          description={t3T(
+            "Send activity from this environment to your mobile clients for push notifications and Live Activities.",
+          )}
           checked={publishAgentActivity}
           disabled={disabled}
           onCheckedChange={onPublishAgentActivityChange}
@@ -351,6 +361,8 @@ function OnboardingToggleRow({
 }
 
 function DevicesStep() {
+  const t3T = useUiTranslate();
+
   const { environments } = useEnvironments();
   const primaryEnvironment = usePrimaryEnvironment();
   const savedEnvironments = environments.filter(
@@ -365,8 +377,9 @@ function DevicesStep() {
         showSavedEnvironments
         empty={
           <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-            No other environments are published to your account yet. Publish one from another device
-            and it will show up here.
+            {t3T(
+              "No other environments are published to your account yet. Publish one from another device and it will show up here.",
+            )}
           </p>
         }
       />

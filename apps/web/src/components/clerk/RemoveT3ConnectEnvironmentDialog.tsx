@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useState } from "react";
 
 import {
@@ -27,6 +28,8 @@ export function RemoveT3ConnectEnvironmentDialog({
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const accountPage = useT3ConnectAccountPage();
   // Keep the label through the close animation.
   const [shownLabel, setShownLabel] = useState(environmentLabel);
@@ -43,12 +46,16 @@ export function RemoveT3ConnectEnvironmentDialog({
       >
         <AlertDialogPopup>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove {shownLabel} from this device?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t3T("Remove")} {shownLabel} {t3T("from this device?")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This forgets its pairing, credentials, and cached threads here.
+              {t3T("This forgets its pairing, credentials, and cached threads here.")}
             </AlertDialogDescription>
             <AlertDialogDescription>
-              It stays on your T3 Connect account and keeps its host space. Deregister it in{" "}
+              {t3T(
+                "It stays on your T3 Connect account and keeps its host space. Deregister it in",
+              )}{" "}
               {openAccountPage ? (
                 <InlineButton
                   onClick={() => {
@@ -56,18 +63,20 @@ export function RemoveT3ConnectEnvironmentDialog({
                     openAccountPage();
                   }}
                 >
-                  T3 Connect settings
+                  {t3T("T3 Connect settings")}
                 </InlineButton>
               ) : (
-                "T3 Connect settings"
+                t3T("T3 Connect settings")
               )}{" "}
-              to free it.
+              {t3T("to free it.")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {t3T("Cancel")}
+            </AlertDialogClose>
             <Button variant="destructive" onClick={onConfirm}>
-              Remove from this device
+              {t3T("Remove from this device")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>
