@@ -1,0 +1,56 @@
+{
+  "product": "Actual Orchestrator V2 bilingual Mac desktop",
+  "architecture": "arm64",
+  "upstreamCommit": "fed41fa88bb27cb4325cb208d571393850bc63c2",
+  "upstreamTrack": "V2 development main, NOT V1 stable v0.0.45",
+  "sourceBranch": "release/desktop-v2-zh",
+  "buildVersion": "0.0.46-nightly.20261003.1",
+  "applicationName": "T3 Code (Nightly)",
+  "artifact": {
+    "path": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/verified-desktop/T3-Code-0.0.46-nightly.20261003.1-arm64.dmg",
+    "bytes": 161092614,
+    "sha256": "b7122c0270725f842cecfb61d3b4c70d3733c13601ed38bbd1da9641ffda40a7"
+  },
+  "packagedV2Evidence": {
+    "selector": [
+      "apps/server/dist/client/assets/SettingsPanels-C_LvSBZw.js",
+      "apps/server/dist/client/assets/main-CtoQByHd.js"
+    ],
+    "labels": ["apps/server/dist/client/assets/utils-BDqZS4hR.js"],
+    "persistence": ["apps/server/dist/client/assets/useSettings-DXOyPkRQ.js"],
+    "nativeMenu": ["apps/desktop/dist-electron/main.cjs"],
+    "clientVersion": [
+      "apps/server/dist/client/assets/atomRegistry-D8sOsyur.js",
+      "apps/server/dist/client/assets/dist-DTm49M-m.js",
+      "apps/server/dist/client/assets/dist-DTm49M-m.js"
+    ],
+    "v2Database": ["apps/server/dist/binCli-tLrog8Vh.mjs"],
+    "v2Orchestrator": ["apps/server/dist/binCli-tLrog8Vh.mjs"]
+  },
+  "checks": {
+    "webTypecheckExit": 0,
+    "desktopTypecheckExit": 0,
+    "webLanguageTests": 107,
+    "nativeLanguageTests": 19,
+    "isolatedV2DatabaseMigrationTests": 4,
+    "productionStagingRegressionTests": 1,
+    "buildExit": 0,
+    "dmgIntegrityExit": 0,
+    "deepResourceSignatureExit": 0,
+    "packagedV2AndLanguageCheckExit": 0,
+    "bundledElectronNodeBackendHelpExit": 0,
+    "gatekeeperExit": 3
+  },
+  "limitations": {
+    "appleDeveloperIdOrNotarization": false,
+    "guiVisualValidation": false,
+    "autoUpdateValidated": false
+  },
+  "repairs": [
+    "Select complete compatible zod 3.25.76: auto peer 3.25.0 had missing production dist",
+    "Seal locally signed Mac bundle with ad-hoc identity"
+  ],
+  "existingApplicationModified": false,
+  "userDataReadOrModified": false,
+  "originalLanguageBranch": "f71c44ea0bfa7c39f6d44329ed577719db2a3ee8"
+}
