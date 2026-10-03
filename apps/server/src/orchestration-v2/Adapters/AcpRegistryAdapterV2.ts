@@ -161,13 +161,15 @@ function makeAcpRegistryRuntime(options: AcpRegistryAdapterV2Options) {
       const context = yield* Layer.build(
         AcpSessionRuntime.layer({
           ...runtimeInput,
-          spawn:
-            processEnvironment === undefined
-              ? resolved.spawn
-              : {
-                  ...resolved.spawn,
-                  env: { ...resolved.spawn.env, ...processEnvironment },
-                },
+          spawn: {
+            ...resolved.spawn,
+            // Local ACP launchers can translate the selected T3 policy into
+            // their own runtime settings without agent-specific adapter hooks.
+            env: acpRegistryRuntimeEnvironment(resolved.spawn.env ?? {}, {
+              processEnvironment,
+              runtimePolicy: input.runtimePolicy,
+            }),
+          },
           ...(options.settings.authMethodId ? { authMethodId: options.settings.authMethodId } : {}),
         }).pipe(
           Layer.provide(
@@ -179,6 +181,20 @@ function makeAcpRegistryRuntime(options: AcpRegistryAdapterV2Options) {
         Effect.provide(context),
       );
     });
+}
+
+export function acpRegistryRuntimeEnvironment(
+  environment: NodeJS.ProcessEnv,
+  input: {
+    readonly processEnvironment: NodeJS.ProcessEnv | undefined;
+    readonly runtimePolicy: AcpAdapterV2RuntimeInput["runtimePolicy"];
+  },
+): NodeJS.ProcessEnv {
+  return {
+    ...environment,
+    ...input.processEnvironment,
+    T3_RUNTIME_MODE: input.runtimePolicy.runtimeMode,
+  };
 }
 
 export function makeAcpRegistryAdapterV2(options: AcpRegistryAdapterV2Options) {

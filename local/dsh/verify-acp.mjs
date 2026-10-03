@@ -1,7 +1,12 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
+const argument = (name) => {
+  const index = process.argv.indexOf(name);
+  return index === -1 ? undefined : process.argv[index + 1];
+};
+const cwd = argument("--cwd") ?? "/Users/yu";
 const child = spawn(new URL("./t3-dsh-acp", import.meta.url).pathname, [], {
-  cwd: "/Users/yu",
+  cwd,
   stdio: ["pipe", "pipe", "pipe"],
 });
 let nextId = 0;
@@ -10,6 +15,7 @@ let answer = "";
 let stderr = "";
 child.stderr.on("data", (chunk) => {
   stderr = (stderr + chunk).slice(-3000);
+  if (process.env.T3_DSH_VERIFY_PERMISSION === "1") process.stderr.write(chunk);
 });
 const lines = createInterface({ input: child.stdout });
 lines.on("line", (line) => {
@@ -57,23 +63,31 @@ try {
     "initialize:",
     JSON.stringify({ protocolVersion: init.protocolVersion, capabilities: init.agentCapabilities }),
   );
-  const session = await request("session/new", { cwd: "/Users/yu", mcpServers: [] });
-  console.log(
-    "session/new:",
-    JSON.stringify({ sessionId: session.sessionId, configOptions: session.configOptions }),
-  );
-  if (process.argv.includes("--prompt")) {
+  const resumeId = argument("--resume");
+  const session = await request(resumeId ? "session/resume" : "session/new", {
+    cwd,
+    mcpServers: [],
+    ...(resumeId ? { sessionId: resumeId } : {}),
+  });
+  const sessionId = resumeId ?? session.sessionId;
+  console.log("session/new:", JSON.stringify({ sessionId, configOptions: session.configOptions }));
+  const writeProbe = argument("--write-probe");
+  if (writeProbe || process.argv.includes("--prompt")) {
+    if (writeProbe && !/^\/[a-zA-Z0-9_./-]+$/.test(writeProbe))
+      throw new Error("Invalid probe path");
     const result = await request("session/prompt", {
-      sessionId: session.sessionId,
+      sessionId,
       prompt: [
         {
           type: "text",
-          text: "这是安装连通性测试。不要调用任何工具、读写文件或启动任务，只回答 DSH_T3_OK。",
+          text: writeProbe
+            ? `这是一次隔离的权限验证。只调用一次 bash 工具执行这条命令：printf DSH_PERMISSION_OK > '${writeProbe}'。不要读写任何其他文件，不要寻求更高权限，不要重试，不要启动子任务。命令成功只回复 WRITE_OK；失败只回复 WRITE_DENIED。`
+            : "这是安装连通性测试。不要调用任何工具、读写文件或启动任务，只回答 DSH_T3_OK。",
         },
       ],
     });
     console.log("session/prompt:", JSON.stringify({ stopReason: result.stopReason, answer }));
-    if (!answer.includes("DSH_T3_OK")) throw new Error("Expected marker absent");
+    if (!writeProbe && !answer.includes("DSH_T3_OK")) throw new Error("Expected marker absent");
   }
 } catch (error) {
   console.error(error.message);

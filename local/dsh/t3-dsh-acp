@@ -1,4 +1,10 @@
 #!/bin/sh
 # T3 local ACP entry, using a current-runtime profile with existing model routes.
 export PATH="/Users/yu/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+case "${T3_RUNTIME_MODE:-}" in
+  full-access) export DSH_PERMISSION_MODE="danger-full-access" ;;
+  approval-required|auto-accept-edits|auto) export DSH_PERMISSION_MODE="workspace-write" ;;
+  "") ;;
+  *) echo "Unsupported T3 runtime mode: $T3_RUNTIME_MODE" >&2; exit 64 ;;
+esac
 exec /Users/yu/.npm-global/bin/dsh --profile t3-acp "$@"

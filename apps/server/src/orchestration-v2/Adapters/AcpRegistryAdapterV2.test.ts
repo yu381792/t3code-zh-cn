@@ -35,6 +35,7 @@ import {
   AcpRegistryAdapterV2Driver,
   makeAcpRegistryAdapterV2,
   acpRegistryPromptFailure,
+  acpRegistryRuntimeEnvironment,
 } from "./AcpRegistryAdapterV2.ts";
 
 const registryUrl = "https://registry.test/registry.json";
@@ -90,6 +91,28 @@ const testLayer = Layer.mergeAll(
 );
 
 describe("AcpRegistryAdapterV2", () => {
+  it("forwards the current T3 runtime mode while preserving provider and MCP environment", () => {
+    for (const runtimeMode of [
+      "full-access",
+      "approval-required",
+      "auto-accept-edits",
+      "auto",
+    ] as const) {
+      const actual = acpRegistryRuntimeEnvironment(
+        { PATH: "/provider/bin", T3_RUNTIME_MODE: "stale" },
+        {
+          processEnvironment: { T3_MCP_URL: "http://localhost/mcp", T3_RUNTIME_MODE: "also-stale" },
+          runtimePolicy: { runtimeMode, interactionMode: "default", cwd: null },
+        },
+      );
+      assert.deepEqual(actual, {
+        PATH: "/provider/bin",
+        T3_MCP_URL: "http://localhost/mcp",
+        T3_RUNTIME_MODE: runtimeMode,
+      });
+    }
+  });
+
   it("preserves and sanitizes structured ACP errors without exposing arbitrary defects", () => {
     const limit = new EffectAcpErrors.AcpRequestError({
       code: -31001,
