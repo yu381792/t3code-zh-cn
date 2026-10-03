@@ -10,6 +10,7 @@ import {
   type ProviderInstanceId,
   type ServerProviderSkill,
   type ServerProviderSlashCommand,
+  ProviderOptionDescriptor,
 } from "@t3tools/contracts";
 import * as Crypto from "effect/Crypto";
 import * as Deferred from "effect/Deferred";
@@ -19,6 +20,7 @@ import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
 import * as Result from "effect/Result";
+import * as Schema from "effect/Schema";
 import { ChildProcessSpawner } from "effect/unstable/process";
 import type * as EffectAcpErrors from "effect-acp/errors";
 import type * as EffectAcpSchema from "effect-acp/compat";
@@ -42,6 +44,9 @@ const MAX_COMMAND_LINE_LENGTH = 2_048;
 const PROBE_TIMEOUT_SECONDS = 60;
 const PROBE_TIMEOUT = `${PROBE_TIMEOUT_SECONDS} seconds`;
 const COMMAND_ADVERTISEMENT_GRACE = "500 millis";
+const decodeModelConfigOptions = Schema.decodeUnknownOption(
+  Schema.Array(ProviderOptionDescriptor).check(Schema.isMaxLength(16)),
+);
 
 const boundedText = (value: string, maximumLength: number): string =>
   value.trim().slice(0, maximumLength);
@@ -75,6 +80,7 @@ function normalizeModels(
     id: model.value,
     name: model.name,
     description: model.description ?? null,
+    configOptions: decodeModelConfigOptions(model._meta?.["t3code/config-options"]),
   }));
   const seen = new Set<string>();
   const models: Array<AcpRegistryProbeModel> = [];
@@ -89,6 +95,9 @@ function normalizeModels(
         candidate.description === null
           ? null
           : boundedText(candidate.description, MAX_DESCRIPTION_LENGTH) || null,
+      ...(Option.isSome(candidate.configOptions)
+        ? { configOptions: candidate.configOptions.value }
+        : {}),
     });
     if (models.length === MAX_MODELS) break;
   }

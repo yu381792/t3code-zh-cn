@@ -47,6 +47,42 @@ function catalogWithInspection(
 }
 
 describe("acpRegistrySnapshotReadiness", () => {
+  it("does not replace GPT reasoning controls with the latest GLM session controls", () => {
+    const gpt = [
+      {
+        id: "reasoning_effort",
+        label: "Reasoning",
+        type: "select" as const,
+        options: ["low", "medium", "high", "xhigh", "max"].map((id) => ({ id, label: id })),
+      },
+    ];
+    const glm = [{ ...gpt[0]!, options: ["low", "high", "max"].map((id) => ({ id, label: id })) }];
+    const models = [
+      { id: "gpt", name: "GPT", description: null, configOptions: gpt },
+      { id: "glm", name: "GLM", description: null, configOptions: glm },
+    ];
+    const provider = buildCheckedAcpRegistrySnapshot({
+      ...identity,
+      settings: decodeSettings({ agentId: "test-agent" }),
+      checkedAt: "2026-10-03T00:00:00Z",
+      inspection: { status: "ready", agentId: "test-agent", version: "1.0.0", distribution: "npx" },
+    });
+    const live = applyAcpRegistryLiveConfiguration(
+      provider,
+      {
+        models,
+        currentModelId: "glm",
+        configOptions: glm,
+      },
+      [],
+    );
+    expect(
+      live.models.find((model) => model.slug === "gpt")?.capabilities?.optionDescriptors,
+    ).toEqual(gpt);
+    expect(
+      live.models.find((model) => model.slug === "glm")?.capabilities?.optionDescriptors,
+    ).toEqual(glm);
+  });
   it("treats a live empty command advertisement as an authoritative replacement", () => {
     const provider = buildCheckedAcpRegistrySnapshot({
       ...identity,

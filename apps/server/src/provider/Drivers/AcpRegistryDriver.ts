@@ -98,8 +98,8 @@ function modelsFromDiscovery(
   customModels: ReadonlyArray<string>,
 ): ReadonlyArray<ServerProviderModel> {
   const discovered = discovery?.models ?? [];
-  // Discovered session config options and modes ride on every model so the
-  // composer's generic option controls can drive them per thread.
+  // Legacy agents expose only session defaults. Agents with model-specific
+  // metadata keep their dependent controls separate (e.g. GPT versus GLM).
   const capabilities =
     discovery === undefined || discovery.configOptions.length === 0
       ? EMPTY_CAPABILITIES
@@ -120,7 +120,10 @@ function modelsFromDiscovery(
           name: model.name,
           isCustom: false,
           ...(model.id === discovery?.currentModelId ? { isDefault: true } : {}),
-          capabilities,
+          capabilities:
+            model.configOptions === undefined
+              ? capabilities
+              : createModelCapabilities({ optionDescriptors: model.configOptions }),
         }));
   return providerModelsFromSettings(builtInModels, customModels, capabilities);
 }

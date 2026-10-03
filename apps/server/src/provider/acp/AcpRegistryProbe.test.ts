@@ -20,6 +20,7 @@ import {
   logoutAcpRegistry,
   normalizeAcpRegistryAuthMethods,
   normalizeAcpRegistryCommands,
+  normalizeAcpRegistryLiveConfiguration,
   probeAcpRegistryConfiguration,
 } from "./AcpRegistryProbe.ts";
 import * as AcpRegistrySupport from "./AcpRegistrySupport.ts";
@@ -30,6 +31,31 @@ const mockAgentPath = NodePath.join(__dirname, "../../../scripts/acp-mock-agent.
 const decodeSettings = Schema.decodeSync(AcpRegistrySettings);
 
 describe("ACP Registry probe", () => {
+  it("keeps model-specific controls and ignores invalid metadata", () => {
+    const options = [
+      {
+        id: "reasoning_effort",
+        label: "Reasoning",
+        type: "select" as const,
+        options: [{ id: "xhigh", label: "Extra High" }],
+      },
+    ];
+    const result = normalizeAcpRegistryLiveConfiguration([
+      {
+        id: "model",
+        name: "Model",
+        category: "model",
+        type: "select",
+        currentValue: "gpt",
+        options: [
+          { value: "gpt", name: "GPT", _meta: { "t3code/config-options": options } },
+          { value: "glm", name: "GLM", _meta: { "t3code/config-options": "invalid" } },
+        ],
+      },
+    ]);
+    expect(result.models[0]?.configOptions).toEqual(options);
+    expect(result.models[1]?.configOptions).toBeUndefined();
+  });
   it("returns advertised auth methods and de-duplicated models", () => {
     const result = acpRegistryProbeResult(instanceId, {
       sessionId: "probe-session",

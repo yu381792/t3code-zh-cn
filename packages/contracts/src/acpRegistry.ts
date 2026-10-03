@@ -268,6 +268,10 @@ export const AcpRegistryProbeModel = Schema.Struct({
   id: AcpRegistryProbeText,
   name: AcpRegistryProbeText,
   description: AcpRegistryProbeDescription,
+  /** Optional model-specific ACP controls; absence uses session defaults. */
+  configOptions: Schema.optionalKey(
+    Schema.Array(ProviderOptionDescriptor).check(Schema.isMaxLength(16)),
+  ),
 });
 export type AcpRegistryProbeModel = typeof AcpRegistryProbeModel.Type;
 

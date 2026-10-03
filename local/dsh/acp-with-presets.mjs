@@ -10,6 +10,9 @@ const acp = await import(pathToFileURL(require.resolve("@deepseek-ai/dsh-acp")).
 const { ndJsonStream } = await import(
   pathToFileURL(require.resolve("@agentclientprotocol/sdk")).href
 );
+const { isBuiltInPreset } = await import(
+  pathToFileURL(require.resolve("@deepseek-ai/dsh-agent-preset-registry/display")).href
+);
 export const name = "acp-with-presets";
 export const Config = acp.Config;
 export const inject = [...acp.inject, "agentPresets", "sessionProjections"];
@@ -21,13 +24,14 @@ export function apply(ctx, config) {
   const writer = transport.writable.getWriter();
   const requests = new Map();
   const sessionOptions = new Map();
+  const reasoningByModel = new Map();
   async function presetOption(sessionId) {
     const agent = ctx.agents.get(sessionId);
     const allPresets = await ctx.agentPresets.list();
     if (process.env.T3_DSH_VERIFY_PRESET === "1")
       for (const preset of allPresets.filter((preset) => preset.broken))
         console.error(`DSH preset unavailable: ${preset.id}: ${preset.broken}`);
-    const roster = allPresets.filter((preset) => !preset.broken);
+    const roster = allPresets.filter((preset) => !preset.broken && !isBuiltInPreset(preset));
     const current = agent ? ctx.agentPresets.composedPreset(agent.ctx) : ctx.agentPresets.defaultId;
     return {
       id: PRESET_CONFIG_ID,
@@ -47,6 +51,45 @@ export function apply(ctx, config) {
       ...options.filter((option) => option.id !== PRESET_CONFIG_ID),
       await presetOption(sessionId),
     ];
+    const shared = next.filter(
+      (option) => option.category !== "model" && option.category !== "thought_level",
+    );
+    for (const option of next.filter((option) => option.category === "model")) {
+      for (const group of option.options) {
+        for (const model of "value" in group ? [group] : group.options) {
+          if (!reasoningByModel.has(model.value)) {
+            const [provider, modelId] = JSON.parse(model.value);
+            const info = await ctx.llm.resolveModelInfo(provider, modelId);
+            reasoningByModel.set(model.value, info.reasoning);
+          }
+          const reasoning = reasoningByModel.get(model.value);
+          const controls = shared.map((control) => ({
+            id: control.id,
+            label: control.name,
+            type: control.type,
+            options: control.options.map((choice) => ({ id: choice.value, label: choice.name })),
+            ...(control.currentValue ? { currentValue: control.currentValue } : {}),
+          }));
+          const liveReasoning =
+            model.value === option.currentValue
+              ? next.find((control) => control.category === "thought_level")?.currentValue
+              : undefined;
+          const currentEffort = liveReasoning ?? reasoning?.defaultEffort;
+          if (reasoning)
+            controls.unshift({
+              id: "reasoning_effort",
+              label: "Reasoning effort",
+              type: "select",
+              options: reasoning.efforts.map((effort) => ({
+                id: String(effort.id),
+                label: effort.id === "xhigh" ? "Extra High" : effort.name,
+              })),
+              ...(currentEffort ? { currentValue: String(currentEffort) } : {}),
+            });
+          model._meta = { ...model._meta, "t3code/config-options": controls };
+        }
+      }
+    }
     sessionOptions.set(sessionId, next);
     return next;
   }
