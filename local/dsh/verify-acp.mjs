@@ -5,17 +5,30 @@ const argument = (name) => {
   return index === -1 ? undefined : process.argv[index + 1];
 };
 const cwd = argument("--cwd") ?? "/Users/yu";
-const child = spawn(new URL("./t3-dsh-acp", import.meta.url).pathname, [], {
-  cwd,
-  stdio: ["pipe", "pipe", "pipe"],
-});
+const presetProbe = process.argv.includes("--preset-probe");
+const patch =
+  argument("--patch") ??
+  (presetProbe ? new URL("./verify-preset.patch.yml", import.meta.url).pathname : undefined);
+const child = spawn(
+  new URL("./t3-dsh-acp", import.meta.url).pathname,
+  patch ? ["--patch", patch] : [],
+  {
+    cwd,
+    stdio: ["pipe", "pipe", "pipe"],
+  },
+);
 let nextId = 0;
 const pending = new Map();
 let answer = "";
 let stderr = "";
 child.stderr.on("data", (chunk) => {
   stderr = (stderr + chunk).slice(-3000);
-  if (process.env.T3_DSH_VERIFY_PERMISSION === "1") process.stderr.write(chunk);
+  if (
+    presetProbe ||
+    process.env.T3_DSH_VERIFY_PERMISSION === "1" ||
+    process.env.T3_DSH_VERIFY_PRESET === "1"
+  )
+    process.stderr.write(chunk);
 });
 const lines = createInterface({ input: child.stdout });
 lines.on("line", (line) => {
