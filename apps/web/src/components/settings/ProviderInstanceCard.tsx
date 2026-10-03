@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { Spinner } from "~/components/ui/spinner";
 
 import {
@@ -186,13 +188,15 @@ export function deriveProviderModelsForDisplay(input: {
 }
 
 function ProviderAuthEmail(props: { readonly email: string | undefined }) {
+  const t3T = useUiTranslate();
+
   const email = props.email?.trim();
   if (!email) return null;
 
   return (
     <RedactedSensitiveText
       value={email}
-      ariaLabel="Toggle account email visibility"
+      ariaLabel={t3T("Toggle account email visibility")}
       revealTooltip="Click to reveal email"
       hideTooltip="Click to hide email"
       className="max-w-full truncate"
@@ -256,6 +260,8 @@ function ProviderEnvironmentFieldRow(props: {
   readonly onCommit: (field: ProviderEnvironmentFieldDefinition, value: string) => void;
   readonly onRemove: (field: ProviderEnvironmentFieldDefinition) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const inputId = `${props.idPrefix}-environment-${props.field.name}`;
   const value = props.variable?.valueRedacted ? "" : (props.variable?.value ?? "");
   const placeholder = props.variable?.valueRedacted
@@ -264,8 +270,8 @@ function ProviderEnvironmentFieldRow(props: {
 
   return (
     <SettingsRow
-      title={<label htmlFor={inputId}>{props.field.label}</label>}
-      description={props.field.description}
+      title={<label htmlFor={inputId}>{t3T(props.field.label)}</label>}
+      description={t3T(props.field.description)}
       control={
         <div className="flex w-full min-w-0 items-center gap-2 @min-[32rem]/settings-row:w-56">
           <DraftInput
@@ -285,7 +291,7 @@ function ProviderEnvironmentFieldRow(props: {
               size="icon-sm"
               variant="ghost-destructive"
               onClick={() => props.onRemove(props.field)}
-              aria-label={`Clear ${props.field.label}`}
+              aria-label={t3T("Clear {0}", [props.field.label])}
             >
               <XIcon className="size-3.5" />
             </Button>
@@ -300,6 +306,8 @@ function ProviderEnvironmentSection(props: {
   readonly environment: ReadonlyArray<ProviderInstanceEnvironmentVariable>;
   readonly onChange: (environment: ReadonlyArray<ProviderInstanceEnvironmentVariable>) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [rows, setRows] = useState<ReadonlyArray<EnvironmentDraftRow>>(() =>
     props.environment.map(makeEnvironmentDraftRow),
   );
@@ -379,12 +387,12 @@ function ProviderEnvironmentSection(props: {
 
   return (
     <SettingsRow
-      title="Variables"
-      description="API keys, base URLs, and other per-instance CLI settings."
+      title={t3T("Variables")}
+      description={t3T("API keys, base URLs, and other per-instance CLI settings.")}
       control={
         <Button type="button" size="sm" variant="outline" onClick={addVariable}>
           <PlusIcon className="size-3" />
-          Add variable
+          {t3T("Add variable")}
         </Button>
       }
     >
@@ -398,9 +406,9 @@ function ProviderEnvironmentSection(props: {
                 className="w-full min-w-0 sm:w-44 sm:shrink-0"
                 value={variable.name}
                 onCommit={(name) => updateVariable(variable.id, { name: name.trim() })}
-                placeholder="VARIABLE_NAME"
+                placeholder={t3T("VARIABLE_NAME")}
                 spellCheck={false}
-                aria-label={`Environment variable name ${index + 1}`}
+                aria-label={t3T("Environment variable name {0}", [index + 1])}
               />
               <span className="hidden text-xs text-muted-foreground sm:inline" aria-hidden>
                 =
@@ -414,10 +422,12 @@ function ProviderEnvironmentSection(props: {
                 type={variable.sensitive ? "password" : undefined}
                 autoComplete="off"
                 placeholder={
-                  variable.valueRedacted ? "Stored secret, enter a new value to replace" : "value"
+                  variable.valueRedacted
+                    ? t3T("Stored secret, enter a new value to replace")
+                    : t3T("value")
                 }
                 spellCheck={false}
-                aria-label={`Environment variable value ${index + 1}`}
+                aria-label={t3T("Environment variable value {0}", [index + 1])}
               />
               <Tooltip>
                 <TooltipTrigger
@@ -436,7 +446,9 @@ function ProviderEnvironmentSection(props: {
                         });
                       }}
                       aria-pressed={variable.sensitive}
-                      aria-label={`Mark environment variable ${variable.name || index + 1} as sensitive`}
+                      aria-label={t3T("Mark environment variable {0} as sensitive", [
+                        variable.name || index + 1,
+                      ])}
                     >
                       {variable.sensitive ? (
                         <LockIcon className="size-3" />
@@ -447,7 +459,7 @@ function ProviderEnvironmentSection(props: {
                   }
                 />
                 <TooltipPopup side="top">
-                  {variable.sensitive ? "Sensitive, stored separately" : "Plain text"}
+                  {variable.sensitive ? t3T("Sensitive, stored separately") : t3T("Plain text")}
                 </TooltipPopup>
               </Tooltip>
               <Button
@@ -455,14 +467,14 @@ function ProviderEnvironmentSection(props: {
                 size="icon-micro"
                 variant="ghost-destructive"
                 onClick={() => removeVariable(variable.id)}
-                aria-label={`Remove environment variable ${variable.name || index + 1}`}
+                aria-label={t3T("Remove environment variable {0}", [variable.name || index + 1])}
               >
                 <XIcon className="size-3" />
               </Button>
             </div>
           ))}
           <p className="text-xs text-muted-foreground">
-            Sensitive values are stored separately and never returned to the app.
+            {t3T("Sensitive values are stored separately and never returned to the app.")}
           </p>
         </div>
       ) : null}
@@ -565,6 +577,8 @@ export function ProviderInstanceCard({
   environmentId,
   acpProjects = EMPTY_ACP_PROJECTS,
 }: ProviderInstanceCardProps) {
+  const t3T = useUiTranslate();
+
   const enabled = resolveProviderInstanceEnabled(instance);
   const compatibility = enabled ? liveProvider?.compatibilityAdvisory : undefined;
   // A locally disabled provider reads "Disabled" with a muted dot even if its
@@ -750,7 +764,7 @@ export function ProviderInstanceCard({
     isAuthenticated && authEmail ? (
       <>
         {needsAttention ? statusDotNode : null}
-        <span>Authenticated as</span>
+        <span>{t3T("Authenticated as")}</span>
         <ProviderAuthEmail email={authEmail} />
         {authLabel ? <span>· {authLabel}</span> : null}
         {inlineStatusDetail ? (
@@ -760,7 +774,7 @@ export function ProviderInstanceCard({
     ) : (
       <>
         {statusDotNode}
-        <span>{summary.headline}</span>
+        <span>{t3T(summary.headline)}</span>
         {inlineStatusDetail ? (
           <span className="min-w-0 [overflow-wrap:anywhere]">· {inlineStatusDetail}</span>
         ) : null}
@@ -785,7 +799,7 @@ export function ProviderInstanceCard({
             type="button"
             className="pointer-events-auto absolute inset-0 cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={onSelect}
-            aria-label={`Select ${displayName}`}
+            aria-label={t3T("Select {0}", [displayName])}
             aria-pressed={selected}
           />
           {titleIconNode}
@@ -805,7 +819,7 @@ export function ProviderInstanceCard({
                         <span
                           tabIndex={0}
                           role="img"
-                          aria-label={versionAdvisory.title}
+                          aria-label={t3T(versionAdvisory.title)}
                           className="pointer-events-auto relative inline-flex shrink-0 text-warning"
                         >
                           <VersionAdvisoryIcon className="size-3.5" />
@@ -823,7 +837,7 @@ export function ProviderInstanceCard({
                           size="icon-micro"
                           variant="ghost-muted"
                           className="pointer-events-auto relative shrink-0"
-                          aria-label={`Copy ${displayName} update command`}
+                          aria-label={t3T("Copy {0} update command", [displayName])}
                           onClick={() =>
                             copyToClipboard(updateCommand, { providerName: displayName })
                           }
@@ -832,10 +846,14 @@ export function ProviderInstanceCard({
                         </Button>
                       }
                     />
-                    <TooltipPopup side="top">Copy update command</TooltipPopup>
+                    <TooltipPopup side="top">{t3T("Copy update command")}</TooltipPopup>
                   </Tooltip>
                 ) : (
-                  <span role="img" aria-label="Update available" className="inline-flex shrink-0">
+                  <span
+                    role="img"
+                    aria-label={t3T("Update available")}
+                    className="inline-flex shrink-0"
+                  >
                     <ArrowUpCircleIcon className="size-3.5 text-muted-foreground" />
                   </span>
                 )
@@ -850,7 +868,7 @@ export function ProviderInstanceCard({
                   tabIndex={statusDiagnostic ? 0 : undefined}
                   className="pointer-events-auto line-clamp-2 [overflow-wrap:anywhere]"
                 >
-                  {summary.headline}
+                  {t3T(summary.headline)}
                   {needsAttention && inlineStatusDetail ? ` · ${inlineStatusDetail}` : null}
                 </span>
               </ProviderStatusDiagnostic>
@@ -862,7 +880,7 @@ export function ProviderInstanceCard({
             checked={enabled}
             disabled={readOnly}
             onCheckedChange={(checked) => updateEnabled(Boolean(checked))}
-            aria-label={`Enable ${displayName}`}
+            aria-label={t3T("Enable {0}", [displayName])}
           />
         </span>
       </div>
@@ -873,7 +891,7 @@ export function ProviderInstanceCard({
     <div className="flex shrink-0 items-center gap-1.5">
       {driverOption?.badgeLabel ? (
         <Badge variant="warning" size="sm" className="shrink-0">
-          {driverOption.badgeLabel}
+          {t3T(driverOption.badgeLabel)}
         </Badge>
       ) : null}
       {versionCodeNode}
@@ -893,7 +911,7 @@ export function ProviderInstanceCard({
                         type="button"
                         size="icon-xs"
                         variant="ghost-muted"
-                        aria-label={`${versionAdvisory.title} — view details`}
+                        aria-label={t3T("{0} — view details", [versionAdvisory.title])}
                       >
                         <VersionAdvisoryIcon
                           className={cn(hasCompatibilityWarning && "text-warning")}
@@ -903,7 +921,7 @@ export function ProviderInstanceCard({
                   />
                 }
               />
-              <TooltipPopup side="top">{versionAdvisory.title}</TooltipPopup>
+              <TooltipPopup side="top">{t3T(versionAdvisory.title)}</TooltipPopup>
             </Tooltip>
             <PopoverPopup side="bottom" align="end" width="md">
               <div className="grid min-w-0 gap-3">
@@ -933,16 +951,18 @@ export function ProviderInstanceCard({
                   >
                     {isUpdating ? <Spinner /> : <DownloadIcon />}
                     {isUpdating
-                      ? "Updating"
+                      ? t3T("Updating")
                       : versionAdvisory.targetVersion
-                        ? `Install ${getProviderVersionLabel(versionAdvisory.targetVersion)}`
-                        : "Update now"}
+                        ? t3T("Install {0}", [
+                            getProviderVersionLabel(versionAdvisory.targetVersion),
+                          ])
+                        : t3T("Update now")}
                   </Button>
                 ) : null}
                 {onRunVersionAction && updateCommand ? (
                   <div className="flex items-center gap-2 text-3xs font-medium uppercase tracking-wider text-muted-foreground">
                     <span aria-hidden className="h-px flex-1 bg-border" />
-                    or, update manually using
+                    {t3T("or, update manually using")}
                     <span aria-hidden className="h-px flex-1 bg-border" />
                   </div>
                 ) : null}
@@ -962,13 +982,13 @@ export function ProviderInstanceCard({
                             onClick={() =>
                               copyToClipboard(updateCommand, { providerName: displayName })
                             }
-                            aria-label="Copy update command"
+                            aria-label={t3T("Copy update command")}
                           >
                             <CopyIcon className="size-3" />
                           </Button>
                         }
                       />
-                      <TooltipPopup side="top">Copy command</TooltipPopup>
+                      <TooltipPopup side="top">{t3T("Copy command")}</TooltipPopup>
                     </Tooltip>
                   </div>
                 ) : null}
@@ -984,7 +1004,7 @@ export function ProviderInstanceCard({
             variant="ghost-destructive"
             disabled={readOnly}
             onClick={onDelete}
-            aria-label={`Delete instance ${instanceId}`}
+            aria-label={t3T("Delete instance {0}", [instanceId])}
           >
             <Trash2Icon />
           </Button>
@@ -1003,11 +1023,12 @@ export function ProviderInstanceCard({
     />
   ) : (
     <SettingsRow
-      title="Driver"
+      title={t3T("Driver")}
       description={
         <span>
-          This instance uses <code className="text-foreground">{String(instance.driver)}</code>,
-          which is not available in this build. Its configuration is preserved.
+          {t3T("This instance uses")}{" "}
+          <code className="text-foreground">{String(instance.driver)}</code>
+          {t3T(", which is not available in this build. Its configuration is preserved.")}
         </span>
       }
     />
@@ -1017,7 +1038,7 @@ export function ProviderInstanceCard({
     <>
       <SettingsSection title={displayName} icon={titleIconNode} headerAction={editorHeaderAction}>
         <SettingsRow
-          title="Display name"
+          title={t3T("Display name")}
           status={
             <>
               <ProviderStatusDiagnostic detail={statusDiagnostic}>
@@ -1047,7 +1068,7 @@ export function ProviderInstanceCard({
                     disabled={readOnly}
                   >
                     <ExternalLinkIcon />
-                    Continue authentication
+                    {t3T("Continue authentication")}
                   </Button>
                 </div>
               ) : null}
@@ -1075,7 +1096,7 @@ export function ProviderInstanceCard({
                 className="min-w-0 flex-1 @min-[32rem]/settings-row:w-56"
                 value={instance.displayName ?? ""}
                 onCommit={updateDisplayName}
-                placeholder={driverOption?.label ?? "Instance label"}
+                placeholder={driverOption?.label ?? t3T("Instance label")}
                 spellCheck={false}
               />
             </div>
@@ -1084,7 +1105,7 @@ export function ProviderInstanceCard({
       </SettingsSection>
 
       {setup || environmentFields.length > 0 ? (
-        <SettingsSection title="Setup">
+        <SettingsSection title={t3T("Setup")}>
           {setup}
           <div
             inert={readOnly}
@@ -1118,7 +1139,7 @@ export function ProviderInstanceCard({
           <FoldedSettingsSection
             key={instanceId}
             id={`provider-instance-${instanceId}-runtime`}
-            title="Runtime"
+            title={t3T("Runtime")}
             headerPlacement="outside"
           >
             {runtime ?? runtimeFields}
@@ -1126,7 +1147,7 @@ export function ProviderInstanceCard({
         </div>
       ) : !driverOption || deriveProviderSettingsFields(driverOption).length > 0 ? (
         <SettingsSection
-          title="Runtime"
+          title={t3T("Runtime")}
           inert={readOnly}
           aria-disabled={readOnly || undefined}
           className={readOnly ? "opacity-50 select-none" : undefined}
@@ -1136,7 +1157,7 @@ export function ProviderInstanceCard({
       ) : null}
 
       <SettingsSection
-        title="Environment"
+        title={t3T("Environment")}
         inert={readOnly}
         aria-disabled={readOnly || undefined}
         className={readOnly ? "opacity-50 select-none" : undefined}
@@ -1158,15 +1179,16 @@ export function ProviderInstanceCard({
 
       {driverOption !== undefined ? (
         <SettingsSection
-          title="Models"
+          title={t3T("Models")}
           inert={readOnly}
           aria-disabled={readOnly || undefined}
           className={readOnly ? "opacity-50 select-none" : undefined}
         >
           <div className="px-3 py-3 sm:px-4">
             <p className="mb-3 text-xs text-muted-foreground">
-              Favorites, visibility, and ordering are saved on this device. Custom models are saved
-              on the selected environment.
+              {t3T(
+                "Favorites, visibility, and ordering are saved on this device. Custom models are saved on the selected environment.",
+              )}
             </p>
             <ProviderModelsSection
               instanceId={instanceId}

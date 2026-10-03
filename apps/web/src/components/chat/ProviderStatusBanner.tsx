@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { type ProviderInstanceId, type ServerProvider } from "@t3tools/contracts";
 import { memo } from "react";
 import { InfoIcon, XIcon } from "lucide-react";
@@ -97,6 +98,8 @@ export const ProviderStatusBanner = memo(function ProviderStatusBanner({
   onOpenProviderSetup?: (instanceId: ProviderInstanceId) => void;
   status: ServerProvider | null;
 }) {
+  const t3T = useUiTranslate();
+
   if (!status || getProviderStatusBannerKey(status) === null) {
     return null;
   }
@@ -132,13 +135,13 @@ export const ProviderStatusBanner = memo(function ProviderStatusBanner({
           </Tooltip>
           {onOpenProviderSetup && hasProviderSetup(status) ? (
             <InlineButton onClick={() => onOpenProviderSetup(status.instanceId)}>
-              Open provider setup
+              {t3T("Open provider setup")}
             </InlineButton>
           ) : null}
         </AlertDescription>
         <AlertAction>
           <Button
-            aria-label={`Dismiss ${providerName} provider ${status.status}`}
+            aria-label={t3T("Dismiss {0} provider {1}", [providerName, status.status])}
             onClick={onDismiss}
             size="icon-xs"
             variant="ghost-muted"

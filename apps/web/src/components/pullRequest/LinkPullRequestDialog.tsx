@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { changeRequestUrlFor as changeRequestWebUrl } from "@t3tools/shared/changeRequestUrl";
 export { changeRequestUrlFor as changeRequestWebUrl } from "@t3tools/shared/changeRequestUrl";
 import {
@@ -122,6 +123,8 @@ function LinkPullRequestDialog({
   projectId,
   onOpenChange,
 }: LinkPullRequestDialogProps) {
+  const t3T = useUiTranslate();
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [reference, setReference] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -202,16 +205,17 @@ function LinkPullRequestDialog({
     <Dialog open={open} onOpenChange={(next) => (pending ? undefined : onOpenChange(next))}>
       <DialogPopup className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Link pull request</DialogTitle>
+          <DialogTitle>{t3T("Link pull request")}</DialogTitle>
           <DialogDescription>
-            Attach a pull request to this thread. A full URL can point at any repository on a host
-            this environment has a project for.
+            {t3T(
+              "Attach a pull request to this thread. A full URL can point at any repository on a host this environment has a project for.",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <Input
             ref={inputRef}
-            placeholder="Pull request URL or #42"
+            placeholder={t3T("Pull request URL or #42")}
             value={reference}
             onChange={(event) => {
               setDirty(true);
@@ -240,7 +244,7 @@ function LinkPullRequestDialog({
             onClick={() => onOpenChange(false)}
             disabled={pending}
           >
-            Cancel
+            {t3T("Cancel")}
           </Button>
           <Button
             type="button"
@@ -248,7 +252,7 @@ function LinkPullRequestDialog({
             onClick={() => void submit()}
             disabled={pending || resolved === null || "error" in resolved}
           >
-            {pending ? "Linking..." : "Link"}
+            {pending ? t3T("Linking...") : t3T("Link")}
           </Button>
         </DialogFooter>
       </DialogPopup>

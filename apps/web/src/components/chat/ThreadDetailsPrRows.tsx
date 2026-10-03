@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import type { EnvironmentId, ThreadPullRequestLink } from "@t3tools/contracts";
 import {
@@ -65,6 +66,8 @@ export function ThreadDetailsPrRows({
   currentLink: ThreadPullRequestLink | null;
   onOpenLink: (event: ReactMouseEvent<HTMLElement>, url: string) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [expanded, setExpanded] = useState(false);
   const rest =
     currentLink === null
@@ -101,7 +104,7 @@ export function ThreadDetailsPrRows({
         ) : (
           <PlusIcon aria-hidden className="size-4 shrink-0" />
         )}
-        {expanded ? "Show less" : `Show ${rest.length} more`}
+        {expanded ? t3T("Show less") : t3T("Show {0} more", [rest.length])}
       </ThreadDetailsControl>
     </>
   );

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { createFileRoute } from "@tanstack/react-router";
 import { EnvironmentId, ProviderInstanceId } from "@t3tools/contracts";
 
@@ -10,14 +11,16 @@ import { useSettingsScope } from "../components/settings/SettingsScopeContext";
  * A project crumb narrows candidates to where that project is registered.
  */
 function SettingsProvidersRoute() {
+  const t3T = useUiTranslate();
+
   const target = Route.useSearch();
   const { environment, scope } = useSettingsScope();
   if (!environment) {
     return (
       <p className="p-8 text-sm text-muted-foreground">
         {scope.kind === "environment"
-          ? `Reconnect ${scope.label} to set up its providers.`
-          : "Connect an environment to set up its providers."}
+          ? t3T("Reconnect {0} to set up its providers.", [scope.label])
+          : t3T("Connect an environment to set up its providers.")}
       </p>
     );
   }

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { isAtomCommandInterrupted } from "@t3tools/client-runtime/state/runtime";
 import type { EnvironmentId, PullRequestRef } from "@t3tools/contracts";
 import {
@@ -44,6 +45,8 @@ export function PullRequestLinkPreview({
   onOpenFallback?: (url: string) => Promise<void>;
   fallback?: ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   const [resolvingClick, setResolvingClick] = useState(false);
   const detailQuery = useEnvironmentQuery(
@@ -131,7 +134,7 @@ export function PullRequestLinkPreview({
                   <span className="min-w-0 truncate">{authorLabel}</span>
                   <span aria-hidden>·</span>
                   <span className="shrink-0">
-                    opened {formatRelativeTimeLabel(detail.createdAt)}
+                    {t3T("opened")} {formatRelativeTimeLabel(detail.createdAt)}
                   </span>
                 </div>
               </div>

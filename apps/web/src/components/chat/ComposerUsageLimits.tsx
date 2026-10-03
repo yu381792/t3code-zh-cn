@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { EnvironmentId, UsageLimitsReport } from "@t3tools/contracts";
 import { limitsNotice } from "@t3tools/shared/usageLimits";
 import { GaugeIcon } from "lucide-react";
@@ -24,6 +25,8 @@ function accountLabel(account: UsageLimitsReport["accounts"][number]): string {
 }
 
 function AccountSummary({ account }: { readonly account: UsageLimitsReport["accounts"][number] }) {
+  const t3T = useUiTranslate();
+
   const label = accountLabel(account);
   return (
     <>
@@ -31,7 +34,7 @@ function AccountSummary({ account }: { readonly account: UsageLimitsReport["acco
         <RedactedSensitiveText
           key={label}
           value={label}
-          ariaLabel="Toggle account label visibility"
+          ariaLabel={t3T("Toggle account label visibility")}
           revealTooltip="Click to reveal account"
           hideTooltip="Click to hide account"
           className="max-w-full truncate align-bottom font-sans text-xs leading-normal"
@@ -78,6 +81,8 @@ function UsageLimitsBannerBody({
   readonly report: UsageLimitsReport;
   readonly environmentId: EnvironmentId;
 }) {
+  const t3T = useUiTranslate();
+
   const now = Date.parse(report.createdAt);
   return (
     <ComposerBanner.Scroll>
@@ -112,7 +117,7 @@ function UsageLimitsBannerBody({
                   className="self-start"
                   onClick={() => void ensureLocalApi().shell.openExternal(externalUsage.url)}
                 >
-                  Manage usage
+                  {t3T("Manage usage")}
                 </Button>
               ) : null}
               {resetCreditInput && account.limits.resetCredits ? (

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { LoaderCircleIcon } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { observeVisibleAnimation } from "~/lib/visibleAnimation";
@@ -26,9 +27,11 @@ function Spinner({
   tone,
   ...props
 }: React.ComponentPropsWithoutRef<typeof LoaderCircleIcon> & VariantProps<typeof spinnerVariants>) {
+  const t3T = useUiTranslate();
+
   return (
     <LoaderCircleIcon
-      aria-label="Loading"
+      aria-label={t3T("Loading")}
       ref={observeVisibleAnimation}
       className={cn(spinnerVariants({ size, tone }), className)}
       role="status"

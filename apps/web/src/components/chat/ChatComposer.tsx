@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { DESKTOP_PASTE_AS_TEXT_EVENT } from "../../lib/desktopPasteAsText";
 import { runtimeModeConfig, runtimeModeOptions as runtimeModes } from "./runtimeModeConfig";
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
@@ -1238,6 +1239,8 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
   onToggleInteractionMode: () => void;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const size = props.size ?? "sm";
   const composerFloatingLayerProps = useComposerMenuProps();
   const [open, setOpen] = useComposerMenuState(props.hidden);
@@ -1280,7 +1283,7 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
             />
           )}
           <span data-composer-control-label className="sr-only sm:not-sr-only">
-            {props.interactionMode === "plan" ? "Plan" : "Build"}
+            {props.interactionMode === "plan" ? t3T("Plan") : t3T("Build")}
           </span>
         </TooltipTrigger>
         <TooltipPopup side="top">{interactionModeTooltip}</TooltipPopup>
@@ -1304,12 +1307,12 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
               <ComposerSelectControl
                 data-composer-shortcut="composer.mode"
                 size={size}
-                aria-label="Runtime mode"
+                aria-label={t3T("Runtime mode")}
               />
             }
           >
             <ComposerControlIcon icon={RuntimeModeIcon} size={size} />
-            <SelectValue data-composer-control-label>{runtimeModeOption.label}</SelectValue>
+            <SelectValue data-composer-control-label>{t3T(runtimeModeOption.label)}</SelectValue>
           </TooltipTrigger>
           <SelectPopup alignItemWithTrigger={false} {...composerFloatingLayerProps}>
             {props.runtimeModeOptions.map((option) => {
@@ -1325,10 +1328,10 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
                     <div className="grid min-w-0 flex-1 gap-0.5">
                       <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
                         <OptionIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                        {option.label}
+                        {t3T(option.label)}
                       </span>
                       <span className="text-muted-foreground text-xs leading-4">
-                        {option.description}
+                        {t3T(option.description)}
                       </span>
                     </div>
                   </div>
@@ -1337,7 +1340,7 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
             })}
           </SelectPopup>
         </Select>
-        <TooltipPopup side="top">{runtimeModeOption.description}</TooltipPopup>
+        <TooltipPopup side="top">{t3T(runtimeModeOption.description)}</TooltipPopup>
       </Tooltip>
 
       {interactionModeToggle}
@@ -1681,6 +1684,8 @@ export interface ChatComposerProps {
 // --------------------------------------------------------------------------
 
 export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps) {
+  const t3T = useUiTranslate();
+
   const {
     composerDraftTarget,
     environmentId,
@@ -5115,7 +5120,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
             key={image.id}
             type="button"
             className="relative size-7 shrink-0 cursor-zoom-in overflow-hidden rounded-md border border-border/70 bg-muted/60"
-            aria-label={`Preview ${image.name}`}
+            aria-label={t3T("Preview {0}", [image.name])}
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => {
               const preview = buildExpandedImagePreview(composerImages, image.id);
@@ -5150,7 +5155,9 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
           <button
             type="button"
             className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border/70 bg-muted/60 font-medium text-secondary-label text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
-            aria-label={`Show ${String(restingImagePreviewCounts.overflowCount)} more image attachments`}
+            aria-label={t3T("Show {0} more image attachments", [
+              String(restingImagePreviewCounts.overflowCount),
+            ])}
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => {
               if (isComposerCollapsedMobile) {
@@ -5347,7 +5354,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       className="shrink-0"
     >
       <CircleAlertIcon className="size-4" />
-      {providerSetupInstanceId ? "Open provider settings" : "No provider available"}
+      {providerSetupInstanceId ? t3T("Open provider settings") : t3T("No provider available")}
     </ComposerControl>
   ) : (
     <>
@@ -6669,9 +6676,9 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                               )}
                               onPointerDown={(event) => event.preventDefault()}
                               onClick={expandMobileComposer}
-                              aria-label="Write custom answer"
+                              aria-label={t3T("Write custom answer")}
                             >
-                              {activePendingProgress?.customAnswer || "Write custom answer"}
+                              {activePendingProgress?.customAnswer || t3T("Write custom answer")}
                             </button>
                           ) : null}
                           {activePendingProgress?.activeQuestion?.multiSelect ? (
@@ -6775,17 +6782,17 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                   onPointerDown={(event) => event.preventDefault()}
                   onClick={isChoiceOnlyPendingQuestion ? undefined : expandMobileComposer}
                   disabled={isChoiceOnlyPendingQuestion}
-                  aria-label="Expand composer"
+                  aria-label={t3T("Expand composer")}
                 >
                   {activePendingProgress
                     ? isChoiceOnlyPendingQuestion
-                      ? "Choose an option above"
+                      ? t3T("Choose an option above")
                       : activePendingProgress.customAnswer ||
-                        "Type your own answer, or leave this blank to use the selected option"
+                        t3T("Type your own answer, or leave this blank to use the selected option")
                     : prompt.trim() ||
                       (showProviderUnavailable
-                        ? "Enable a provider in Settings"
-                        : "Ask anything...")}
+                        ? t3T("Enable a provider in Settings")
+                        : t3T("Ask anything..."))}
                 </button>
                 {collapsedComposerImagePreviews}
                 <button
@@ -6851,8 +6858,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 {composerSuggestionsVisible && composerMenuItems.length === 0
                   ? isComposerMenuLoading
                     ? composerTriggerKind === "pull-request"
-                      ? "Finding pull request..."
-                      : "Searching workspace files..."
+                      ? t3T("Finding pull request...")
+                      : t3T("Searching workspace files...")
                     : composerMenuEmptyState
                   : ""}
               </div>
@@ -6899,7 +6906,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                           size="icon-xs"
                           className="absolute right-1 top-1"
                           onClick={() => onRemoveEditingQueuedAttachment(attachment.id)}
-                          aria-label={`Remove ${attachment.name}`}
+                          aria-label={t3T("Remove {0}", [attachment.name])}
                         >
                           <XIcon />
                         </Button>
@@ -6959,7 +6966,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                               <button
                                 type="button"
                                 className="h-full w-full cursor-zoom-in"
-                                aria-label={`Preview ${image.name}`}
+                                aria-label={t3T("Preview {0}", [image.name])}
                                 onClick={() => {
                                   const preview = buildExpandedImagePreview(
                                     composerImages,
@@ -7000,7 +7007,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                   render={
                                     <span
                                       role="img"
-                                      aria-label="Draft attachment may not persist"
+                                      aria-label={t3T("Draft attachment may not persist")}
                                       className="absolute left-1 top-1 inline-flex items-center justify-center rounded bg-background/85 p-0.5 text-warning-foreground"
                                     >
                                       <CircleAlertIcon className="size-3" />
@@ -7008,8 +7015,9 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                   }
                                 />
                                 <TooltipPopup side="top">
-                                  Draft attachment could not be saved locally and may be lost on
-                                  navigation.
+                                  {t3T(
+                                    "Draft attachment could not be saved locally and may be lost on navigation.",
+                                  )}
                                 </TooltipPopup>
                               </Tooltip>
                             )}
@@ -7033,7 +7041,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                           draftTarget: attachmentDraftTarget,
                                         })
                                       }
-                                      aria-label={`Retry upload for ${image.name}`}
+                                      aria-label={t3T("Retry upload for {0}", [image.name])}
                                     />
                                   }
                                 >
@@ -7054,7 +7062,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                 variant="media-close"
                                 size="icon-xs"
                                 onClick={() => removeComposerImage(image.id)}
-                                aria-label={`Remove ${image.name}`}
+                                aria-label={t3T("Remove {0}", [image.name])}
                               >
                                 <XIcon />
                               </Button>
@@ -7093,7 +7101,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                           <button
                             type="button"
                             className="flex h-full w-full cursor-zoom-in flex-col items-center justify-center gap-1 px-1 text-white"
-                            aria-label={`Play ${file.name}`}
+                            aria-label={t3T("Play {0}", [file.name])}
                             onClick={() => {
                               if (file.file !== null) {
                                 const preview = buildExpandedImagePreview([file], file.id);
@@ -7132,7 +7140,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                         draftTarget: attachmentDraftTarget,
                                       })
                                     }
-                                    aria-label={`Retry upload for ${file.name}`}
+                                    aria-label={t3T("Retry upload for {0}", [file.name])}
                                   />
                                 }
                               >
@@ -7146,7 +7154,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                             size="icon-xs"
                             className="absolute right-1 top-1"
                             onClick={() => removeComposerFileFromDraft(file.id)}
-                            aria-label={`Remove ${file.name}`}
+                            aria-label={t3T("Remove {0}", [file.name])}
                           >
                             <XIcon />
                           </Button>
@@ -7190,8 +7198,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                           <span className="shrink-0 text-xs text-secondary-label">
                             {needsReattach
                               ? canReattachFile
-                                ? "Attach again"
-                                : "Remove to send"
+                                ? t3T("Attach again")
+                                : t3T("Remove to send")
                               : upload?.status === "uploading"
                                 ? formatAttachmentUploadProgress(upload.progress)
                                 : formatAttachmentSize(file.sizeBytes)}
@@ -7210,7 +7218,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                                         draftTarget: attachmentDraftTarget,
                                       })
                                     }
-                                    aria-label={`Retry upload for ${file.name}`}
+                                    aria-label={t3T("Retry upload for {0}", [file.name])}
                                   />
                                 }
                               >
@@ -7223,7 +7231,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                             variant="ghost"
                             size="icon-xs"
                             onClick={() => removeComposerFileFromDraft(file.id)}
-                            aria-label={`Remove ${file.name}`}
+                            aria-label={t3T("Remove {0}", [file.name])}
                           >
                             <XIcon />
                           </Button>
@@ -7285,7 +7293,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 ) : null}
                 <ComposerContextActionsContext value={composerContextActions}>
                   <ComposerPromptEditor
-                    ariaLabel="Message"
+                    ariaLabel={t3T("Message")}
                     suggestionListId={composerSuggestionListId}
                     activeSuggestionId={
                       composerSuggestionListVisible && activeComposerMenuItem
@@ -7330,20 +7338,26 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                     onPaste={onComposerPaste}
                     placeholder={
                       isComposerApprovalState
-                        ? "Resolve this approval request to continue"
+                        ? t3T("Resolve this approval request to continue")
                         : activePendingProgress
                           ? isChoiceOnlyPendingQuestion
-                            ? "Choose an option above"
-                            : "Type your own answer, or leave this blank to use the selected option"
+                            ? t3T("Choose an option above")
+                            : t3T(
+                                "Type your own answer, or leave this blank to use the selected option",
+                              )
                           : showPlanFollowUpPrompt && activeProposedPlan
-                            ? "Add feedback to refine the plan, or leave this blank to implement it"
+                            ? t3T(
+                                "Add feedback to refine the plan, or leave this blank to implement it",
+                              )
                             : projectSelectionRequired
-                              ? "Choose a project above to start a thread"
+                              ? t3T("Choose a project above to start a thread")
                               : showProviderUnavailable
-                                ? "Enable a provider in Settings to send a message"
+                                ? t3T("Enable a provider in Settings to send a message")
                                 : phase === "disconnected"
-                                  ? DISCONNECTED_COMPOSER_PLACEHOLDER
-                                  : "Ask anything, @tag files/folders, $use skills, or / for commands"
+                                  ? t3T(DISCONNECTED_COMPOSER_PLACEHOLDER)
+                                  : t3T(
+                                      "Ask anything, @tag files/folders, $use skills, or / for commands",
+                                    )
                     }
                     disabled={
                       isConnecting ||
@@ -7455,13 +7469,13 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                               size="icon-sm"
                               onPointerDown={(event) => event.preventDefault()}
                               onClick={() => attachmentInputRef.current?.click()}
-                              aria-label="Attach files"
+                              aria-label={t3T("Attach files")}
                             />
                           }
                         >
                           <PaperclipIcon />
                         </TooltipTrigger>
-                        <TooltipPopup>Attach files</TooltipPopup>
+                        <TooltipPopup>{t3T("Attach files")}</TooltipPopup>
                       </Tooltip>
                     </>
                   ) : null}

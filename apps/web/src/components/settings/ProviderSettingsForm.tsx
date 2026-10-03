@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { useMemo, type ReactNode } from "react";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
@@ -186,6 +188,8 @@ function ProviderSettingsSelect({
   readonly className?: string | undefined;
   readonly onChange: ProviderSettingsFormProps["onChange"];
 }) {
+  const t3T = useUiTranslate();
+
   const options = field.options ?? [];
   const fallback = options[0]?.value ?? "";
   const current = readProviderConfigString(value, field.key) || fallback;
@@ -198,13 +202,13 @@ function ProviderSettingsSelect({
         onChange(nextProviderConfigWithFieldValue(value, field, next === fallback ? "" : next));
       }}
     >
-      <SelectTrigger id={inputId} size={size} className={className} aria-label={field.label}>
-        <SelectValue>{label}</SelectValue>
+      <SelectTrigger id={inputId} size={size} className={className} aria-label={t3T(field.label)}>
+        <SelectValue>{t3T(label)}</SelectValue>
       </SelectTrigger>
       <SelectPopup align="start" alignItemWithTrigger={false}>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            {t3T(option.label)}
           </SelectItem>
         ))}
       </SelectPopup>
@@ -237,14 +241,16 @@ function ProviderSettingsFieldRow({
   variant,
   onChange,
 }: ProviderSettingsFieldRowProps) {
+  const t3T = useUiTranslate();
+
   const inputId = `${idPrefix}-${field.key}`;
   const descriptionClassName =
     variant === "dialog"
       ? "text-2xs text-muted-foreground"
       : "mt-1 block text-xs text-muted-foreground";
-  const label = <span className="text-xs font-medium text-foreground">{field.label}</span>;
+  const label = <span className="text-xs font-medium text-foreground">{t3T(field.label)}</span>;
   const description = field.description ? (
-    <span className={descriptionClassName}>{field.description}</span>
+    <span className={descriptionClassName}>{t3T(field.description)}</span>
   ) : null;
 
   if (variant === "settings") {
@@ -256,7 +262,7 @@ function ProviderSettingsFieldRow({
           onCheckedChange={(checked) =>
             onChange(nextProviderConfigWithFieldValue(value, field, Boolean(checked)))
           }
-          aria-label={field.label}
+          aria-label={t3T(field.label)}
           aria-describedby={descriptionId}
         />
       ) : field.control === "select" ? (
@@ -277,7 +283,7 @@ function ProviderSettingsFieldRow({
           onChange={(event) =>
             onChange(nextProviderConfigWithFieldValue(value, field, event.target.value))
           }
-          placeholder={field.placeholder}
+          placeholder={t3T(field.placeholder)}
           spellCheck={false}
         />
       ) : (
@@ -298,10 +304,14 @@ function ProviderSettingsFieldRow({
     return (
       <SettingsRow
         title={
-          field.control === "switch" ? field.label : <label htmlFor={inputId}>{field.label}</label>
+          field.control === "switch" ? (
+            t3T(field.label)
+          ) : (
+            <label htmlFor={inputId}>{t3T(field.label)}</label>
+          )
         }
         description={
-          field.description ? <span id={descriptionId}>{field.description}</span> : undefined
+          field.description ? <span id={descriptionId}>{t3T(field.description)}</span> : undefined
         }
         control={control}
       />
@@ -313,7 +323,7 @@ function ProviderSettingsFieldRow({
       <FieldFrame variant={variant}>
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            {label}
+            {t3T(label)}
             {description}
           </div>
           <Switch
@@ -321,7 +331,7 @@ function ProviderSettingsFieldRow({
             onCheckedChange={(checked) =>
               onChange(nextProviderConfigWithFieldValue(value, field, Boolean(checked)))
             }
-            aria-label={field.label}
+            aria-label={t3T(field.label)}
           />
         </div>
       </FieldFrame>
@@ -332,7 +342,7 @@ function ProviderSettingsFieldRow({
     return (
       <FieldFrame variant={variant}>
         <label htmlFor={inputId} className={cn(variant === "card" && "block")}>
-          {label}
+          {t3T(label)}
           <ProviderSettingsSelect
             field={field}
             value={value}
@@ -351,7 +361,7 @@ function ProviderSettingsFieldRow({
     return (
       <FieldFrame variant={variant}>
         <label htmlFor={inputId} className={cn(variant === "card" && "block")}>
-          {label}
+          {t3T(label)}
           <Textarea
             id={inputId}
             className={cn(variant === "card" && "mt-1.5")}
@@ -372,7 +382,7 @@ function ProviderSettingsFieldRow({
   return (
     <FieldFrame variant={variant}>
       <label htmlFor={inputId} className={cn(variant === "card" && "block")}>
-        {label}
+        {t3T(label)}
         {variant === "card" ? (
           <DraftInput
             id={inputId}

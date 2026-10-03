@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { isWindowsAbsolutePath } from "@t3tools/shared/path";
@@ -36,6 +37,8 @@ export function ProjectFaviconPickerDialog(props: {
   readonly open: boolean;
   readonly projectName: string;
 }) {
+  const t3T = useUiTranslate();
+
   const [query, setQuery] = useState("");
   const [highlightedItemValue, setHighlightedItemValue] = useState<string | null>(null);
   const [isPickingExternal, setIsPickingExternal] = useState(false);
@@ -70,12 +73,12 @@ export function ProjectFaviconPickerDialog(props: {
     <CommandDialog open={props.open} onOpenChange={props.onOpenChange}>
       {props.open ? (
         <CommandDialogPopup
-          aria-label="Choose project icon"
+          aria-label={t3T("Choose project icon")}
           className="overflow-hidden"
           onBackdropPointerDown={() => props.onOpenChange(false)}
         >
           <CommandPaletteContent
-            aria-label="Choose project icon"
+            aria-label={t3T("Choose project icon")}
             autoHighlight="always"
             escapeLabel="Close"
             footerActionLabel="Select icon"
@@ -102,7 +105,7 @@ export function ProjectFaviconPickerDialog(props: {
                       .finally(() => setIsPickingExternal(false));
                   }}
                 >
-                  {`Open in ${fileManagerName}`}
+                  {t3T("Open in {0}", [fileManagerName])}
                 </CommandFooterAction>
               ) : null
             }

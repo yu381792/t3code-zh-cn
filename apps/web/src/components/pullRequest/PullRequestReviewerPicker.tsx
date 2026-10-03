@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * Asking someone to review, from the row that says who is already reviewing.
  *
@@ -45,6 +46,8 @@ export function PullRequestReviewerPicker({
    * hiding: the control disabled with a reason answers the question its absence would raise. */
   allowed: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<string | null>(null);
@@ -98,7 +101,7 @@ export function PullRequestReviewerPicker({
   return (
     <PullRequestCandidatePicker
       icon={<UserPlusIcon className="size-3.5" />}
-      label="Request a review"
+      label={t3T("Request a review")}
       allowed={allowed}
       disabledReason="Asking someone to review needs write access on this repository"
       open={open}
@@ -122,10 +125,10 @@ export function PullRequestReviewerPicker({
         <>
           <PullRequestActorLabel actor={candidate} className="flex-1" />
           {candidate.kind === "team" ? (
-            <span className="shrink-0 text-muted-foreground">team</span>
+            <span className="shrink-0 text-muted-foreground">{t3T("team")}</span>
           ) : null}
           {candidate.isRequested ? (
-            <CheckIcon aria-label="Already asked" className="size-3.5 shrink-0" />
+            <CheckIcon aria-label={t3T("Already asked")} className="size-3.5 shrink-0" />
           ) : null}
         </>
       )}

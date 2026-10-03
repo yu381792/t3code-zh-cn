@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId, ProviderInstanceId } from "@t3tools/contracts";
 
@@ -21,6 +22,8 @@ export function ProviderWizardAuthenticationStep({
   readonly instanceId: ProviderInstanceId;
   readonly onFinish: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const providers =
     useAtomValue(serverEnvironment.providersValueAtom(environmentId)) ?? EMPTY_SERVER_PROVIDERS;
   const provider = providers.find((candidate) => candidate.instanceId === instanceId);
@@ -57,18 +60,20 @@ export function ProviderWizardAuthenticationStep({
             />
           ) : (
             <SettingsRow
-              title="Account"
+              title={t3T("Account")}
               description={
                 isDiscovering
-                  ? "Discovering sign-in methods…"
+                  ? t3T("Discovering sign-in methods…")
                   : (query.error ??
                     auth?.message ??
-                    "No in-app sign-in advertised. Follow the provider's docs to finish setup.")
+                    t3T(
+                      "No in-app sign-in advertised. Follow the provider's docs to finish setup.",
+                    ))
               }
               control={
                 isDiscovering ? (
                   <Button disabled size="sm" variant="outline">
-                    Sign in
+                    {t3T("Sign in")}
                   </Button>
                 ) : provider?.setup?.documentationUrl ? (
                   <Button
@@ -78,7 +83,7 @@ export function ProviderWizardAuthenticationStep({
                       <a href={provider.setup.documentationUrl} target="_blank" rel="noreferrer" />
                     }
                   >
-                    Open docs
+                    {t3T("Open docs")}
                   </Button>
                 ) : undefined
               }
@@ -93,7 +98,7 @@ export function ProviderWizardAuthenticationStep({
           disabled={active}
           onClick={onFinish}
         >
-          {signedIn ? "Done" : "Skip for now"}
+          {signedIn ? t3T("Done") : t3T("Skip for now")}
         </Button>
       </WizardFooter>
     </>

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * The comment half of the floating composer: a remark on the pull request itself, optionally
  * the one that closes or reopens it. The popover around it belongs to PullRequestComposer.
@@ -36,6 +37,8 @@ export function PullRequestCommentForm({
   onCommented: () => void;
   onClose: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState<"comment" | "close" | "reopen" | null>(null);
   const postComment = useAtomCommand(pullRequestEnvironment.comment, { reportFailure: false });
@@ -90,8 +93,8 @@ export function PullRequestCommentForm({
         disabled={submitting !== null || actionPending}
         value={body}
         rows={3}
-        placeholder="Leave a comment"
-        aria-label="Comment on this pull request"
+        placeholder={t3T("Leave a comment")}
+        aria-label={t3T("Comment on this pull request")}
         onChange={(event) => setBody(event.target.value)}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing || event.keyCode === 229) return;
@@ -122,11 +125,11 @@ export function PullRequestCommentForm({
             )}
             {submitting === followUpAction
               ? followUpAction === "close"
-                ? "Closing..."
-                : "Reopening..."
+                ? t3T("Closing...")
+                : t3T("Reopening...")
               : followUpAction === "close"
-                ? "Close with comment"
-                : "Reopen with comment"}
+                ? t3T("Close with comment")
+                : t3T("Reopen with comment")}
           </Button>
         )}
         <Button
@@ -136,7 +139,7 @@ export function PullRequestCommentForm({
           onClick={() => void submit("comment")}
         >
           <SendIcon className="size-3.5" />
-          {submitting === "comment" ? "Posting..." : "Comment"}
+          {submitting === "comment" ? t3T("Posting...") : t3T("Comment")}
         </Button>
       </div>
     </div>

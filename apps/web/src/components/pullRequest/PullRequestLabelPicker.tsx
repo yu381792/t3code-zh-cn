@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * Putting a label on, and taking one off, from the row that says which it already wears.
  *
@@ -40,6 +41,8 @@ export function PullRequestLabelPicker({
    * than hidden, like the reviewer control beside it. */
   allowed: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<string | null>(null);
@@ -81,7 +84,7 @@ export function PullRequestLabelPicker({
   return (
     <PullRequestCandidatePicker
       icon={<TagIcon className="size-3.5" />}
-      label="Change labels"
+      label={t3T("Change labels")}
       allowed={allowed}
       disabledReason="Changing labels needs triage access on this repository"
       open={open}
@@ -117,7 +120,7 @@ export function PullRequestLabelPicker({
               ) : null}
             </span>
             {candidate.isApplied ? (
-              <CheckIcon aria-label="Applied" className="size-3.5 shrink-0" />
+              <CheckIcon aria-label={t3T("Applied")} className="size-3.5 shrink-0" />
             ) : null}
           </>
         );

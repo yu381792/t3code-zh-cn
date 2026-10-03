@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { Spinner } from "~/components/ui/spinner";
 
 import { Toast } from "@base-ui/react/toast";
@@ -539,6 +541,8 @@ function ToastProvider({ children, position = "top-right", ...props }: ToastProv
 }
 
 function Toasts({ position }: { position: ToastPosition }) {
+  const t3T = useUiTranslate();
+
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
   const isTop = position.startsWith("top");
@@ -655,7 +659,7 @@ function Toasts({ position }: { position: ToastPosition }) {
                     ? ["left", isTop ? "up" : "down"]
                     : ["right", isTop ? "up" : "down"]
               }
-              toast={toast}
+              toast={{ ...toast, title: t3T(toast.title), description: t3T(toast.description) }}
             >
               <ThreadToastVisibleAutoDismiss
                 dismissAfterVisibleMs={toast.data?.dismissAfterVisibleMs}
@@ -663,7 +667,7 @@ function Toasts({ position }: { position: ToastPosition }) {
               />
               <div className={toastCornerDismissClass}>
                 <button
-                  aria-label="Dismiss notification"
+                  aria-label={t3T("Dismiss notification")}
                   className={toastCornerOrbClass}
                   data-slot="toast-close"
                   onClick={() =>
@@ -712,6 +716,8 @@ function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
 }
 
 function AnchoredToasts() {
+  const t3T = useUiTranslate();
+
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
 
@@ -736,7 +742,7 @@ function AnchoredToasts() {
                 data-slot="toast-positioner"
                 key={toast.id}
                 sideOffset={positionerProps.sideOffset ?? 4}
-                toast={toast}
+                toast={{ ...toast, title: t3T(toast.title), description: t3T(toast.description) }}
               >
                 <Toast.Root
                   className={cn(
@@ -744,7 +750,7 @@ function AnchoredToasts() {
                     tooltipStyle ? "rounded-md" : "rounded-lg",
                   )}
                   data-slot="toast-popup"
-                  toast={toast}
+                  toast={{ ...toast, title: t3T(toast.title), description: t3T(toast.description) }}
                 >
                   {tooltipStyle ? (
                     <Toast.Content className="pointer-events-auto px-2 py-1">
@@ -754,7 +760,7 @@ function AnchoredToasts() {
                     <>
                       <div className={toastCornerDismissClass}>
                         <button
-                          aria-label="Dismiss notification"
+                          aria-label={t3T("Dismiss notification")}
                           className={toastCornerOrbClass}
                           data-slot="toast-close"
                           onClick={() =>

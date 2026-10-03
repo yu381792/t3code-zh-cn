@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { type ComponentProps, type ReactNode, useLayoutEffect, useRef } from "react";
 
@@ -37,6 +38,8 @@ export function CommandPaletteContent({
   testId,
   ...commandProps
 }: CommandPaletteContentProps) {
+  const t3T = useUiTranslate();
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Direct-open flows replace the initial palette view after the dialog has
@@ -73,22 +76,22 @@ export function CommandPaletteContent({
               <Kbd>
                 <ArrowDownIcon />
               </Kbd>
-              <span>Navigate</span>
+              <span>{t3T("Navigate")}</span>
             </KbdGroup>
             {footerActionLabel !== undefined ? (
               <KbdGroup>
-                <Kbd>Enter</Kbd>
+                <Kbd>{t3T("Enter")}</Kbd>
                 <span>{footerActionLabel}</span>
               </KbdGroup>
             ) : null}
             {showBackHint ? (
               <KbdGroup>
-                <Kbd>Backspace</Kbd>
-                <span>Back</span>
+                <Kbd>{t3T("Backspace")}</Kbd>
+                <span>{t3T("Back")}</span>
               </KbdGroup>
             ) : null}
             <KbdGroup>
-              <Kbd>Esc</Kbd>
+              <Kbd>{t3T("Esc")}</Kbd>
               <span>{escapeLabel}</span>
             </KbdGroup>
           </div>

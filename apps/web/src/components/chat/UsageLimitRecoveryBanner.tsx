@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   type OrchestrationV2LimitRecovery,
   type OrchestrationV2LimitRecoveryUpdate,
@@ -34,6 +35,8 @@ export function usageLimitRecoveryBannerItem(props: RecoveryProps): ComposerBann
 }
 
 function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: RecoveryProps) {
+  const t3T = useUiTranslate();
+
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -76,7 +79,11 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button size="xs" variant="ghost" disabled={pending} onClick={() => void toggle("resume")}>
-        {pending ? "Saving..." : scheduled ? "Cancel auto-resume" : "Resume at reset"}
+        {pending
+          ? t3T("Saving...")
+          : scheduled
+            ? t3T("Cancel auto-resume")
+            : t3T("Resume at reset")}
       </Button>
       {!snoozed ? (
         <Button
@@ -85,7 +92,7 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
           disabled={pending || Date.parse(resetAt!) <= nowMs}
           onClick={() => void toggle("snooze")}
         >
-          {pending ? "Saving..." : "Snooze until reset"}
+          {pending ? t3T("Saving...") : t3T("Snooze until reset")}
         </Button>
       ) : null}
       {error ? (

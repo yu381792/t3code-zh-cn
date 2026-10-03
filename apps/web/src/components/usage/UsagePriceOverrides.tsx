@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { ChevronDownIcon, PlusIcon, RotateCcwIcon, XIcon } from "lucide-react";
@@ -100,6 +101,8 @@ export function UsagePriceOverrides({
   readonly initialSelectedEnvironmentIds: ReadonlySet<EnvironmentId> | null;
   readonly onOpenChange: (open: boolean) => void;
 }) {
+  const t3T = useUiTranslate();
+
   const environments = useAtomValue(priceTargetsAtom);
   const [selectedIds, setSelectedIds] = useState(initialSelectedEnvironmentIds);
   const selected = environments.filter(
@@ -247,16 +250,16 @@ export function UsagePriceOverrides({
     >
       <DialogPopup className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Custom model prices</DialogTitle>
+          <DialogTitle>{t3T("Custom model prices")}</DialogTitle>
           <DialogDescription>
-            Prices apply to all past and future usage on the environments you select.
+            {t3T("Prices apply to all past and future usage on the environments you select.")}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <Label id="usage-prices-apply-label" className="shrink-0">
-                Apply to
+                {t3T("Apply to")}
               </Label>
               <Menu>
                 <MenuTrigger
@@ -275,7 +278,7 @@ export function UsagePriceOverrides({
                     closeOnClick={false}
                     onCheckedChange={(checked) => selectEnvironments(checked ? null : new Set())}
                   >
-                    All environments
+                    {t3T("All environments")}
                   </MenuCheckboxItem>
                   <MenuSeparator />
                   {environments.map((environment) => (
@@ -303,18 +306,18 @@ export function UsagePriceOverrides({
                 </MenuPopup>
               </Menu>
             </div>
-            <span className="text-xs text-muted-foreground">USD / million tokens</span>
+            <span className="text-xs text-muted-foreground">{t3T("USD / million tokens")}</span>
           </div>
           {selected.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {environments.length === 0
-                ? "Connect an environment to set model prices."
-                : "Select an environment to see and change its model prices."}
+                ? t3T("Connect an environment to set model prices.")
+                : t3T("Select an environment to see and change its model prices.")}
             </p>
           ) : (
             <>
               <div className="min-w-0 overflow-hidden rounded-lg border border-border">
-                <Table className="min-w-160 table-fixed" aria-label="Custom model prices">
+                <Table className="min-w-160 table-fixed" aria-label={t3T("Custom model prices")}>
                   <colgroup>
                     <col className="w-[34%]" />
                     {USAGE_PRICE_FIELDS.map((field) => (
@@ -324,7 +327,7 @@ export function UsagePriceOverrides({
                   </colgroup>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Model ID</TableHead>
+                      <TableHead>{t3T("Model ID")}</TableHead>
                       {USAGE_PRICE_FIELDS.map((field) => (
                         <TableHead key={field.key}>{field.label}</TableHead>
                       ))}
@@ -332,7 +335,7 @@ export function UsagePriceOverrides({
                         <Button
                           size="icon-xs"
                           variant="ghost"
-                          aria-label="Add model price"
+                          aria-label={t3T("Add model price")}
                           disabled={locked}
                           onClick={() => {
                             const id = `new:${nextRowId.current++}`;
@@ -351,8 +354,8 @@ export function UsagePriceOverrides({
                         <TableCell colSpan={6} className="text-center whitespace-normal">
                           <p className="py-6 text-muted-foreground">
                             {selected.some((environment) => environment.prices === null)
-                              ? "Some environment prices are unavailable."
-                              : "No custom prices. Add a row to override automatic pricing."}
+                              ? t3T("Some environment prices are unavailable.")
+                              : t3T("No custom prices. Add a row to override automatic pricing.")}
                           </p>
                         </TableCell>
                       </TableRow>
@@ -370,12 +373,12 @@ export function UsagePriceOverrides({
                                     focusRowRef.current = null;
                                   }
                                 }}
-                                aria-label="New model ID"
+                                aria-label={t3T("New model ID")}
                                 aria-invalid={
                                   (row.model.trim() !== "" && errors.has(row.id)) || undefined
                                 }
                                 list="usage-price-models"
-                                placeholder="Model ID"
+                                placeholder={t3T("Model ID")}
                                 autoComplete="off"
                                 spellCheck={false}
                                 disabled={locked}
@@ -404,7 +407,7 @@ export function UsagePriceOverrides({
                           {row.removed ? (
                             <TableCell colSpan={4}>
                               <span className="text-muted-foreground">
-                                Automatic pricing after saving
+                                {t3T("Automatic pricing after saving")}
                               </span>
                             </TableCell>
                           ) : (
@@ -415,12 +418,15 @@ export function UsagePriceOverrides({
                                   <Input
                                     size="compact"
                                     inputMode="decimal"
-                                    aria-label={`${field.label} price for ${row.model || "new model"}`}
+                                    aria-label={t3T("{0} price for {1}", [
+                                      field.label,
+                                      row.model || "new model",
+                                    ])}
                                     value={row.values[field.key] ?? (row.isNew ? "" : cell.value)}
                                     placeholder={
                                       row.isNew
                                         ? field.optional
-                                          ? "Input rate"
+                                          ? t3T("Input rate")
                                           : "0.00"
                                         : cell.placeholder
                                     }
@@ -442,10 +448,10 @@ export function UsagePriceOverrides({
                                 disabled={locked}
                                 aria-label={
                                   row.removed
-                                    ? `Undo reset for ${row.model}`
+                                    ? t3T("Undo reset for {0}", [row.model])
                                     : row.isNew
-                                      ? "Remove new model"
-                                      : `Reset price for ${row.model} to automatic`
+                                      ? t3T("Remove new model")
+                                      : t3T("Reset price for {0} to automatic", [row.model])
                                 }
                                 onClick={() => {
                                   if (row.isNew)
@@ -465,10 +471,10 @@ export function UsagePriceOverrides({
                               </TooltipTrigger>
                               <TooltipPopup>
                                 {row.removed
-                                  ? "Undo reset"
+                                  ? t3T("Undo reset")
                                   : row.isNew
-                                    ? "Remove row"
-                                    : "Reset to automatic"}
+                                    ? t3T("Remove row")
+                                    : t3T("Reset to automatic")}
                               </TooltipPopup>
                             </Tooltip>
                           </TableCell>
@@ -486,9 +492,9 @@ export function UsagePriceOverrides({
                   ))}
               </datalist>
               <p className="text-xs text-muted-foreground">
-                Blank cache rates use the input price. Enter 0 for free tokens.
+                {t3T("Blank cache rates use the input price. Enter 0 for free tokens.")}
                 {selected.length > 1
-                  ? " Mixed cells keep each environment’s rate until you edit them."
+                  ? t3T(" Mixed cells keep each environment’s rate until you edit them.")
                   : ""}
               </p>
             </>
@@ -508,10 +514,10 @@ export function UsagePriceOverrides({
                       }
                     >
                       {result?.status === "failed"
-                        ? `Not saved · ${result.error}`
+                        ? t3T("Not saved · {0}", [result.error])
                         : result?.status === "saved"
-                          ? "Saved"
-                          : "Saving…"}
+                          ? t3T("Saved")
+                          : t3T("Saving…")}
                     </span>
                   </div>
                 );
@@ -521,12 +527,14 @@ export function UsagePriceOverrides({
         </DialogPanel>
         <DialogFooter variant="bare" className="items-center sm:justify-between">
           <span className="text-xs text-muted-foreground">
-            {hasChanges ? `Changes apply to ${destinationLabel}` : ""}
+            {hasChanges ? t3T("Changes apply to {0}", [destinationLabel]) : ""}
           </span>
           <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
             {hasChanges ? (
               <Button variant="ghost" disabled={pending} onClick={discard}>
-                {failedDestinations.length > 0 ? "Discard pending changes" : "Discard changes"}
+                {failedDestinations.length > 0
+                  ? t3T("Discard pending changes")
+                  : t3T("Discard changes")}
               </Button>
             ) : null}
             <Button
@@ -538,10 +546,10 @@ export function UsagePriceOverrides({
               onClick={() => void save(failedDestinations.length > 0)}
             >
               {pending
-                ? "Saving…"
+                ? t3T("Saving…")
                 : failedDestinations.length > 0
-                  ? "Retry failed saves"
-                  : "Save changes"}
+                  ? t3T("Retry failed saves")
+                  : t3T("Save changes")}
             </Button>
           </div>
         </DialogFooter>

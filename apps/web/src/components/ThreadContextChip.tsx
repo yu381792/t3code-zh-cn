@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { ThreadContextRecord } from "@t3tools/contracts";
 import { Link } from "@tanstack/react-router";
 import { MessagesSquareIcon } from "lucide-react";
@@ -14,6 +15,8 @@ export function ThreadContextChip(props: {
   record: Pick<ThreadContextRecord, "environmentId" | "threadId" | "title">;
   copyMarkdown?: string;
 }) {
+  const t3T = useUiTranslate();
+
   const { environmentId, threadId } = props.record;
   const shell = useThreadShell({ environmentId, threadId });
   const title = shell?.title?.trim() || props.record.title;
@@ -24,7 +27,7 @@ export function ThreadContextChip(props: {
           <ContextChip
             kind="thread"
             render={<Link to="/$environmentId/$threadId" params={{ environmentId, threadId }} />}
-            aria-label={`Thread, ${title}`}
+            aria-label={t3T("Thread, {0}", [title])}
             data-markdown-copy={props.copyMarkdown}
             className="no-underline"
           >
@@ -33,7 +36,9 @@ export function ThreadContextChip(props: {
           </ContextChip>
         }
       />
-      <TooltipPopup side="top">{shell ? "Open thread" : "Thread no longer available"}</TooltipPopup>
+      <TooltipPopup side="top">
+        {shell ? t3T("Open thread") : t3T("Thread no longer available")}
+      </TooltipPopup>
     </Tooltip>
   );
 }

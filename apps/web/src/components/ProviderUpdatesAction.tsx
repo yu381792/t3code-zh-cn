@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { PROVIDER_DISPLAY_NAMES } from "@t3tools/contracts";
 import { useMemo, useRef, useState } from "react";
 
@@ -22,6 +23,8 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
  * it. Renders nothing when no machine has a one-click update.
  */
 export function ProviderUpdatesAction() {
+  const t3T = useUiTranslate();
+
   const { environments } = useEnvironments();
   const updateProvider = useAtomCommand(serverEnvironment.updateProvider, {
     reportFailure: false,
@@ -93,7 +96,7 @@ export function ProviderUpdatesAction() {
             disabled={isPending}
             onClick={() => void handleUpdate()}
           >
-            {isPending ? "Updating…" : "Update all"}
+            {isPending ? t3T("Updating…") : t3T("Update all")}
           </Button>
         }
       />

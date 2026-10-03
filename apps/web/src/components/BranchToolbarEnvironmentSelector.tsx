@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadDetailsSelectControl } from "./chat/ThreadDetailsControl";
 import { ComposerContextLabel } from "./ComposerContextLabel";
 import { Tooltip, TooltipTrigger, TooltipPopup } from "./ui/tooltip";
@@ -41,6 +42,8 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
   onEnvironmentChange,
   displayMode = "toolbar",
 }: BranchToolbarEnvironmentSelectorProps) {
+  const t3T = useUiTranslate();
+
   const composerFloatingLayerProps = useComposerMenuProps();
   const activeEnvironment = useMemo(() => {
     return availableEnvironments.find((env) => env.environmentId === environmentId) ?? null;
@@ -78,14 +81,14 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
           className={displayMode === "panel" ? THREAD_DETAILS_PANEL_ICON_CLASS : "size-3 shrink-0"}
         />
         <ComposerContextLabel displayMode={displayMode}>
-          {activeEnvironment?.label ?? "Run on"}
+          {activeEnvironment?.label ?? t3T("Run on")}
         </ComposerContextLabel>
       </span>
     );
     return (
       <Tooltip>
         <TooltipTrigger render={lockedRow} />
-        <TooltipPopup>{activeEnvironment?.label ?? "Run on"}</TooltipPopup>
+        <TooltipPopup>{activeEnvironment?.label ?? t3T("Run on")}</TooltipPopup>
       </Tooltip>
     );
   }
@@ -105,7 +108,7 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
             <ThreadDetailsSelectControl
               panel={displayMode === "panel"}
               className="min-w-0 max-w-full"
-              aria-label="Run on"
+              aria-label={t3T("Run on")}
               data-composer-shortcut="composer.host"
               data-composer-context-control
             />
@@ -130,7 +133,9 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
             <SelectValue />
           </ComposerContextLabel>
         </TooltipTrigger>
-        <TooltipPopup>{autoEnvironmentLabel ?? activeEnvironment?.label ?? "Run on"}</TooltipPopup>
+        <TooltipPopup>
+          {autoEnvironmentLabel ?? activeEnvironment?.label ?? t3T("Run on")}
+        </TooltipPopup>
       </Tooltip>
       <SelectPopup
         alignItemWithTrigger={false}
@@ -142,7 +147,7 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
           : {})}
       >
         <SelectGroup>
-          <SelectGroupLabel>Run on</SelectGroupLabel>
+          <SelectGroupLabel>{t3T("Run on")}</SelectGroupLabel>
           {onAutoEnvironment && (
             <SelectItem
               value="auto"
@@ -152,7 +157,7 @@ export const BranchToolbarEnvironmentSelector = memo(function BranchToolbarEnvir
             >
               <span className="inline-flex items-center gap-1.5">
                 <ScaleIcon className="size-3" aria-hidden="true" />
-                {autoEnvironmentLabel ?? "Auto balance"}
+                {autoEnvironmentLabel ?? t3T("Auto balance")}
               </span>
             </SelectItem>
           )}

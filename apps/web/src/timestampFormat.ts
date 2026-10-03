@@ -1,3 +1,4 @@
+import { getInterfaceLanguage, translate } from "./i18n/translate";
 import { type TimestampFormat } from "@t3tools/contracts/settings";
 
 function getTimestampFormatOptions(
@@ -88,14 +89,15 @@ function getTimestampFormatter(
   timestampFormat: TimestampFormat,
   includeSeconds: boolean,
 ): Intl.DateTimeFormat {
-  const cacheKey = `${timestampFormat}:${includeSeconds ? "seconds" : "minutes"}`;
+  const locale = getInterfaceLanguage() === "zh-CN" ? "zh-CN" : timestampLocale;
+  const cacheKey = `${locale ?? "system"}:${timestampFormat}:${includeSeconds ? "seconds" : "minutes"}`;
   const cachedFormatter = timestampFormatterCache.get(cacheKey);
   if (cachedFormatter) {
     return cachedFormatter;
   }
 
   const formatter = new Intl.DateTimeFormat(
-    timestampLocale,
+    locale,
     getTimestampFormatOptions(timestampFormat, includeSeconds),
   );
   timestampFormatterCache.set(cacheKey, formatter);
@@ -144,6 +146,9 @@ export function formatChatTimestampTooltip(
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
   const time = formatShortTimestamp(isoDate, timestampFormat);
+  if (getInterfaceLanguage() === "zh-CN") {
+    return `${new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric" }).format(date)} ${time}`;
+  }
   const day = date.getDate();
   const month = monthNameFormatter.format(date);
   const year = date.getFullYear();
@@ -188,10 +193,10 @@ export function formatDayAwareTimestamp(
   const dayDiff = Math.round((startOfToday - startOfMessageDay) / 86_400_000);
 
   if (dayDiff <= 0) return time;
-  if (dayDiff === 1) return `yesterday at ${time}`;
+  if (dayDiff === 1) return `${translate("yesterday at")} ${time}`;
   const dateFormatter =
     date.getFullYear() === now.getFullYear() ? numericDateFormatter : numericDateWithYearFormatter;
-  return `${dateFormatter.format(date)} ${time}`;
+  return `${getInterfaceLanguage() === "zh-CN" ? new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }) }).format(date) : dateFormatter.format(date)} ${time}`;
 }
 
 /**
@@ -215,17 +220,22 @@ export function formatUpcomingTimestamp(
 
   if (dayDiff < 0) return formatDayAwareTimestamp(isoDate, timestampFormat, nowMs);
   if (dayDiff === 0) return time;
-  if (dayDiff === 1) return `tomorrow at ${time}`;
+  if (dayDiff === 1) return `${translate("tomorrow at")} ${time}`;
   const dateFormatter =
     date.getFullYear() === now.getFullYear() ? numericDateFormatter : numericDateWithYearFormatter;
-  return `${dateFormatter.format(date)} ${time}`;
+  return `${getInterfaceLanguage() === "zh-CN" ? new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }) }).format(date) : dateFormatter.format(date)} ${time}`;
 }
 
 /**
  * Format a relative time string from an ISO date.
- * Returns `{ value: "20s", suffix: "ago" }` or `{ value: "just now", suffix: null }`
+ * Returns `{ value: "20s", suffix: translate("ago") }` or `{ value: translate("just now"), suffix: null }`
  * so callers can style the numeric portion independently.
  */
+function formatDurationUnit(value: number, unit: "s" | "m" | "h" | "d"): string {
+  const labels = { s: "秒", m: "分钟", h: "小时", d: "天" };
+  return `${value}${getInterfaceLanguage() === "zh-CN" ? labels[unit] : unit}`;
+}
+
 type RelativeTimeParts = { value: string; suffix: string | null };
 export type RelativeTimeState =
   | { status: "missing" }
@@ -236,15 +246,15 @@ export function formatRelativeTime(isoDate: string): RelativeTimeParts | null {
   const date = parseTimestampDate(isoDate);
   if (!date) return null;
   const diffMs = Date.now() - date.getTime();
-  if (diffMs < 0) return { value: "just now", suffix: null };
+  if (diffMs < 0) return { value: translate("just now"), suffix: null };
   const seconds = Math.floor(diffMs / 1000);
-  if (seconds < 60) return { value: "just now", suffix: null };
+  if (seconds < 60) return { value: translate("just now"), suffix: null };
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return { value: `${minutes}m`, suffix: "ago" };
+  if (minutes < 60) return { value: formatDurationUnit(minutes, "m"), suffix: translate("ago") };
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return { value: `${hours}h`, suffix: "ago" };
+  if (hours < 24) return { value: formatDurationUnit(hours, "h"), suffix: translate("ago") };
   const days = Math.floor(hours / 24);
-  return { value: `${days}d`, suffix: "ago" };
+  return { value: formatDurationUnit(days, "d"), suffix: translate("ago") };
 }
 
 export function formatRelativeTimeLabel(isoDate: string) {
@@ -268,20 +278,20 @@ export function formatElapsedDurationLabel(isoDate: string, nowMs: number = Date
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
   const diffMs = nowMs - date.getTime();
-  if (diffMs <= 0) return "just now";
+  if (diffMs <= 0) return translate("just now");
 
   const seconds = Math.floor(diffMs / 1000);
-  if (seconds < 5) return "just now";
-  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 5) return translate("just now");
+  if (seconds < 60) return formatDurationUnit(seconds, "s");
 
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return formatDurationUnit(minutes, "m");
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
+  if (hours < 24) return formatDurationUnit(hours, "h");
 
   const days = Math.floor(hours / 24);
-  return `${days}d`;
+  return formatDurationUnit(days, "d");
 }
 
 /**
@@ -291,16 +301,16 @@ export function formatRelativeTimeUntil(isoDate: string): RelativeTimeParts | nu
   const date = parseTimestampDate(isoDate);
   if (!date) return null;
   const diffMs = date.getTime() - Date.now();
-  if (diffMs <= 0) return { value: "Expired", suffix: null };
+  if (diffMs <= 0) return { value: translate("Expired"), suffix: null };
   const seconds = Math.floor(diffMs / 1000);
-  if (seconds < 5) return { value: "Soon", suffix: null };
-  if (seconds < 60) return { value: `${seconds}s`, suffix: "left" };
+  if (seconds < 5) return { value: translate("Soon"), suffix: null };
+  if (seconds < 60) return { value: formatDurationUnit(seconds, "s"), suffix: translate("left") };
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return { value: `${minutes}m`, suffix: "left" };
+  if (minutes < 60) return { value: formatDurationUnit(minutes, "m"), suffix: translate("left") };
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return { value: `${hours}h`, suffix: "left" };
+  if (hours < 24) return { value: formatDurationUnit(hours, "h"), suffix: translate("left") };
   const days = Math.floor(hours / 24);
-  return { value: `${days}d`, suffix: "left" };
+  return { value: formatDurationUnit(days, "d"), suffix: translate("left") };
 }
 
 export function formatRelativeTimeUntilLabel(isoDate: string): string {
@@ -313,7 +323,7 @@ export function formatRelativeTimeUntilLabel(isoDate: string): string {
  * Countdown for a future instant (e.g. link expiry): "Expires in 4m 12s", with second precision under one hour.
  * Pass `nowMs` when a parent tick drives re-renders so the diff matches that snapshot.
  */
-export function formatExpiresInLabel(isoDate: string, nowMs: number = Date.now()): string {
+function formatExpiresInSource(isoDate: string, nowMs: number): string {
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
   const diffMs = date.getTime() - nowMs;
@@ -352,4 +362,17 @@ export function formatExpiresInLabel(isoDate: string, nowMs: number = Date.now()
   if (minutes > 0) tail.push(`${minutes}m`);
   if (seconds > 0) tail.push(`${seconds}s`);
   return tail.length > 0 ? `Expires in ${days}d ${tail.join(" ")}` : `Expires in ${days}d`;
+}
+
+export function formatExpiresInLabel(isoDate: string, nowMs: number = Date.now()): string {
+  const source = formatExpiresInSource(isoDate, nowMs);
+  if (getInterfaceLanguage() !== "zh-CN" || !source) return source;
+  if (source === "Expired") return translate(source);
+  if (source === "Expires in a moment") return "即将过期";
+  const duration = source
+    .replace(/^Expires in /, "")
+    .replace(/(\d+)([smhd])/g, (_match, value: string, unit: "s" | "m" | "h" | "d") =>
+      formatDurationUnit(Number(value), unit),
+    );
+  return `${duration}后过期`;
 }

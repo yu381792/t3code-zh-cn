@@ -1,4 +1,17 @@
 import type { EnvironmentId, ProjectId } from "@t3tools/contracts";
+// These unit tests invoke elements directly; mounted language subscriptions are
+// covered separately by i18n/translate.test.tsx.
+vi.mock("~/i18n/translate", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("~/i18n/translate")>();
+  return {
+    ...actual,
+    useTranslate: () => (source: unknown, values?: readonly unknown[]) =>
+      typeof source === "string"
+        ? actual.translate(source, values ?? actual.getInterfaceLanguage())
+        : source,
+  };
+});
+
 import { CircleIcon } from "lucide-react";
 import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vite-plus/test";

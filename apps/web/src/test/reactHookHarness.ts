@@ -47,6 +47,14 @@ function createReactHookHarness() {
       cursor = 0;
       slots = [];
     },
+    useSyncExternalStore<T>(
+      _subscribe: (listener: () => void) => () => void,
+      getSnapshot: () => T,
+    ): T {
+      nextIndex();
+      // Like the other shims, a test's explicit render reads the current state.
+      return getSnapshot();
+    },
     useCallback<T>(callback: T): T {
       nextIndex();
       return callback;

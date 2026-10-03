@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import type {
   PullRequestActor,
@@ -465,6 +466,8 @@ export function PullRequestActorLabel({
   tooltip?: boolean;
   profileUrl?: string | null;
 }) {
+  const t3T = useUiTranslate();
+
   const login = actor?.login ?? "ghost";
   const label = (
     <span className={cn("flex min-w-0 items-center", variant === "label" && "gap-1.5")}>
@@ -488,7 +491,7 @@ export function PullRequestActorLabel({
                   href={profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Open ${login}'s profile`}
+                  aria-label={t3T("Open {0}'s profile", [login])}
                 />
               }
             />
@@ -501,7 +504,7 @@ export function PullRequestActorLabel({
       </TooltipTrigger>
       <TooltipPopup side="top">
         {actor?.name && actor.name !== login ? `${actor.name} (@${login})` : login}
-        {profileUrl ? " · Open profile" : ""}
+        {profileUrl ? t3T(" · Open profile") : ""}
       </TooltipPopup>
     </Tooltip>
   );

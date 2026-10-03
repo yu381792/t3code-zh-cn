@@ -1,3 +1,4 @@
+import { translate as translateUi } from "~/i18n/translate";
 import {
   codexFeedbackNotice,
   type CodexFeedbackSubmission,
@@ -39,7 +40,7 @@ export function feedbackBannerItem(
             );
           }}
         >
-          Copy ID
+          {translateUi("Copy ID")}
         </Button>
       ) : undefined,
     ...(submission.status !== "uploading"

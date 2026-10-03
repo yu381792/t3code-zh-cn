@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import type { ProjectContentMatch } from "@t3tools/contracts";
 
@@ -81,9 +82,11 @@ function SearchOptionButton(props: {
 }
 
 function EmptyContentSearchDialog() {
+  const t3T = useUiTranslate();
+
   return (
     <CommandPaletteContent
-      aria-label="Search project contents"
+      aria-label={t3T("Search project contents")}
       escapeLabel="Back"
       footerActionLabel="Open file"
       inputProps={{ disabled: true, placeholder: "Search project contents…" }}
@@ -93,7 +96,7 @@ function EmptyContentSearchDialog() {
       value=""
     >
       <p className="m-auto px-6 text-center text-muted-foreground text-sm">
-        Open a project to search its files.
+        {t3T("Open a project to search its files.")}
       </p>
     </CommandPaletteContent>
   );
@@ -103,6 +106,8 @@ function OpenContentSearchDialog(props: {
   readonly onOpenChange: (open: boolean) => void;
   readonly target: ActiveProjectTarget;
 }) {
+  const t3T = useUiTranslate();
+
   const { target } = props;
   const { resolvedTheme } = useTheme();
   const [query, setQuery] = useState("");
@@ -163,28 +168,28 @@ function OpenContentSearchDialog(props: {
 
   return (
     <CommandPaletteContent
-      aria-label={`Search file contents in ${target.projectName}`}
+      aria-label={t3T("Search file contents in {0}", [target.projectName])}
       escapeLabel="Back"
       footerActionLabel="Open file"
       inputAccessory={
         <div className="absolute inset-e-2.5 top-1/2 flex shrink-0 -translate-y-1/2 items-center gap-0.5 rounded-md border bg-muted/30 p-0.5">
           <SearchOptionButton
             active={caseSensitive}
-            label="Match case"
+            label={t3T("Match case")}
             onClick={() => setCaseSensitive((current) => !current)}
           >
-            Aa
+            {t3T("Aa")}
           </SearchOptionButton>
           <SearchOptionButton
             active={wholeWord}
-            label="Match whole word"
+            label={t3T("Match whole word")}
             onClick={() => setWholeWord((current) => !current)}
           >
-            <span className="underline decoration-2 underline-offset-2">ab</span>
+            <span className="underline decoration-2 underline-offset-2">{t3T("ab")}</span>
           </SearchOptionButton>
           <SearchOptionButton
             active={useRegex}
-            label="Use regular expression"
+            label={t3T("Use regular expression")}
             onClick={() => setUseRegex((current) => !current)}
           >
             .*
@@ -227,14 +232,18 @@ function OpenContentSearchDialog(props: {
         <div className="flex h-9 shrink-0 items-center border-b px-3 text-xs text-muted-foreground">
           {search.isPending ? (
             <span className="flex items-center gap-2">
-              <Spinner size="sm" /> Searching…
+              <Spinner size="sm" /> {t3T("Searching…")}
             </span>
           ) : search.error ? (
             <span className="text-destructive">{search.error}</span>
           ) : search.invalidRegex ? (
-            <span className="text-destructive">Invalid regular expression</span>
+            <span className="text-destructive">{t3T("Invalid regular expression")}</span>
           ) : (
-            `${matches.length.toLocaleString()}${search.truncated ? "+" : ""} results in ${fileCount.toLocaleString()} files`
+            t3T("{0}{1} results in {2} files", [
+              matches.length.toLocaleString(),
+              search.truncated ? "+" : "",
+              fileCount.toLocaleString(),
+            ])
           )}
         </div>
       ) : null}
@@ -242,8 +251,8 @@ function OpenContentSearchDialog(props: {
       {matches.length === 0 ? (
         <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-muted-foreground">
           {search.hasQuery && !search.isPending && !search.error
-            ? "No results found."
-            : "Type to search across your project."}
+            ? t3T("No results found.")
+            : t3T("Type to search across your project.")}
         </div>
       ) : (
         <ScrollArea className="min-h-0 flex-1" scrollFade>

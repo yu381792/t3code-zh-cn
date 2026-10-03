@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -68,6 +70,8 @@ function DialogPopup({
   bottomStickOnMobile?: boolean;
   variant?: "default" | "media";
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <DialogPortal>
       {/* Media opens from inside other overlays (a composer chip, a popover), so it sits above them. */}
@@ -93,7 +97,7 @@ function DialogPopup({
           {children}
           {showCloseButton && (
             <DialogPrimitive.Close
-              aria-label="Close"
+              aria-label={t3T("Close")}
               className="absolute end-2 top-2"
               render={<Button size="icon" variant="ghost" />}
             >

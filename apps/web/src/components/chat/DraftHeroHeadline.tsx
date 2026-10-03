@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { DraftId } from "~/composerDraftStore";
 import { useComposerDraftStore } from "~/composerDraftStore";
 import { resolveEnvironmentMachineKind, type ScopedProjectRef } from "@t3tools/contracts";
@@ -55,6 +56,8 @@ export function DraftHeroHeadline({
   activeProjectRef,
   activeProjectTitle,
 }: DraftHeroHeadlineProps) {
+  const t3T = useUiTranslate();
+
   const projects = useProjects();
   const threads = useThreadShells();
   const { environments } = useEnvironments();
@@ -242,7 +245,9 @@ export function DraftHeroHeadline({
           }
         >
           <span className="min-w-0 truncate">
-            {isScratchDraft ? "No project" : (activeProjectDisplayName ?? "Choose a project")}
+            {isScratchDraft
+              ? t3T("No project")
+              : (activeProjectDisplayName ?? t3T("Choose a project"))}
           </span>
         </TooltipTrigger>
         {activeProjectDisplayName && !isScratchDraft ? (
@@ -274,7 +279,7 @@ export function DraftHeroHeadline({
                 >
                   <MessageSquareDashedIcon className="size-full" />
                 </span>
-                No project
+                {t3T("No project")}
               </span>
             </MenuRadioItem>
           )}
@@ -304,7 +309,7 @@ export function DraftHeroHeadline({
         {projectPickerEntries.length > 0 ? <MenuSeparator /> : null}
         <MenuItem onClick={openAddProject}>
           <FolderPlusIcon />
-          Add project
+          {t3T("Add project")}
         </MenuItem>
       </MenuPopup>
     </Menu>
@@ -314,7 +319,7 @@ export function DraftHeroHeadline({
       onClick={openAddProject}
       className="pointer-events-auto inline cursor-pointer border-muted-foreground/35 border-b border-dotted text-muted-foreground/60 transition-colors hover:border-muted-foreground/60 hover:text-muted-foreground/80 focus-visible:rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {activeProjectTitle ?? "Add a project"}
+      {activeProjectTitle ?? t3T("Add a project")}
     </button>
   );
 
@@ -351,7 +356,7 @@ export function DraftHeroHeadline({
             />
           }
         >
-          or start without a project
+          {t3T("or start without a project")}
         </TooltipTrigger>
         {noProjectShortcut ? <TooltipPopup side="bottom">{noProjectShortcut}</TooltipPopup> : null}
       </Tooltip>
@@ -364,13 +369,17 @@ export function DraftHeroHeadline({
         className="w-full text-center font-normal text-2xl text-foreground tracking-tight sm:text-3xl"
       >
         {isScratchDraft ? (
-          <>What should we work on?</>
+          <>{t3T("What should we work on?")}</>
         ) : hasResolvedProject ? (
-          <>What should we build in {projectSelector}?</>
+          <>
+            {t3T("What should we build in")} {projectSelector}?
+          </>
         ) : canChooseProject ? (
-          <>{projectSelector} to start</>
+          <>
+            {projectSelector} {t3T("to start")}
+          </>
         ) : (
-          <>Add a project to start</>
+          <>{t3T("Add a project to start")}</>
         )}
       </h1>
       {/* Reserved whenever threads can skip a project, so the heading does not

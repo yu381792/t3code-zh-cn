@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   type EnvironmentId,
   type ProviderConsumeResetCreditOutcome,
@@ -53,6 +54,8 @@ export function barColor(driver: ServerProvider["driver"]): string {
 
 /** Pace as a glyph with the words on hover. */
 export function PaceIcon({ pace }: { readonly pace: LimitPace }) {
+  const t3T = useUiTranslate();
+
   const Icon = PACE[pace].icon;
   return (
     <Tooltip>
@@ -60,14 +63,14 @@ export function PaceIcon({ pace }: { readonly pace: LimitPace }) {
         render={
           <span
             role="img"
-            aria-label={PACE[pace].label}
+            aria-label={t3T(PACE[pace].label)}
             className="inline-flex text-muted-foreground"
           />
         }
       >
         <Icon className="size-3.5" aria-hidden />
       </TooltipTrigger>
-      <TooltipPopup side="top">{PACE[pace].label}</TooltipPopup>
+      <TooltipPopup side="top">{t3T(PACE[pace].label)}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -87,6 +90,8 @@ function WindowBar({
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
 }) {
+  const t3T = useUiTranslate();
+
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const remaining = remainingPercent(window);
   const elapsed = elapsedShare(window, now);
@@ -130,14 +135,18 @@ function WindowBar({
       <TooltipPopup side="top">
         <div className="flex flex-col gap-0.5">
           <span className="text-foreground">
-            {remaining}% left{timeLeft !== null ? ` · ${timeLeft}% of the window left` : ""}
+            {remaining}
+            {t3T("% left")}
+            {timeLeft !== null ? t3T(" · {0}% of the window left", [timeLeft]) : ""}
           </span>
           {timeLeft !== null ? (
-            <span className="text-muted-foreground">The line is where even spending would be.</span>
+            <span className="text-muted-foreground">
+              {t3T("The line is where even spending would be.")}
+            </span>
           ) : null}
           {resetsAt ? (
             <span className="text-muted-foreground">
-              Resets {resetsAt}
+              {t3T("Resets")} {resetsAt}
               {resetsIn ? ` · ${resetsIn}` : ""}
             </span>
           ) : null}
@@ -162,6 +171,8 @@ export function LimitWindows({
   readonly now: number;
   readonly compact?: boolean;
 }) {
+  const t3T = useUiTranslate();
+
   const color = barColor(driver);
   return (
     <div
@@ -179,7 +190,8 @@ export function LimitWindows({
             <span className="flex min-w-0 items-center gap-2 text-xs">
               <span className="truncate text-muted-foreground">{window.label}</span>
               <span className="ms-auto shrink-0 font-medium text-foreground tabular-nums">
-                {remainingPercent(window)}% left
+                {remainingPercent(window)}
+                {t3T("% left")}
               </span>
             </span>
             <WindowBar color={color} window={window} now={now} />
@@ -246,19 +258,22 @@ export function ResetCreditDialog({
   readonly onOpenChange: (open: boolean) => void;
   readonly onConfirm: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogPopup>
         <AlertDialogHeader>
-          <AlertDialogTitle>Use a reset credit?</AlertDialogTitle>
+          <AlertDialogTitle>{t3T("Use a reset credit?")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This redeems one credit on your account and clears the current rate-limit windows. It
-            cannot be undone.
+            {t3T(
+              "This redeems one credit on your account and clears the current rate-limit windows. It cannot be undone.",
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
-          <Button onClick={onConfirm}>Use credit</Button>
+          <AlertDialogClose render={<Button variant="outline" />}>{t3T("Cancel")}</AlertDialogClose>
+          <Button onClick={onConfirm}>{t3T("Use credit")}</Button>
         </AlertDialogFooter>
       </AlertDialogPopup>
     </AlertDialog>
@@ -294,6 +309,8 @@ export function ResetCredits({
   readonly credits: ServerProviderResetCredits;
   readonly now: number;
 }) {
+  const t3T = useUiTranslate();
+
   const { confirming, setConfirming, busy, status, redeem } = useResetCredit(environmentId, input);
   if (credits.availableCount === 0 && status === null) return null;
   return (
@@ -301,7 +318,7 @@ export function ResetCredits({
       <span className="tabular-nums">{resetCreditsSummary(credits, now)}</span>
       {credits.availableCount > 0 ? (
         <Button size="xs" variant="outline" disabled={busy} onClick={() => setConfirming(true)}>
-          {busy ? "Using…" : "Use reset"}
+          {busy ? t3T("Using…") : t3T("Use reset")}
         </Button>
       ) : null}
       {status ? <span className="text-foreground">{status}</span> : null}

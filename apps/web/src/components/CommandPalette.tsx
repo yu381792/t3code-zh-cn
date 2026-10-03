@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { threadPullRequestLinkMode } from "@t3tools/client-runtime/thread-pull-request-compatibility";
 import { visibleThreadPullRequests } from "@t3tools/shared/threadPullRequests";
 
@@ -639,16 +641,18 @@ function CommandPaletteDialog(props: {
   readonly openOverlayMode: (mode: SearchOverlayMode) => void;
   readonly clearOpenIntent: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const composerHandleRef = useComposerHandleContext();
 
   return (
     <CommandDialogPopup
       aria-label={
         props.mode === "files"
-          ? "File picker"
+          ? t3T("File picker")
           : props.mode === "content"
-            ? "Search project contents"
-            : "Command palette"
+            ? t3T("Search project contents")
+            : t3T("Command palette")
       }
       className={cn("overflow-hidden", props.mode === "content" && "h-105")}
       data-command-palette="true"
@@ -684,6 +688,8 @@ function OpenCommandPaletteDialog(props: {
   readonly openOverlayMode: (mode: SearchOverlayMode) => void;
   readonly clearOpenIntent: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const navigate = useNavigate();
   const pathname = useLocation({ select: (location) => location.pathname });
   const { clearOpenIntent, openIntent, openOverlayMode, setOpen } = props;
@@ -1635,12 +1641,12 @@ function OpenCommandPaletteDialog(props: {
                       openSourceControlSettings();
                     }}
                   >
-                    Setup Required
+                    {t3T("Setup Required")}
                   </Button>
                 }
               />
               <TooltipPopup align="end" side="left">
-                {disabledHint ?? "Open Settings -> Source Control to configure this provider."}
+                {disabledHint ?? t3T("Open Settings -> Source Control to configure this provider.")}
               </TooltipPopup>
             </Tooltip>
           </span>
@@ -1684,6 +1690,7 @@ function OpenCommandPaletteDialog(props: {
       startAddProjectBrowse,
       startAddProjectClone,
       startNewProject,
+      t3T,
     ],
   );
 
@@ -1876,7 +1883,7 @@ function OpenCommandPaletteDialog(props: {
         searchTerms: ["new thread", "chat", "create", "draft"],
         title: (
           <>
-            New thread in <span className="font-semibold">{activeProjectTitle}</span>
+            {t3T("New thread in")} <span className="font-semibold">{activeProjectTitle}</span>
           </>
         ),
         icon: <SquarePenIcon className={ITEM_ICON_CLASS} />,
@@ -2109,7 +2116,7 @@ function OpenCommandPaletteDialog(props: {
           titleTrailingContent: (
             <span className="flex shrink-0 items-center gap-2">
               {(themeHalves?.[resolvedTheme] ?? getThemeDefinition(theme)?.id ?? null) === id ? (
-                <span className="text-xs text-muted-foreground/70">Current</span>
+                <span className="text-xs text-muted-foreground/70">{t3T("Current")}</span>
               ) : null}
               <span className="flex items-center gap-1" aria-hidden>
                 {previews.map((preview) => (
@@ -2156,7 +2163,7 @@ function OpenCommandPaletteDialog(props: {
           icon: <Icon className={ITEM_ICON_CLASS} />,
           titleTrailingContent:
             appearanceMode === mode ? (
-              <span className="text-xs text-muted-foreground/70">Current</span>
+              <span className="text-xs text-muted-foreground/70">{t3T("Current")}</span>
             ) : undefined,
           run: async () => {
             if (!setAppearanceMode(mode)) notifyThemeSaveFailure();
@@ -3232,7 +3239,7 @@ function OpenCommandPaletteDialog(props: {
               size="xs"
               tabIndex={-1}
               className="absolute inset-e-2.5 top-1/2 -translate-y-1/2"
-              aria-label="Create (Enter)"
+              aria-label={t3T("Create (Enter)")}
               disabled={!canSubmitNewProject}
               onMouseDown={(event) => {
                 event.preventDefault();
@@ -3243,12 +3250,12 @@ function OpenCommandPaletteDialog(props: {
             />
           }
         >
-          <span>{isCreatingNewProject ? "Creating" : "Create"}</span>
+          <span>{isCreatingNewProject ? t3T("Creating") : t3T("Create")}</span>
           <KbdGroup className="pointer-events-none -me-0.5">
-            <Kbd>Enter</Kbd>
+            <Kbd>{t3T("Enter")}</Kbd>
           </KbdGroup>
         </TooltipTrigger>
-        <TooltipPopup side="top">Create (Enter)</TooltipPopup>
+        <TooltipPopup side="top">{t3T("Create (Enter)")}</TooltipPopup>
       </Tooltip>
     ) : addProjectCloneFlow?.step === "repository" ? (
       <Tooltip>
@@ -3259,7 +3266,7 @@ function OpenCommandPaletteDialog(props: {
               size="xs"
               tabIndex={-1}
               className="absolute inset-e-2.5 top-1/2 -translate-y-1/2"
-              aria-label={`${remoteProjectButtonLabel ?? "Continue"} (Enter)`}
+              aria-label={t3T("{0} (Enter)", [remoteProjectButtonLabel ?? "Continue"])}
               disabled={!canSubmitRemoteProjectFlow}
               onMouseDown={(event) => {
                 event.preventDefault();
@@ -3270,12 +3277,14 @@ function OpenCommandPaletteDialog(props: {
             />
           }
         >
-          <span>{isRemoteProjectPending ? "Working" : remoteProjectButtonLabel}</span>
+          <span>{isRemoteProjectPending ? t3T("Working") : remoteProjectButtonLabel}</span>
           <KbdGroup className="pointer-events-none -me-0.5">
-            <Kbd>Enter</Kbd>
+            <Kbd>{t3T("Enter")}</Kbd>
           </KbdGroup>
         </TooltipTrigger>
-        <TooltipPopup side="top">{remoteProjectButtonLabel ?? "Continue"} (Enter)</TooltipPopup>
+        <TooltipPopup side="top">
+          {remoteProjectButtonLabel ?? t3T("Continue")} {t3T("(Enter)")}
+        </TooltipPopup>
       </Tooltip>
     ) : isBrowsing ? (
       <Tooltip>
@@ -3309,10 +3318,12 @@ function OpenCommandPaletteDialog(props: {
           }
         >
           <span>
-            {isCloneDestinationStep && isRemoteProjectPending ? "Cloning" : submitActionLabel}
+            {isCloneDestinationStep && isRemoteProjectPending ? t3T("Cloning") : submitActionLabel}
           </span>
           <KbdGroup className="pointer-events-none -me-0.5">
-            <Kbd>{hasHighlightedBrowseItem ? `${submitModifierLabel} Enter` : "Enter"}</Kbd>
+            <Kbd>
+              {hasHighlightedBrowseItem ? t3T("{0} Enter", [submitModifierLabel]) : t3T("Enter")}
+            </Kbd>
           </KbdGroup>
         </TooltipTrigger>
         <TooltipPopup side="top">
@@ -3341,14 +3352,14 @@ function OpenCommandPaletteDialog(props: {
         void handleOpenProjectFromFileManager();
       }}
     >
-      {`Open in ${fileManagerName}`}
+      {t3T("Open in {0}", [fileManagerName])}
     </CommandFooterAction>
   ) : null;
 
   return (
     <CommandPaletteContent
       key={`${viewStack.length}-${browseGeneration}-${isBrowsing}-${newProjectFlow ? "new-project" : (addProjectCloneFlow?.step ?? "none")}`}
-      aria-label="Command palette"
+      aria-label={t3T("Command palette")}
       autoHighlight={
         isBrowsing || isRemoteProjectCloneFlow || newProjectFlow !== null ? false : "always"
       }
@@ -3374,7 +3385,7 @@ function OpenCommandPaletteDialog(props: {
                 <button
                   type="button"
                   className="flex cursor-pointer items-center"
-                  aria-label="Back"
+                  aria-label={t3T("Back")}
                   onClick={popView}
                 >
                   <ArrowLeftIcon />
@@ -3400,13 +3411,15 @@ function OpenCommandPaletteDialog(props: {
             <FolderGit2Icon className={ITEM_ICON_CLASS} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-foreground text-sm">
-                {newProjectName.length > 0 ? newProjectName : "New project"}
+                {newProjectName.length > 0 ? newProjectName : t3T("New project")}
               </span>
               <span className="truncate text-muted-foreground/85 text-xs">
                 {newProjectName.length > 0
-                  ? `Creates ${newProjectPathPreview}`
-                  : `Goes in ${newProjectsRoot}`}
-                {newProjectEnvironmentLabel === null ? null : ` on ${newProjectEnvironmentLabel}`}
+                  ? t3T("Creates {0}", [newProjectPathPreview])
+                  : t3T("Goes in {0}", [newProjectsRoot])}
+                {newProjectEnvironmentLabel === null
+                  ? null
+                  : t3T(" on {0}", [newProjectEnvironmentLabel])}
               </span>
             </span>
           </div>
@@ -3414,7 +3427,9 @@ function OpenCommandPaletteDialog(props: {
       ) : null}
       {remoteProjectContext ? (
         <div className="p-2 pb-0">
-          <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">Repository</div>
+          <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
+            {t3T("Repository")}
+          </div>
           <div className="flex min-h-8 items-center gap-2 rounded-sm px-2 py-1.5">
             {remoteProjectContext.icon}
             <span className="flex min-w-0 flex-1 flex-col">

@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   type ModelSelection,
   type ProviderDriverKind,
@@ -94,9 +95,11 @@ type TraitsPersistence =
 const ULTRATHINK_PROMPT_PREFIX = "Ultrathink:\n";
 
 function DefaultBadge() {
+  const t3T = useUiTranslate();
+
   return (
     <Badge variant="outline" size="sm" className="min-w-0">
-      Default
+      {t3T("Default")}
     </Badge>
   );
 }
@@ -297,6 +300,8 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
   planModeEnabled,
   ...persistence
 }: TraitsMenuContentProps & TraitsPersistence) {
+  const t3T = useUiTranslate();
+
   const modelSelection =
     instanceId && model ? { instanceId, model, options: modelOptions ?? [] } : null;
   const setProviderModelOptions = useComposerDraftStore((store) => store.setProviderModelOptions);
@@ -380,7 +385,7 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
               {index > 0 ? <MenuDivider /> : null}
               <MenuGroup>
                 <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs">
-                  {descriptor.label}
+                  {t3T(descriptor.label)}
                 </div>
                 <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">{value}</div>
               </MenuGroup>
@@ -404,12 +409,13 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
             {index > 0 ? <MenuDivider /> : null}
             <MenuGroup>
               <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs">
-                {descriptor.label}
+                {t3T(descriptor.label)}
               </div>
               {ultrathinkInBodyText && descriptor.id === primarySelectDescriptor?.id ? (
                 <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
-                  Your prompt contains &quot;ultrathink&quot; in the text. Remove it to change this
-                  option.
+                  {t3T(
+                    'Your prompt contains "ultrathink" in the text. Remove it to change this option.',
+                  )}
                 </div>
               ) : null}
               <MenuRadioGroup
@@ -429,7 +435,7 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
                     <span className="flex w-full min-w-0 flex-col">
                       <span className="flex w-full min-w-0 items-center justify-between gap-3">
                         <span className="min-w-0 truncate">
-                          {option.label}
+                          {t3T(option.label)}
                           {option.isDefault ? (
                             <>
                               {" "}
@@ -440,7 +446,7 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
                       </span>
                       {option.description ? (
                         <span className="max-w-56 text-pretty text-muted-foreground/80 text-xs">
-                          {option.description}
+                          {t3T(option.description)}
                         </span>
                       ) : null}
                     </span>
@@ -459,7 +465,7 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
             {index > 0 || selectDescriptors.length > 0 ? <MenuDivider /> : null}
             <MenuGroup>
               <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
-                {descriptor.label}
+                {t3T(descriptor.label)}
               </div>
               <MenuRadioGroup
                 value={selectedValue}
@@ -472,7 +478,7 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
                 {(["on", "off"] as const).map((value) => (
                   <MenuRadioItem key={value} value={value} hideIndicator closeOnClick>
                     <span className="flex w-full min-w-0 items-center justify-between gap-3">
-                      <span>{value === "on" ? "On" : "Off"}</span>
+                      <span>{value === "on" ? t3T("On") : t3T("Off")}</span>
                     </span>
                   </MenuRadioItem>
                 ))}

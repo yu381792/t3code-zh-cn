@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /* oxlint-disable react/no-array-index-key -- Table rows and columns have stable positions and may contain identical values. */
 import { parseDelimitedPreview } from "@t3tools/shared/delimitedPreview";
 import { useMemo } from "react";
@@ -10,6 +11,8 @@ export function DelimitedTablePreview(props: {
   readonly text: string;
   readonly delimiter: "," | "\t";
 }) {
+  const t3T = useUiTranslate();
+
   const table = useMemo(
     () => parseDelimitedPreview(props.text, props.delimiter),
     [props.text, props.delimiter],
@@ -19,7 +22,9 @@ export function DelimitedTablePreview(props: {
     <div className="flex min-h-0 flex-1 flex-col">
       {table.truncated ? (
         <FileSurfaceNotice>
-          Table limited to the first 100 rows and 30 columns. Switch to source for the rest.
+          {t3T(
+            "Table limited to the first 100 rows and 30 columns. Switch to source for the rest.",
+          )}
         </FileSurfaceNotice>
       ) : null}
       <div className="min-h-0 flex-1 overflow-auto">

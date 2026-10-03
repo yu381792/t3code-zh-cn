@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAtomValue } from "@effect/atom-react";
 import {
   ProviderDriverKind,
@@ -31,6 +32,8 @@ export function AddCodexAccountDialog({
     | undefined;
   readonly renderSetup: (instanceId: ProviderInstanceId, provider: ServerProvider) => ReactNode;
 }) {
+  const t3T = useUiTranslate();
+
   const settings = useEnvironmentSettings(environmentId);
   const providers = useAtomValue(serverEnvironment.providersValueAtom(environmentId));
   const update = useAtomCommand(serverEnvironment.updateSettings, "Add ChatGPT account");
@@ -87,15 +90,20 @@ export function AddCodexAccountDialog({
     >
       <WizardPopup size="wide">
         <WizardHeader
-          title={instanceId ? displayName : "Add ChatGPT account"}
-          description="Each account has its own Codex instance and sign-in. Choose the other account on the sign-in page."
+          title={instanceId ? displayName : t3T("Add ChatGPT account")}
+          description={t3T(
+            "Each account has its own Codex instance and sign-in. Choose the other account on the sign-in page.",
+          )}
         />
         <WizardPanel>
           {instanceId ? (
             provider?.setup ? (
               renderSetup(instanceId, provider)
             ) : (
-              <SettingsRow title="Codex runtime" description="Preparing managed setup." />
+              <SettingsRow
+                title={t3T("Codex runtime")}
+                description={t3T("Preparing managed setup.")}
+              />
             )
           ) : (
             <form
@@ -106,15 +114,15 @@ export function AddCodexAccountDialog({
               }}
             >
               <SettingsRow
-                title="Account name"
-                description="Shown in the provider list and model picker."
+                title={t3T("Account name")}
+                description={t3T("Shown in the provider list and model picker.")}
                 control={
                   <Input
-                    aria-label="Account name"
+                    aria-label={t3T("Account name")}
                     value={name}
                     disabled={pending}
                     onChange={(event) => setName(event.target.value)}
-                    placeholder="e.g. Personal or Work"
+                    placeholder={t3T("e.g. Personal or Work")}
                   />
                 }
               />
@@ -124,15 +132,15 @@ export function AddCodexAccountDialog({
         <WizardFooter>
           {instanceId ? (
             <Button variant="outline" onClick={onClose}>
-              Finish later
+              {t3T("Finish later")}
             </Button>
           ) : (
             <>
               <Button variant="outline" disabled={pending} onClick={onClose}>
-                Cancel
+                {t3T("Cancel")}
               </Button>
               <Button type="submit" form="add-codex-account" disabled={pending || !name.trim()}>
-                {pending ? "Adding account…" : "Continue"}
+                {pending ? t3T("Adding account…") : t3T("Continue")}
               </Button>
             </>
           )}

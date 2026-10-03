@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ComposerContextLabel } from "./ComposerContextLabel";
 import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
@@ -130,6 +131,8 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
   previousWorktreeBranch,
   onUsePreviousWorktree,
 }: MobileRunContextSelectorProps) {
+  const t3T = useUiTranslate();
+
   const composerFloatingLayerProps = useComposerMenuProps();
   const activeEnvironment = useMemo(
     () => availableEnvironments?.find((env) => env.environmentId === environmentId) ?? null,
@@ -172,7 +175,9 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
             />
           )}
         </TooltipTrigger>
-        <TooltipPopup>{autoEnvironmentLabel ?? activeEnvironment?.label ?? "Run on"}</TooltipPopup>
+        <TooltipPopup>
+          {autoEnvironmentLabel ?? activeEnvironment?.label ?? t3T("Run on")}
+        </TooltipPopup>
       </Tooltip>
       {workspaceIcon}
     </span>
@@ -184,7 +189,7 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
       {icon}
       <ComposerContextLabel>
         {autoEnvironmentLabel ??
-          (showEnvironmentIndicator ? (activeEnvironment?.label ?? "Run on") : workspaceLabel)}
+          (showEnvironmentIndicator ? (activeEnvironment?.label ?? t3T("Run on")) : workspaceLabel)}
       </ComposerContextLabel>
     </>
   );
@@ -223,7 +228,7 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
         {showEnvironmentPicker && availableEnvironments && onEnvironmentChange ? (
           <>
             <MenuGroup>
-              <MenuGroupLabel>Run on</MenuGroupLabel>
+              <MenuGroupLabel>{t3T("Run on")}</MenuGroupLabel>
               <MenuRadioGroup
                 value={autoEnvironmentLabel ? "auto" : environmentId}
                 onValueChange={(value) =>
@@ -244,7 +249,7 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
                     <span className="flex min-w-0 items-center gap-1.5">
                       <ScaleIcon className="size-3" aria-hidden="true" />
                       <span className="min-w-0 truncate">
-                        {autoEnvironmentLabel ?? "Auto balance"}
+                        {autoEnvironmentLabel ?? t3T("Auto balance")}
                       </span>
                     </span>
                   </MenuRadioItem>
@@ -268,7 +273,7 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
           </>
         ) : null}
         <MenuGroup>
-          <MenuGroupLabel>Workspace</MenuGroupLabel>
+          <MenuGroupLabel>{t3T("Workspace")}</MenuGroupLabel>
           <MenuRadioGroup
             value={effectiveEnvMode}
             onValueChange={(value) => {
@@ -292,7 +297,7 @@ const MobileRunContextSelector = memo(function MobileRunContextSelector({
             <MenuRadioItem disabled={envModeLocked} value="worktree" closeOnClick>
               <span className="flex min-w-0 items-center gap-1.5">
                 <FolderGit2Icon className="size-3" />
-                <span className="min-w-0 truncate">{resolveEnvModeLabel("worktree")}</span>
+                <span className="min-w-0 truncate">{t3T(resolveEnvModeLabel("worktree"))}</span>
               </span>
             </MenuRadioItem>
             {previousWorktreeLabel ? (

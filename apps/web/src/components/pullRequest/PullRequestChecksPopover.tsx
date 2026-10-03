@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type * as React from "react";
 import type {
   EnvironmentId,
@@ -41,6 +42,8 @@ function LazyChecksBody({
   reference: PullRequestRef;
   threadRef: ScopedThreadRef | null;
 }) {
+  const t3T = useUiTranslate();
+
   const detailQuery = useEnvironmentQuery(
     pullRequestEnvironment.detail({ environmentId, input: reference }),
   );
@@ -50,7 +53,7 @@ function LazyChecksBody({
   if (detailQuery.data === null) {
     return (
       <p className="text-muted-foreground text-xs">
-        {detailQuery.isPending ? "Loading checks…" : "No checks reported"}
+        {detailQuery.isPending ? t3T("Loading checks…") : t3T("No checks reported")}
       </p>
     );
   }
@@ -64,13 +67,15 @@ function ChecksBody({
   checks: ReadonlyArray<PullRequestCheck>;
   threadRef: ScopedThreadRef | null;
 }) {
+  const t3T = useUiTranslate();
+
   const openLink = useOpenLink(threadRef);
   const [showAll, setShowAll] = useState(false);
   const { attention, running, completed } = groupPullRequestChecks(checks);
   const canCollapse = attention.length + running.length > 0 && completed.length > 0;
   const visibleChecks = [...attention, ...running, ...(showAll || !canCollapse ? completed : [])];
   if (checks.length === 0) {
-    return <p className="text-muted-foreground text-xs">No checks reported</p>;
+    return <p className="text-muted-foreground text-xs">{t3T("No checks reported")}</p>;
   }
   return (
     <>
@@ -102,7 +107,7 @@ function ChecksBody({
                     });
                   }}
                 >
-                  Details
+                  {t3T("Details")}
                 </button>
               )}
             </li>
@@ -116,7 +121,7 @@ function ChecksBody({
           aria-expanded={showAll}
           onClick={() => setShowAll(!showAll)}
         >
-          {showAll ? "Show less" : "Show all"}
+          {showAll ? t3T("Show less") : t3T("Show all")}
         </Button>
       ) : null}
     </>
@@ -153,6 +158,8 @@ export function PullRequestChecksPopover({
   className?: string;
   render?: React.ReactElement;
 }) {
+  const t3T = useUiTranslate();
+
   const presentation = pullRequestChecksStatePresentation(checksState);
   // Counts beat the rollup's own wording where they are known, the way GitHub's own header reads.
   const runningCount = checks?.filter((check) => check.status === "pending").length ?? 0;
@@ -166,8 +173,8 @@ export function PullRequestChecksPopover({
         nativeButton={variant === "count"}
         aria-label={
           variant === "count"
-            ? `Open checks: ${summary ?? presentation.label}`
-            : `Checks: ${presentation.label}`
+            ? t3T("Open checks: {0}", [summary ?? presentation.label])
+            : t3T("Checks: {0}", [presentation.label])
         }
         render={
           variant === "count" ? (
@@ -199,7 +206,7 @@ export function PullRequestChecksPopover({
         {summary === null ? null : <p className="mb-2 text-muted-foreground text-xs">{summary}</p>}
         {stale ? (
           <p className="text-muted-foreground text-xs">
-            Check details are out of date. Refresh the pull request to update them.
+            {t3T("Check details are out of date. Refresh the pull request to update them.")}
           </p>
         ) : checks !== undefined ? (
           <ChecksBody checks={checks} threadRef={threadRef} />

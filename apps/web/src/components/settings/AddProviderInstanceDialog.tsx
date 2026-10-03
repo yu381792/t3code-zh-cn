@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
+
 import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
 
 import { Radio as RadioPrimitive } from "@base-ui/react/radio";
@@ -108,6 +110,8 @@ export function AddProviderInstanceDialog({
   onOpenChange,
   onCreated,
 }: AddProviderInstanceDialogProps) {
+  const t3T = useUiTranslate();
+
   const settings = useEnvironmentSettings(environmentId);
   const persistProviderInstance = usePersistEnvironmentProviderInstanceMutation(environmentId);
 
@@ -336,8 +340,12 @@ export function AddProviderInstanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <WizardPopup size="wide">
         <WizardHeader
-          title="Add provider"
-          description={<>Add an account or configure a provider on {environmentLabel}.</>}
+          title={t3T("Add provider")}
+          description={
+            <>
+              {t3T("Add an account or configure a provider on")} {environmentLabel}.
+            </>
+          }
         >
           {isAcpRegistry ? (
             <AddProviderInstanceWizardSteps
@@ -376,7 +384,7 @@ export function AddProviderInstanceDialog({
             >
               <div className={cn("grid gap-2", wizardStep !== 0 && "hidden")}>
                 <div id="add-instance-driver-label" className="text-sm font-medium text-foreground">
-                  Provider
+                  {t3T("Provider")}
                 </div>
                 <RadioGroup
                   disabled={isPreparingRegistryAgent}
@@ -403,7 +411,7 @@ export function AddProviderInstanceDialog({
                             iconClassName="size-4"
                           />
                           <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                            {option.label}
+                            {t3T(option.label)}
                           </span>
                           <RadioPrimitive.Indicator
                             className="grid size-5 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"
@@ -413,7 +421,7 @@ export function AddProviderInstanceDialog({
                           </RadioPrimitive.Indicator>
                           {option.badgeLabel ? (
                             <Badge variant="warning" size="sm">
-                              {option.badgeLabel}
+                              {t3T(option.badgeLabel)}
                             </Badge>
                           ) : null}
                         </RadioPrimitive.Root>
@@ -427,16 +435,20 @@ export function AddProviderInstanceDialog({
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <div aria-hidden className="flex-1 border-t border-border/70" />
-                    <span>Or choose from ACP Registry</span>
+                    <span>{t3T("Or choose from ACP Registry")}</span>
                     <div aria-hidden className="flex-1 border-t border-border/70" />
                   </div>
                   {isAcpRegistry && isManualAcpConfiguration ? (
                     <div className="grid gap-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-sm font-medium text-foreground">Enter manually</h3>
+                          <h3 className="text-sm font-medium text-foreground">
+                            {t3T("Enter manually")}
+                          </h3>
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            Enter an official registry ID and any local executable or auth override.
+                            {t3T(
+                              "Enter an official registry ID and any local executable or auth override.",
+                            )}
                           </p>
                         </div>
                         <Button
@@ -447,7 +459,7 @@ export function AddProviderInstanceDialog({
                           size="xs"
                           variant="ghost"
                         >
-                          Search registry
+                          {t3T("Search registry")}
                         </Button>
                       </div>
                       <SettingsGroup variant="plain">
@@ -488,30 +500,37 @@ export function AddProviderInstanceDialog({
                       {selectedAcp.name}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      v{selectedAcp.version} · {selectedAcp.distribution}
+                      {t3T("v")}
+                      {selectedAcp.version} · {selectedAcp.distribution}
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2 text-2xs">
                     {selectedAcp.website ? (
                       <a
-                        aria-label={`Open documentation for ${selectedAcp.name} (${selectedAcp.id})`}
+                        aria-label={t3T("Open documentation for {0} ({1})", [
+                          selectedAcp.name,
+                          selectedAcp.id,
+                        ])}
                         className="text-muted-foreground hover:text-foreground"
                         href={selectedAcp.website}
                         rel="noreferrer"
                         target="_blank"
                       >
-                        Docs
+                        {t3T("Docs")}
                       </a>
                     ) : null}
                     {selectedAcp.repository ? (
                       <a
-                        aria-label={`Open source for ${selectedAcp.name} (${selectedAcp.id})`}
+                        aria-label={t3T("Open source for {0} ({1})", [
+                          selectedAcp.name,
+                          selectedAcp.id,
+                        ])}
                         className="text-muted-foreground hover:text-foreground"
                         href={selectedAcp.repository}
                         rel="noreferrer"
                         target="_blank"
                       >
-                        Source
+                        {t3T("Source")}
                       </a>
                     ) : null}
                   </div>
@@ -523,9 +542,11 @@ export function AddProviderInstanceDialog({
                 className={cn(wizardStep !== identityStep && "hidden")}
               >
                 <SettingsRow
-                  title={<label htmlFor="add-provider-label">Label</label>}
+                  title={<label htmlFor="add-provider-label">{t3T("Label")}</label>}
                   description={
-                    <span id="add-provider-label-description">Shown in the provider list.</span>
+                    <span id="add-provider-label-description">
+                      {t3T("Shown in the provider list.")}
+                    </span>
                   }
                   control={
                     <Input
@@ -533,17 +554,17 @@ export function AddProviderInstanceDialog({
                       aria-describedby="add-provider-label-description"
                       size="sm"
                       className="w-full @min-[32rem]/settings-row:w-56"
-                      placeholder="e.g. Work"
+                      placeholder={t3T("e.g. Work")}
                       value={label}
                       onChange={(event) => setIdentityDraft({ label: event.target.value })}
                     />
                   }
                 />
                 <SettingsRow
-                  title={<label htmlFor="add-provider-instance-id">Instance ID</label>}
+                  title={<label htmlFor="add-provider-instance-id">{t3T("Instance ID")}</label>}
                   description={
                     <span id="add-provider-instance-id-description">
-                      Letters, digits, '-', or '_'.
+                      {t3T("Letters, digits, '-', or '_'.")}
                     </span>
                   }
                   status={
@@ -567,7 +588,7 @@ export function AddProviderInstanceDialog({
                       }
                       size="sm"
                       className="w-full @min-[32rem]/settings-row:w-56"
-                      placeholder={`${driver}_work`}
+                      placeholder={t3T("{0}_work", [driver])}
                       value={instanceId}
                       onChange={(event) => {
                         setIdentityDraft({ instanceIdOverride: event.target.value });
@@ -577,8 +598,8 @@ export function AddProviderInstanceDialog({
                   }
                 />
                 <SettingsRow
-                  title="Accent color"
-                  description="Optional marker shown in the picker."
+                  title={t3T("Accent color")}
+                  description={t3T("Optional marker shown in the picker.")}
                   control={
                     <ProviderAccentColorPicker
                       displayName={label || driverOption.label}
@@ -603,7 +624,9 @@ export function AddProviderInstanceDialog({
               ) : !isAcpRegistry && wizardStep === 2 ? (
                 <div className="grid gap-2">
                   <p className="text-sm text-muted-foreground">
-                    This driver has no required configuration. You can add the instance now.
+                    {t3T(
+                      "This driver has no required configuration. You can add the instance now.",
+                    )}
                   </p>
                 </div>
               ) : null}
@@ -622,12 +645,12 @@ export function AddProviderInstanceDialog({
                   setWizardStep((step) => Math.max(0, step - 1));
                 }}
               >
-                {wizardStep === 0 ? "Cancel" : "Back"}
+                {wizardStep === 0 ? t3T("Cancel") : t3T("Back")}
               </Button>
               {wizardStep === 0 && driver === "codex" ? (
                 <>
                   <Button variant="outline" size="sm" onClick={() => navigateToStep(1)}>
-                    Configure manually
+                    {t3T("Configure manually")}
                   </Button>
                   <ChatGptConnectionButton
                     size="sm"
@@ -640,11 +663,15 @@ export function AddProviderInstanceDialog({
                   disabled={isPreparingRegistryAgent}
                   onClick={() => navigateToStep(wizardStep + 1)}
                 >
-                  Next
+                  {t3T("Next")}
                 </Button>
               ) : (
                 <Button size="sm" disabled={isSaving} onClick={() => void handleSave()}>
-                  {isSaving ? "Adding..." : isAcpRegistry ? "Continue to sign-in" : "Add instance"}
+                  {isSaving
+                    ? t3T("Adding...")
+                    : isAcpRegistry
+                      ? t3T("Continue to sign-in")
+                      : t3T("Add instance")}
                 </Button>
               )}
             </WizardFooter>

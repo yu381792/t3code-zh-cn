@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Extension, Node, wrappingInputRule, type JSONContent } from "@tiptap/core";
 import { TaskList } from "@tiptap/extension-task-list";
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
@@ -224,6 +225,8 @@ const ComposerMentionExtension = Node.create({
 });
 
 function ComposerMentionNodeView({ node }: NodeViewProps) {
+  const t3T = useUiTranslate();
+
   const actions = use(ComposerContextActionsContext);
   const path = (node.attrs.path as string) ?? "";
   const chip = (
@@ -231,7 +234,7 @@ function ComposerMentionNodeView({ node }: NodeViewProps) {
       kind="mention"
       render={<button type="button" />}
       onClick={() => actions.openMention(path)}
-      aria-label={`Preview ${path}`}
+      aria-label={t3T("Preview {0}", [path])}
       contentEditable={false}
       spellCheck={false}
       data-composer-mention-chip="true"
@@ -278,6 +281,8 @@ const ComposerSkillExtension = Node.create({
 });
 
 function ComposerSkillNodeView({ node }: NodeViewProps) {
+  const t3T = useUiTranslate();
+
   const actions = use(ComposerContextActionsContext);
   const skills = use(RichComposerSkillsContext);
   const skillName = (node.attrs.skillName as string) ?? "";
@@ -297,11 +302,11 @@ function ComposerSkillNodeView({ node }: NodeViewProps) {
           <p>
             {skill?.description ??
               skillDescription ??
-              "No description is available for this skill."}
+              t3T("No description is available for this skill.")}
           </p>
           {skill?.path ? (
             <Button variant="outline" size="sm" onClick={() => actions.openMention(skill.path)}>
-              View instructions
+              {t3T("View instructions")}
             </Button>
           ) : null}
         </div>

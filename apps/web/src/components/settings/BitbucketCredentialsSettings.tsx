@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { BitbucketSettings, EnvironmentId } from "@t3tools/contracts";
 import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
@@ -55,13 +56,15 @@ function TokenInput({
   readonly draft: string;
   readonly onDraftChange: (draft: string) => void;
 }) {
+  const t3T = useUiTranslate();
+
   return (
     <Input
       id={id}
       type="password"
       autoComplete="off"
       size="sm"
-      placeholder={isSaved ? "Stored secret, enter a new value to replace" : "Not set"}
+      placeholder={isSaved ? t3T("Stored secret, enter a new value to replace") : t3T("Not set")}
       value={draft}
       onChange={(event) => onDraftChange(event.target.value)}
     />
@@ -80,6 +83,8 @@ export function BitbucketCredentialsSettings({
   readonly environmentId: EnvironmentId;
   readonly onSaved: () => void;
 }) {
+  const t3T = useUiTranslate();
+
   const saved = useEnvironmentSettings(environmentId, (settings) => settings.bitbucket);
   const updateSettings = useAtomCommand(serverEnvironment.updateSettings, {
     label: "save Bitbucket credentials",
@@ -140,7 +145,7 @@ export function BitbucketCredentialsSettings({
       {/* Locked while saving: a successful save clears the drafts, which would drop edits made mid-request. */}
       <fieldset disabled={saving} className="contents">
         <ToggleGroup
-          aria-label="Bitbucket sign-in method"
+          aria-label={t3T("Bitbucket sign-in method")}
           variant="segmented"
           value={[method]}
           onValueChange={(next) => {
@@ -148,8 +153,8 @@ export function BitbucketCredentialsSettings({
             if (value === "access-token" || value === "api-token") setMethodChoice(value);
           }}
         >
-          <Toggle value="access-token">{METHODS["access-token"].label}</Toggle>
-          <Toggle value="api-token">{METHODS["api-token"].label}</Toggle>
+          <Toggle value="access-token">{t3T(METHODS["access-token"].label)}</Toggle>
+          <Toggle value="api-token">{t3T(METHODS["api-token"].label)}</Toggle>
         </ToggleGroup>
         <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
           {info.description}{" "}
@@ -160,7 +165,7 @@ export function BitbucketCredentialsSettings({
         </p>
         {method === "access-token" ? (
           <div className="grid gap-1.5">
-            <Label htmlFor={`bitbucket-access-token-${environmentId}`}>Access token</Label>
+            <Label htmlFor={`bitbucket-access-token-${environmentId}`}>{t3T("Access token")}</Label>
             <TokenInput
               id={`bitbucket-access-token-${environmentId}`}
               isSaved={methodIsSaved}
@@ -171,19 +176,21 @@ export function BitbucketCredentialsSettings({
         ) : (
           <>
             <div className="grid gap-1.5">
-              <Label htmlFor={`bitbucket-email-${environmentId}`}>Atlassian account email</Label>
+              <Label htmlFor={`bitbucket-email-${environmentId}`}>
+                {t3T("Atlassian account email")}
+              </Label>
               <Input
                 id={`bitbucket-email-${environmentId}`}
                 type="email"
                 autoComplete="off"
                 size="sm"
-                placeholder="you@example.com"
+                placeholder={t3T("you@example.com")}
                 value={emailDraft ?? saved.email}
                 onChange={(event) => setEmailDraft(event.target.value)}
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor={`bitbucket-api-token-${environmentId}`}>API token</Label>
+              <Label htmlFor={`bitbucket-api-token-${environmentId}`}>{t3T("API token")}</Label>
               <TokenInput
                 id={`bitbucket-api-token-${environmentId}`}
                 isSaved={methodIsSaved}
@@ -196,10 +203,12 @@ export function BitbucketCredentialsSettings({
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             {current === null
-              ? "Without a saved token, the server falls back to its T3CODE_BITBUCKET_* environment variables."
+              ? t3T(
+                  "Without a saved token, the server falls back to its T3CODE_BITBUCKET_* environment variables.",
+                )
               : methodIsSaved
                 ? null
-                : `Saving replaces your ${METHODS[current].label.toLowerCase()}.`}
+                : t3T("Saving replaces your {0}.", [METHODS[current].label.toLowerCase()])}
           </p>
           <div className="flex shrink-0 gap-2">
             {current !== null ? (
@@ -209,11 +218,11 @@ export function BitbucketCredentialsSettings({
                 disabled={saving}
                 onClick={() => void save({ accessToken: "", email: "", apiToken: "" })}
               >
-                Remove
+                {t3T("Remove")}
               </Button>
             ) : null}
             <Button type="submit" size="xs" disabled={!canSave || saving}>
-              Save
+              {t3T("Save")}
             </Button>
           </div>
         </div>

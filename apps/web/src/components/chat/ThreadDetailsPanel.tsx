@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type {
   EditorId,
   EnvironmentId,
@@ -78,6 +79,8 @@ export interface ThreadDetailsPanelProps extends Pick<
 }
 
 export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
+  const t3T = useUiTranslate();
+
   const fileScripts = useT3ProjectFileScripts(
     props.environmentId,
     props.activeProjectScripts ? props.gitCwd : null,
@@ -124,7 +127,7 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
         <>
           <ThreadDetailsSection
             headingId="thread-details-workspace-heading"
-            title="Workspace"
+            title={t3T("Workspace")}
             separated={false}
             showHeading={density === "full"}
           >
@@ -132,16 +135,16 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
               <div className="mx-1 mb-2 flex gap-2 rounded-xl border border-warning/30 bg-warning/6 p-3">
                 <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0 text-warning" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium">Client and server versions differ</p>
+                  <p className="text-xs font-medium">{t3T("Client and server versions differ")}</p>
                   <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
-                    Client {props.versionMismatch.clientVersion} ·{" "}
+                    {t3T("Client")} {props.versionMismatch.clientVersion} ·{" "}
                     {props.versionMismatch.serverLabel} {props.versionMismatch.serverVersion}
                   </p>
                 </div>
                 <Button
                   size="icon-xs"
                   variant="ghost"
-                  aria-label="Dismiss version mismatch warning"
+                  aria-label={t3T("Dismiss version mismatch warning")}
                   onClick={props.onDismissVersionMismatch}
                 >
                   <XIcon className="size-3.5" />
@@ -197,7 +200,7 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
           {props.gitCwd ? (
             <ThreadDetailsSection
               headingId="thread-details-version-control-heading"
-              title="Version Control"
+              title={t3T("Version Control")}
               showHeading={density === "full"}
               separated={density === "full"}
             >

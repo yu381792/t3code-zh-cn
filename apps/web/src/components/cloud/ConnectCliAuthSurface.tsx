@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useAuth, useClerk } from "@clerk/react";
 import { readConnectAuthorizeRequest } from "@t3tools/shared/connectAuth";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -45,6 +46,8 @@ const invalidLinkMessage = {
  * CLI. Headless hosts use Clerk's device authorization page instead.
  */
 export function ConnectCliAuthorizeSurface() {
+  const t3T = useUiTranslate();
+
   const [request] = useState(() => readConnectAuthorizeRequest(new URL(window.location.href)));
   const clerk = useClerk();
   const { isLoaded, isSignedIn } = useAuth();
@@ -94,17 +97,17 @@ export function ConnectCliAuthorizeSurface() {
     <AuthSurfaceShell>
       <ConnectCliAuthMessage
         eyebrow="Browser authorization"
-        title="Connecting your terminal"
+        title={t3T("Connecting your terminal")}
         description={
           isSignedIn
-            ? "Redirecting to authorize T3 Connect for your CLI…"
-            : "Sign in to continue authorizing T3 Connect for your CLI."
+            ? t3T("Redirecting to authorize T3 Connect for your CLI…")
+            : t3T("Sign in to continue authorizing T3 Connect for your CLI.")
         }
       />
       {isLoaded && !isSignedIn ? (
         <div className="mt-6">
           <Button type="button" onClick={openSignIn}>
-            Sign in
+            {t3T("Sign in")}
           </Button>
         </div>
       ) : null}

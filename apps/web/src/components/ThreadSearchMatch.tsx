@@ -1,3 +1,4 @@
+import { useTranslate as useUiTranslate } from "~/i18n/translate";
 function foldAsciiCase(value: string): string {
   return value.replace(/[A-Z]/g, (character) => character.toLowerCase());
 }
@@ -54,11 +55,13 @@ export function ThreadSearchMatchExcerpt(props: {
     readonly query: string;
   };
 }) {
+  const t3T = useUiTranslate();
+
   const isUser = props.match.source === "user";
   return (
     <span className="truncate text-xs text-muted-foreground/85">
       <span className={isUser ? "text-info-foreground" : "text-success-foreground"}>
-        {isUser ? "You:" : "Agent:"}
+        {isUser ? t3T("You:") : t3T("Agent:")}
       </span>{" "}
       <HighlightedSearchText text={props.match.snippet} query={props.match.query} />
     </span>
