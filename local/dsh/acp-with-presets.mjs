@@ -1,3 +1,4 @@
+import { readHistory, conversationItems, enrichSessions } from "./acp-history.mjs";
 import { createRequire } from "node:module";
 import { realpathSync } from "node:fs";
 import { Readable, Writable } from "node:stream";
@@ -133,6 +134,23 @@ export function apply(ctx, config) {
           if (request) requests.delete(packet.id);
           const sessionId =
             packet.result?.sessionId ?? request?.params?.sessionId ?? packet.params?.sessionId;
+          if (request?.method === "session/list" && packet.result?.sessions)
+            packet = {
+              ...packet,
+              result: {
+                ...packet.result,
+                sessions: await enrichSessions(ctx.sessionPersistence, packet.result.sessions),
+              },
+            };
+          if (
+            request?.method === "session/resume" &&
+            !packet.error &&
+            request.params?._meta?.dshReplayHistory
+          ) {
+            const { events } = await readHistory(ctx.sessionPersistence, sessionId);
+            for (const item of conversationItems(sessionId, events))
+              await writer.write({ jsonrpc: "2.0", method: "dsh/history_item", params: { item } });
+          }
           if (sessionId && packet.result?.configOptions)
             packet = {
               ...packet,
