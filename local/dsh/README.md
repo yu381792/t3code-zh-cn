@@ -14,8 +14,10 @@ T3 的运行模式通过接入层传入 `T3_RUNTIME_MODE`。入口程序把“�
 
 默认权限为完全访问，与 T3 的新会话默认值一致；显式选用受限模式仍会切回工作目录沙箱。无 T3 运行模式参数的验证入口也默认完全访问。`T3_DSH_VERIFY_PRESET=1 node local/dsh/verify-acp.mjs --preset-probe` 验证实际预设与 `run_code`。
 
-新建会话的输入框下方提供“预设”选择，默认 `pi-both`，也可选 `standard`、`ptc`、`minimal`、`cordis`。首条消息发送后固定；恢复会话保留原选择。`acp-with-presets.mjs` 包装已安装版本的 ACP 标准数据流，新增 `agent_preset` 配置项，使用 dsh 原生预设名录和首轮前选择服务；模型、工具、权限等其他消息仍走原 ACP。专用 profile 必须禁用原 `acp` 行并通过 `insert` 装入 `t3-acp-bridge`，不能用 `name` 覆盖原行：Cordis 把 `name` 当匹配条件，不是重命名。运行补丁同时更新桥接行的模型默认值。官方预设的提醒工具在此入口关闭，由 T3 管理提醒；其余预设插件和所需宿主依赖按现行已安装版本加载。预设失效时不列入可选项。
+新建会话的输入框下方提供“预设”选择，默认 `pi-both`，菜单只列自定义预设；官方 `standard`、`ptc`、`minimal`、`cordis` 不列入菜单。首条消息发送后固定；恢复会话保留原选择。`acp-with-presets.mjs` 包装已安装版本的 ACP 标准数据流，新增 `agent_preset` 配置项，使用 dsh 原生预设名录和首轮前选择服务；模型、工具、权限等其他消息仍走原 ACP。专用 profile 必须禁用原 `acp` 行并通过 `insert` 装入 `t3-acp-bridge`，不能用 `name` 覆盖原行：Cordis 把 `name` 当匹配条件，不是重命名。运行补丁同时更新桥接行的模型默认值。官方预设的提醒工具在此入口关闭，由 T3 管理提醒；其余预设插件和所需宿主依赖按现行已安装版本加载。预设失效时不列入可选项。
 
 `node local/dsh/verify-acp.mjs --preset standard --prompt --assert-preset-locked pi-both` 验证首轮前选择与首轮后锁定，`--resume <会话编号> --preset standard` 验证恢复后的同值重放。OpenCodex 模型变化在下一次 DSH 进程启动或探测时读取，已运行进程不会即时换清单；T3 列表在会话初始化、刷新智能体设置或应用重启后更新。
 
 权限验证可给 `verify-acp.mjs` 传 `--cwd <工作目录> --write-probe <工作目录外的专用测试文件>`。还可用 `--resume <会话编号>` 验证旧会话从受限模式切到完全访问、再切回受限模式。测试只使用隔离的自有文件，不测试业务数据或凭证。`T3_DSH_VERIFY_PERMISSION=1` 可显示实际应用的权限模式。
+
+推理档位按模型分别提供。桥接层根据 dsh 的真实模型元数据，把各模型的配置通过 ACP 模型条目的 `_meta["t3code/config-options"]` 传给 T3；通用接入层只验证并使用该元数据，不把最后一个会话的 GLM 三档推理覆盖到 GPT 模型。没有该元数据的旧智能体保留原会话配置兼容路径。
