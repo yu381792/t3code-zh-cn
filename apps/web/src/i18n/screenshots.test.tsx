@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 import { DEFAULT_SERVER_SETTINGS } from "@t3tools/contracts";
 import { ProjectDefaultsSettings } from "../components/settings/ProjectDefaultsSettings";
 import { ToastProvider, toastManager } from "../components/ui/toast";
+import { resolveSnoozePresets } from "../components/Sidebar.snooze";
 import { settingInheritanceLayers } from "../components/settings/SettingInheritance";
 import { createLocalApi } from "../localApi";
 import { setInterfaceLanguage, translate } from "./translate";
@@ -199,5 +200,19 @@ describe("screenshots: actual product rendering", () => {
         t,
       ).find((layer) => layer.key === "environment")?.value,
     ).toBe("High");
+  });
+  it("translates dynamic built-in mute and snooze options without changing preset IDs", () => {
+    expect(localizeContextMenuItems([{ id: "toggle-mute", label: "Mute tab" }])[0]?.label).toBe(
+      "静音标签页",
+    );
+    const now = new Date("2026-10-03T10:00:00");
+    const chinese = resolveSnoozePresets(now, "24-hour");
+    setInterfaceLanguage("en");
+    const english = resolveSnoozePresets(now, "24-hour");
+    expect(chinese.map((preset) => preset.id)).toEqual(english.map((preset) => preset.id));
+    expect(chinese.map((preset) => preset.label)).not.toEqual(
+      english.map((preset) => preset.label),
+    );
+    expect(chinese.every((preset) => /[\p{Script=Han}]/u.test(preset.label))).toBe(true);
   });
 });

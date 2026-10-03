@@ -36,5 +36,6 @@
   "copy-image": ["Copy image"],
   "unarchive": ["Unarchive"],
   "open": ["Open"],
-  "open-with": ["Open with"]
+  "open-with": ["Open with"],
+  "toggle-mute": ["Unmute tab", "Mute tab"]
 }
