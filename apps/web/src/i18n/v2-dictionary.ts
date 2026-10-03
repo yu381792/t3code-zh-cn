@@ -3522,4 +3522,9 @@ export const ZH_CN_V2_DICTIONARY: Readonly<Record<string, string>> = {
   "{0} item{1}": "{0} 项",
   "{0} · {1} project override": "{0} · {1} 个项目覆盖",
   "{0} · {1} project overrides": "{0} · {1} 个项目覆盖",
+  "Show all projects": "显示所有项目",
+  "Un-settle thread": "取消收档线程",
+  "Later today ({0})": "今天稍晚（{0}）",
+  "Tomorrow ({0})": "明天（{0}）",
+  "Next week ({0})": "下周（{0}）",
 };
