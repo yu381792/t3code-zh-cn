@@ -10,9 +10,27 @@
 
 ## 使用此版本
 
-需要构建此 fork 的 `feature/interface-language-v2` 分支。官方安装脚本、官方发布包以及 `npx t3@latest` **不会**安装本分支的汉化。
+汉化已合入此 fork 的 `main` 主分支，日常使用和更新从 `main` 获取。官方安装脚本、官方发布包以及 `npx t3@latest` **不会**安装本分支的汉化。
 
 本版本使用上游要求的 Node.js **24.13.1** 和仓库指定的 pnpm。依赖与开发启动方式见 [上游开发文档](docs/operations/development.md)。首次启动使用独立开发数据目录，不要把开发服务器指向现用的 T3 数据库。
+
+## 本地运行
+
+准备好 Node.js 24.13.1 和依赖后，在仓库根目录运行：
+
+```sh
+pnpm exec vp run dev --home-dir "$PWD/.t3"
+```
+
+打开终端输出的完整配对链接（pairing URL），不要只打开一个猜测的 localhost 地址。`Ctrl+C` 停止本次进程。此命令使用仓库内被 Git 忽略的 `.t3` 开发数据目录，不会覆盖现用的 `~/.t3/userdata`；首次启动看到空环境是正常的。
+
+如果需要 Electron 桌面窗口，改用：
+
+```sh
+pnpm exec vp run dev:desktop --home-dir "$PWD/.t3"
+```
+
+桌面模式首次可能需要下载 Electron 并构建相关资源；它不会替换系统中安装的官方 T3 Code 应用。需要独立安装包时，按 [桌面打包说明](docs/operations/development.md#desktop-artifacts) 构建。
 
 ## 跟进上游
 
