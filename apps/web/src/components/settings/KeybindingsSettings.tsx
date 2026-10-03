@@ -547,7 +547,7 @@ function WhenExpressionNodeEditor({
       <div className="flex flex-wrap items-center gap-2">
         <Select value={operator} onValueChange={(value) => setOperator(value as BooleanOperator)}>
           <SelectTrigger size="compact" className="w-24">
-            <SelectValue />
+            <SelectValue>{(value: string | null) => (value ? t3T(value) : null)}</SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} matchTriggerWidth={false}>
             <SelectItem value="and">{t3T("and")}</SelectItem>
