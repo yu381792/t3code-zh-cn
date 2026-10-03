@@ -1,5 +1,7 @@
 "use client";
 
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 
 import { PlusIcon, XIcon } from "lucide-react";
@@ -223,7 +225,9 @@ export function CustomModelEditor({
                 <SelectItem key={preset.id} value={preset.id}>
                   <span className="flex items-baseline gap-2">
                     <code className="font-mono text-xs">{preset.id}</code>
-                    <span className="text-muted-foreground">{preset.label}</span>
+                    <span className="text-muted-foreground">
+                      <LocalizedUiText source={preset.label} />
+                    </span>
                   </span>
                 </SelectItem>
               ))}
@@ -369,7 +373,7 @@ export function CustomModelEditor({
                 onClick={() => addDescriptor(descriptorFromPreset(preset))}
               >
                 <PlusIcon className="size-3" />
-                {preset.label}
+                <LocalizedUiText source={preset.label} />
               </Button>
             ))}
           <Button

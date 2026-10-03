@@ -4,7 +4,7 @@
 
 本分支基于官方 V2 主线 `fed41fa88bb27cb4325cb208d571393850bc63c2`，不是 V1 稳定版 v0.0.45。实际服务使用 `apps/server/src/orchestration-v2/` 和 `statev2.sqlite`。
 
-Mac Apple Silicon 安装包中的应用名为 **T3 Code (Nightly)**，构建版本为 `0.0.46-nightly.20261003.2`（本 fork 的开发版编号，不是官方 0.0.46 稳定发布）。打开设置搜索“语言”，选择简体中文或 English。选择会持久保存，并即时切换界面与原生应用菜单。
+Mac Apple Silicon 安装包中的应用名为 **T3 Code (Nightly)**，构建版本为 `0.0.46-nightly.20261003.3`（本 fork 的开发版编号，不是官方 0.0.46 稳定发布）。打开设置搜索“语言”，选择简体中文或 English。选择会持久保存，并即时切换界面与原生应用菜单。
 
 这沿用原仓库的应用内语言层，不是外部 ASAR 覆盖补丁。现有语言设置优先；未设置语言时沿用原 fork 默认的 English，可在设置中切换中文。
 

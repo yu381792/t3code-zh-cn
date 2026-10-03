@@ -3,6 +3,11 @@ import * as NodePath from "node:path";
 import * as NodeModule from "node:module";
 import * as NodeURL from "node:url";
 
+import {
+  collectInterfaceCatalogs,
+  checkInterfaceCatalogs,
+} from "./interface-localization-catalogs.mjs";
+
 const root = NodePath.resolve(NodePath.dirname(NodeURL.fileURLToPath(import.meta.url)), "..");
 const webRequire = NodeModule.createRequire(NodePath.join(root, "apps/web/package.json"));
 const compilerRequire = NodeModule.createRequire(webRequire.resolve("@rolldown/plugin-babel"));
@@ -47,6 +52,16 @@ for (const name of ["dictionary.ts", "v2-dictionary.ts"]) {
   });
 }
 const pluralSuffixOmissions = new Map([
+  ["{0} day{1}", ["{1}"]],
+  ["{0} item{1}", ["{1}"]],
+  ["{0} {1} outdated. Check provider settings for details.", ["{1}"]],
+  ["{0} {1} outdated. Review provider settings for details.", ["{1}"]],
+  ["Failed to snooze {0} thread{1}", ["{1}"]],
+  [
+    "That prompt was restored or deleted before {0} image{1} finished saving. Re-attach {2} if you still need {3}.",
+    ["{1}", "{3}"],
+  ],
+  ["{0} {1} a manual update", ["{1}"]],
   [" · {0} favorite{1}", ["{1}"]],
   ["{0} bot comment{1}", ["{1}"]],
   ["{0} queued message{1}", ["{1}"]],
@@ -62,6 +77,29 @@ for (const [source, target] of dictionary) {
     if (!targetSlots.has(slot) && !pluralSuffixOmissions.get(source)?.includes(slot))
       errors.push("Missing slot " + slot + " in " + source);
 }
+const catalog = collectInterfaceCatalogs(root, parse, walk);
+const preservedSources = JSON.parse(
+  NodeFS.readFileSync(
+    NodePath.join(root, "apps/web/src/i18n/catalog-preserved-sources.json"),
+    "utf8",
+  ),
+);
+errors.push(...checkInterfaceCatalogs(catalog, dictionary, preservedSources));
+// A registered right-click action must have real translations, not English placeholders.
+const menuCatalog = JSON.parse(
+  NodeFS.readFileSync(NodePath.join(root, "apps/web/src/i18n/context-menu-labels.json"), "utf8"),
+);
+for (const labels of Object.values(menuCatalog))
+  for (const source of labels) {
+    if (!Object.hasOwn(preservedSources, source) && !dictionary.has(source))
+      errors.push("Native menu missing dictionary key " + source);
+  }
+const authoredTemplates = JSON.parse(
+  NodeFS.readFileSync(NodePath.join(root, "apps/web/src/i18n/authored-ui-templates.json"), "utf8"),
+);
+for (const source of authoredTemplates)
+  if (!dictionary.has(source)) errors.push("Authored template missing dictionary key " + source);
+
 const attributes = new Set([
   "title",
   "description",
@@ -166,6 +204,8 @@ console.log(
   JSON.stringify(
     {
       dictionaryKeys: dictionary.size,
+      catalogFiles: catalog.files,
+      catalogSources: catalog.rows.length,
       checkedFiles,
       translatedDisplayCalls: calls,
       errors: errors.length,

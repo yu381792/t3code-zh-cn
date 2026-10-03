@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ProviderInteractionMode, RuntimeMode } from "@t3tools/contracts";
 import { memo, type ReactNode } from "react";
@@ -90,7 +91,7 @@ export const CompactComposerControlsMenu = memo(function CompactComposerControls
         >
           {props.runtimeModeOptions.map((option) => (
             <MenuRadioItem key={option.mode} value={option.mode}>
-              {option.label}
+              <LocalizedUiText source={option.label} />
             </MenuRadioItem>
           ))}
         </MenuRadioGroup>

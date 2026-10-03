@@ -24,6 +24,10 @@ const witnesses = {
   clientVersion: [],
   v2Database: [],
   v2Orchestrator: [],
+  submoduleMessages: [],
+  updateMessages: [],
+  instanceMessages: [],
+  contextMenuMessages: [],
 };
 function walk(node, prefix = "") {
   for (const [name, entry] of Object.entries(node.files ?? {})) {
@@ -42,6 +46,16 @@ function walk(node, prefix = "") {
         witnesses.v2Orchestrator.push(path);
     }
     if (path.includes("client/assets/")) {
+      if (["递归初始化", "仅顶层", "跳过"].every((text) => source.includes(text)))
+        witnesses.submoduleMessages.push(path);
+      if (
+        source.includes("有可用更新：{0} 个提供方") &&
+        source.includes("现在安装更新，或查看提供方设置。")
+      )
+        witnesses.updateMessages.push(path);
+      if (source.includes("已添加 {0} 实例“{1}”。")) witnesses.instanceMessages.push(path);
+      if (source.includes("分组到…") && source.includes("复制路径"))
+        witnesses.contextMenuMessages.push(path);
       if (
         source.includes("interface-language") &&
         source.includes("onValueChange") &&

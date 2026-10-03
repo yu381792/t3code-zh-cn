@@ -1,3 +1,4 @@
+import { translateUiMessage } from "~/i18n/messages";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import { PullRequestGlyph } from "../pullRequest/pullRequestIcons";
@@ -395,10 +396,10 @@ export function ThreadDetailsPrRow({
                     />
                   }
                 >
-                  {trailingAction.pending ? trailingAction.pendingLabel : trailingAction.label}
+                  {t3T(trailingAction.pending ? trailingAction.pendingLabel : trailingAction.label)}
                   {trailingAction.suffix}
                 </TooltipTrigger>
-                <TooltipPopup side="top">{trailingAction.tooltip}</TooltipPopup>
+                <TooltipPopup side="top">{translateUiMessage(trailingAction.tooltip)}</TooltipPopup>
               </Tooltip>
             </>
           ) : null}

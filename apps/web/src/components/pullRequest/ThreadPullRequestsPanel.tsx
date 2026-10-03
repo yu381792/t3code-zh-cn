@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { ScopedThreadRef, ThreadPullRequestLink } from "@t3tools/contracts";
 import {
@@ -60,7 +61,9 @@ function ChecksGlyph({
           className={cn("size-3.5", presentation.toneClassName)}
         />
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }

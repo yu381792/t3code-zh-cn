@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import type {
@@ -107,9 +108,13 @@ export function PullRequestReviewDecisionGlyph({
     <Tooltip>
       <TooltipTrigger render={<span className="inline-flex shrink-0" />}>
         <presentation.Icon aria-hidden className={cn("size-3.5", presentation.toneClassName)} />
-        <span className="sr-only">{presentation.label}</span>
+        <span className="sr-only">
+          <LocalizedUiText source={presentation.label} />
+        </span>
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -172,7 +177,9 @@ export function PullRequestStateGlyph({
           className={cn("size-4 shrink-0", presentation.toneClassName, className)}
         />
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -206,7 +213,9 @@ export function PullRequestConflictGlyph({
           className={cn("size-4 shrink-0", presentation.toneClassName, className)}
         />
       </TooltipTrigger>
-      <TooltipPopup>{presentation.label}</TooltipPopup>
+      <TooltipPopup>
+        <LocalizedUiText source={presentation.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -409,7 +418,7 @@ export function PullRequestReviewOutcomeBadge({
   return (
     <Badge size="sm" variant={presentation.badgeVariant} className={className}>
       <presentation.Icon aria-hidden className="size-3" />
-      {presentation.label}
+      <LocalizedUiText source={presentation.label} />
     </Badge>
   );
 }

@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type {
   EnvironmentId,
@@ -442,7 +443,9 @@ function LifecycleEvent({ event }: { event: PullRequestTimelineEvent }) {
       <div className="py-1.5 text-xs">
         <div className="flex flex-wrap items-center gap-1.5">
           {event.actor ? <ActorName actor={event.actor} /> : null}
-          <span className="font-semibold text-foreground">{presentation.label}</span>
+          <span className="font-semibold text-foreground">
+            <LocalizedUiText source={presentation.label} />
+          </span>
         </div>
         <div className="mt-0.5 text-2xs text-muted-foreground">
           {formatRelativeTimeLabel(event.at)}

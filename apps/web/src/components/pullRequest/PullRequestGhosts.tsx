@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * Loading states specific to the pull request surface — the first list, a search under way,
@@ -332,7 +333,7 @@ export function PullRequestDetailGhost({
               )}
             >
               <checksPresentation.Icon aria-hidden className="size-3.5" />
-              {checksPresentation.label}
+              <LocalizedUiText source={checksPresentation.label} />
             </span>
           ) : (
             <GhostBar className="ml-auto h-3 w-32" />

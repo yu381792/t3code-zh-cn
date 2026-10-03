@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { parseChangeRequestUrl } from "@t3tools/shared/changeRequestUrl";
 import { useAtomValue } from "@effect/atom-react";
@@ -2002,7 +2003,7 @@ export function PullRequestDetailPanel({
                 <Badge size="control" variant="outline">
                   <span className={cn("flex items-center gap-1", statePresentation.toneClassName)}>
                     <statePresentation.Icon className="size-3.5" />
-                    {statePresentation.label}
+                    <LocalizedUiText source={statePresentation.label} />
                   </span>
                 </Badge>
               ) : null}

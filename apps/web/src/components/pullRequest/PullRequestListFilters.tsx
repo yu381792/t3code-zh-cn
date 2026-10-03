@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import type {
@@ -196,7 +197,9 @@ function PullRequestFilterRadioGroup<Value extends string>({
           >
             <span className="flex min-w-0 items-center gap-2">
               <PullRequestFilterOptionIcon option={option} />
-              <span className="min-w-0 flex-1 truncate">{option.label}</span>
+              <span className="min-w-0 flex-1 truncate">
+                <LocalizedUiText source={option.label} />
+              </span>
               {option.unavailable ? <span className="shrink-0">{t3T("· Unavailable")}</span> : null}
               <MenuRadioItemIndicator />
             </span>
@@ -233,7 +236,7 @@ function PullRequestFilterRadioSubmenu<Value extends string>({
         <PullRequestFilterOptionIcon option={current} />
         <span className="flex-1">{label}</span>
         <span className="min-w-0 max-w-32 truncate text-xs text-muted-foreground">
-          {current.label}
+          <LocalizedUiText source={current.label} />
         </span>
       </MenuSubTrigger>
       <MenuSubPopup>

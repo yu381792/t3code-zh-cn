@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   scopeProjectRef,
@@ -841,7 +842,9 @@ export function ThreadStatusLabel({
             }`}
           />
         </TooltipTrigger>
-        <TooltipPopup side="top">{status.label}</TooltipPopup>
+        <TooltipPopup side="top">
+          <LocalizedUiText source={status.label} />
+        </TooltipPopup>
       </Tooltip>
     );
   }
@@ -861,9 +864,13 @@ export function ThreadStatusLabel({
             status.pulse ? "animate-status-pulse" : ""
           }`}
         />
-        <span className="hidden md:inline">{status.label}</span>
+        <span className="hidden md:inline">
+          <LocalizedUiText source={status.label} />
+        </span>
       </TooltipTrigger>
-      <TooltipPopup side="top">{status.label}</TooltipPopup>
+      <TooltipPopup side="top">
+        <LocalizedUiText source={status.label} />
+      </TooltipPopup>
     </Tooltip>
   );
 }
@@ -1023,7 +1030,9 @@ export function ThreadRowTrailingStatus({ thread }: { thread: SidebarThreadSumma
               onAnimationStart={synchronizeTerminalPulse}
             />
           </TooltipTrigger>
-          <TooltipPopup side="top">{terminalStatus.label}</TooltipPopup>
+          <TooltipPopup side="top">
+            <LocalizedUiText source={terminalStatus.label} />
+          </TooltipPopup>
         </Tooltip>
       ) : null}
       {isRemoteThread ? (

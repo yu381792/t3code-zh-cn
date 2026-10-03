@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { BitbucketSettings, EnvironmentId } from "@t3tools/contracts";
 import { ExternalLinkIcon } from "lucide-react";
@@ -157,7 +158,7 @@ export function BitbucketCredentialsSettings({
           <Toggle value="api-token">{t3T(METHODS["api-token"].label)}</Toggle>
         </ToggleGroup>
         <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
-          {info.description}{" "}
+          <LocalizedUiText source={info.description} />{" "}
           <InlineButton render={<a href={info.link} target="_blank" rel="noreferrer noopener" />}>
             {info.linkLabel}
             <ExternalLinkIcon aria-hidden className="size-3" />

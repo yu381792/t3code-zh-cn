@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { Spinner } from "~/components/ui/spinner";
 import { useNavigate } from "@tanstack/react-router";
@@ -185,11 +186,15 @@ export function SidebarProviderUpdatePill() {
               ) : (
                 <DownloadIcon className="size-3.5 shrink-0" />
               )}
-              <span className="min-w-0 wrap-break-word">{displayedView.title}</span>
+              <span className="min-w-0 wrap-break-word">
+                <LocalizedUiText source={displayedView.title} />
+              </span>
             </button>
           }
         />
-        <TooltipPopup side="top">{displayedView.description}</TooltipPopup>
+        <TooltipPopup side="top">
+          <LocalizedUiText source={displayedView.description} />
+        </TooltipPopup>
       </Tooltip>
       {displayedView.dismissible && (
         <Tooltip>

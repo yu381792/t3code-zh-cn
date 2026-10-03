@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { usePullRequestLinking } from "~/hooks/usePullRequestLinking";
 import { useAtomValue } from "@effect/atom-react";
@@ -2871,7 +2872,7 @@ const CHAT_MARKDOWN_COMPONENTS = {
       <div role="note" className={cn("my-1 border-l-2 pl-3", alert.borderClassName)}>
         <p className={cn("flex items-center gap-1.5 font-medium", alert.titleClassName)}>
           <alert.Icon aria-hidden className="size-3.5 shrink-0" />
-          {alert.label}
+          <LocalizedUiText source={alert.label} />
         </p>
         {children}
       </div>

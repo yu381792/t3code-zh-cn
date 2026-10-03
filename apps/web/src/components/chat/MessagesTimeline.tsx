@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ComputerUseAppIcon } from "~/components/Icons";
 import { useChatCanvas } from "./ChatCanvasContext";
@@ -2332,7 +2333,7 @@ function UserMessageIntentMarker({
         }
       >
         {IntentIcon ? <IntentIcon aria-hidden="true" className="size-3" /> : null}
-        {presentation.label}
+        <LocalizedUiText source={presentation.label} />
       </TooltipTrigger>
       <TooltipPopup side="top">
         {intent === "queued_turn"
@@ -2831,7 +2832,9 @@ function V2EventTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "event"
               presentation.tone === "success" && "text-success",
             )}
           />
-          <span className="shrink-0 font-medium text-foreground/90">{presentation.label}</span>
+          <span className="shrink-0 font-medium text-foreground/90">
+            <LocalizedUiText source={presentation.label} />
+          </span>
           {item.status !== "completed" ? (
             <span
               className={cn(
@@ -2912,7 +2915,9 @@ function V2EventTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "event"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-xs font-medium text-foreground/90">{presentation.label}</span>
+            <span className="text-xs font-medium text-foreground/90">
+              <LocalizedUiText source={presentation.label} />
+            </span>
             {item.status !== "completed" ? (
               <span
                 className={cn(

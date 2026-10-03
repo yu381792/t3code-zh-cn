@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import {
   DUO_POSES,
@@ -49,7 +50,7 @@ export function DeviceDuoControls(props: {
                 <DeviceDuoGlyph pose={pose.id} />
               </TooltipTrigger>
               <TooltipPopup side="left">
-                {pose.label}
+                <LocalizedUiText source={pose.label} />
                 {pose.id === "book" ? t3T(" / bookshelf") : ""}
               </TooltipPopup>
             </Tooltip>

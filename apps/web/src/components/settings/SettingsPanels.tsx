@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { SettingsGroup } from "./SettingsGroup";
 import { Spinner } from "~/components/ui/spinner";
@@ -2938,7 +2939,7 @@ export function GeneralSettingsPanel() {
                 {sendShortcutOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     <span className="flex items-center justify-between gap-4">
-                      {option.label}
+                      <LocalizedUiText source={option.label} />
                       {settings.sendShortcut === option.value && <CheckIcon aria-hidden="true" />}
                     </span>
                   </SelectItem>

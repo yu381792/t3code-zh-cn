@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { ThreadDetailsControl } from "./chat/ThreadDetailsControl";
 import { useAtomValue } from "@effect/atom-react";
@@ -490,7 +491,9 @@ function GitActionSuccessButtonContent({ success }: { success: InlineGitActionSu
       role="status"
     >
       <CheckIcon aria-hidden="true" className="size-3.5 shrink-0 text-success" />
-      <p className="min-w-0 truncate text-left">{success.title}</p>
+      <p className="min-w-0 truncate text-left">
+        <LocalizedUiText source={success.title} />
+      </p>
       <div
         className={cn(
           "col-start-2 grid min-w-0 transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
@@ -504,10 +507,10 @@ function GitActionSuccessButtonContent({ success }: { success: InlineGitActionSu
                 <p className="truncate pt-0.5 text-left text-2xs font-normal text-muted-foreground" />
               }
             >
-              {success.description}
+              <LocalizedUiText source={success.description} />
             </TooltipTrigger>
             <TooltipPopup side="bottom" className="max-w-96 break-words">
-              {success.description}
+              <LocalizedUiText source={success.description} />
             </TooltipPopup>
           </Tooltip>
         </div>
@@ -753,7 +756,7 @@ function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
                     >
                       <option.Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
                       <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                        {option.label}
+                        <LocalizedUiText source={option.label} />
                       </span>
                       <Tooltip>
                         <TooltipTrigger
@@ -794,7 +797,7 @@ function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
                   >
                     <option.Icon className="size-5 shrink-0" aria-hidden />
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                      {option.label}
+                      <LocalizedUiText source={option.label} />
                     </span>
                   </RadioPrimitive.Root>
                 );
@@ -881,10 +884,10 @@ function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
                       <option.Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium text-foreground">
-                          {option.label}
+                          <LocalizedUiText source={option.label} />
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          {option.description}
+                          <LocalizedUiText source={option.description} />
                         </span>
                       </span>
                     </RadioPrimitive.Root>

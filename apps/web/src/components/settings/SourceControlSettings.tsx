@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate, translate as translateUi } from "~/i18n/translate";
 import { RefreshIcon } from "~/components/ui/refresh-icon";
 import { ChevronDownIcon } from "lucide-react";
@@ -398,7 +399,9 @@ function GitFetchIntervalSettings() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1">
           <div className="flex min-w-0 items-center gap-1">
-            <span className="text-xs font-medium text-foreground">{setting.title}</span>
+            <span className="text-xs font-medium text-foreground">
+              <LocalizedUiText source={setting.title} />
+            </span>
             <PolicyTooltip>
               {t3T(
                 "This interval is configured for Git only. The shared Background activity policy still decides whether Git refreshes may run when the timer fires. Custom intervals appear as Advanced in General settings.",

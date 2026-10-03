@@ -1,3 +1,5 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
+import { localizedProjectActionLabel } from "~/i18n/contextMenus";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { useSupportsMultiplePullRequests } from "~/hooks/useSupportsMultiplePullRequests";
 import { resolveThreadCurrentPullRequestLink } from "@t3tools/shared/threadPullRequests";
@@ -844,7 +846,9 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
                   onAnimationStart={synchronizeTerminalPulse}
                 />
               </TooltipTrigger>
-              <TooltipPopup side="top">{terminalStatus.label}</TooltipPopup>
+              <TooltipPopup side="top">
+                <LocalizedUiText source={terminalStatus.label} />
+              </TooltipPopup>
             </Tooltip>
           )}
           <div
@@ -1773,11 +1777,11 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
 
         const clicked = await api.contextMenu.show(
           [
-            buildTargetedItem("rename", "Rename"),
-            buildTargetedItem("grouping", "Group into..."),
-            buildTargetedItem("copy-path", "Copy Path"),
+            buildTargetedItem("rename", localizedProjectActionLabel("rename")),
+            buildTargetedItem("grouping", localizedProjectActionLabel("grouping")),
+            buildTargetedItem("copy-path", localizedProjectActionLabel("copy-path")),
             { id: "project-settings", label: "Project settings", icon: "settings" },
-            buildTargetedItem("delete", "Remove", {
+            buildTargetedItem("delete", localizedProjectActionLabel("delete"), {
               destructive: true,
             }),
           ],
@@ -2407,7 +2411,9 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
                 </span>
                 <ChevronRightIcon className="absolute inset-0 m-auto size-3.5 text-icon-muted opacity-0 transition-opacity duration-150 group-hover/project-header:opacity-100" />
               </TooltipTrigger>
-              <TooltipPopup side="top">{projectStatus.label}</TooltipPopup>
+              <TooltipPopup side="top">
+                <LocalizedUiText source={projectStatus.label} />
+              </TooltipPopup>
             </Tooltip>
           ) : (
             <ChevronRightIcon

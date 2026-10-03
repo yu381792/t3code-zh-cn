@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { DeviceHostUpdates } from "../device/DeviceHostUpdates";
 import { DeviceToolVersions } from "../device/DeviceToolVersions";
@@ -317,7 +318,9 @@ function BrowserViewportSetting({ disabled }: { readonly disabled: boolean }) {
                 {PREVIEW_VIEWPORT_PRESETS.map((preset) => (
                   <SelectItem key={preset.id} value={preset.id}>
                     <span className="flex w-full items-center justify-between gap-5">
-                      <span>{preset.label}</span>
+                      <span>
+                        <LocalizedUiText source={preset.label} />
+                      </span>
                       <span className="text-xs tabular-nums text-muted-foreground">
                         {preset.detail}
                       </span>

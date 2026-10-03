@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { RefreshIcon } from "~/components/ui/refresh-icon";
 import { Spinner } from "~/components/ui/spinner";
@@ -2261,7 +2262,9 @@ function CompactFilterMenu<Value extends string>({
           </>
         ) : (
           <>
-            <span className="truncate">{current.label}</span>
+            <span className="truncate">
+              <LocalizedUiText source={current.label} />
+            </span>
             <ChevronDownIcon aria-hidden className="size-3 shrink-0 text-muted-foreground/70" />
           </>
         )}
@@ -2278,7 +2281,7 @@ function CompactFilterMenu<Value extends string>({
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <PullRequestFilterOptionIcon option={option} />
-                  {option.label}
+                  <LocalizedUiText source={option.label} />
                 </span>
               </MenuRadioItem>
             );

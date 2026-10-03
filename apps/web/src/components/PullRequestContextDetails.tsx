@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import type { PullRequestContextMetadata } from "@t3tools/contracts";
 import { ArrowRightIcon } from "lucide-react";
@@ -18,7 +19,9 @@ export function PullRequestContextDetails({ metadata }: { metadata: PullRequestC
           {t3T("Pull request #")}
           {metadata.number}
         </span>
-        <span className={state.toneClassName}>{state.label}</span>
+        <span className={state.toneClassName}>
+          <LocalizedUiText source={state.label} />
+        </span>
       </div>
       <div className="wrap-break-word text-foreground">{metadata.title}</div>
       <div className="flex min-w-0 items-center gap-1 text-secondary-label text-3xs">

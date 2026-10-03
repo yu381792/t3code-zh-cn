@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { isAtomCommandInterrupted } from "@t3tools/client-runtime/state/runtime";
 import type { EnvironmentId, PullRequestRef } from "@t3tools/contracts";
@@ -122,7 +123,7 @@ export function PullRequestLinkPreview({
                   {state === null ? null : (
                     <span className="inline-flex shrink-0 items-center gap-1">
                       <state.Icon aria-hidden className={`size-3 ${state.toneClassName}`} />
-                      {state.label}
+                      <LocalizedUiText source={state.label} />
                     </span>
                   )}
                 </div>

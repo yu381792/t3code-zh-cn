@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { PROVIDER_DISPLAY_NAMES } from "@t3tools/contracts";
 import { useMemo, useRef, useState } from "react";
@@ -76,7 +77,11 @@ export function ProviderUpdatesAction() {
         toastManager.add(
           stackedThreadToast({
             ...view,
-            description: <span className="whitespace-pre-line">{view.description}</span>,
+            description: (
+              <span className="whitespace-pre-line">
+                <LocalizedUiText source={view.description} />
+              </span>
+            ),
           }),
         );
       }

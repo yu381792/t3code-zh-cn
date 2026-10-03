@@ -1,3 +1,4 @@
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 /**
  * The review half of the floating composer: the summary and the verdict that sends it, together
@@ -157,7 +158,7 @@ export function PullRequestReviewForm({
               <SelectItem key={verdict.value} value={verdict.value}>
                 <span className="flex items-center gap-1.5">
                   {verdict.icon}
-                  {verdict.label}
+                  <LocalizedUiText source={verdict.label} />
                 </span>
               </SelectItem>
             ))}

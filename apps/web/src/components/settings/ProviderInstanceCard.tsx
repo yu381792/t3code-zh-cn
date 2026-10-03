@@ -1,4 +1,5 @@
 "use client";
+import { LocalizedUiText } from "~/i18n/LocalizedUiText";
 
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 
@@ -927,7 +928,7 @@ export function ProviderInstanceCard({
               <div className="grid min-w-0 gap-3">
                 <div className="grid gap-0.5">
                   <p className="text-sm font-semibold leading-tight text-foreground">
-                    {versionAdvisory.title}
+                    <LocalizedUiText source={versionAdvisory.title} />
                   </p>
                   <p
                     className={cn(
