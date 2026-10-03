@@ -1,3 +1,6 @@
+import { DEFAULT_INTERFACE_LANGUAGE } from "@t3tools/contracts";
+import * as DesktopClientSettings from "../settings/DesktopClientSettings.ts";
+import { localizeDesktopMenu } from "./DesktopMenuLanguage.ts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -111,6 +114,7 @@ export const make = Effect.gen(function* () {
   const electronMenu = yield* ElectronMenu.ElectronMenu;
   const environment = yield* DesktopEnvironment.DesktopEnvironment;
   const appName = yield* electronApp.name;
+  const settingsService = yield* Effect.serviceOption(DesktopClientSettings.DesktopClientSettings);
   const context = yield* Effect.context<DesktopApplicationMenuRuntimeServices>();
   const runPromise = Effect.runPromiseWith(context);
 
@@ -265,8 +269,28 @@ export const make = Effect.gen(function* () {
       },
     );
 
-    yield* electronMenu.setApplicationMenu(template);
+    const language = Option.isSome(settingsService)
+      ? yield* settingsService.value.get.pipe(
+          Effect.map(
+            Option.match({
+              onNone: () => DEFAULT_INTERFACE_LANGUAGE,
+              onSome: (settings) => settings.interfaceLanguage,
+            }),
+          ),
+          Effect.catch(() => Effect.succeed(DEFAULT_INTERFACE_LANGUAGE)),
+        )
+      : "en";
+    yield* electronMenu.setApplicationMenu(localizeDesktopMenu(template, language));
   }).pipe(Effect.withSpan("desktop.menu.configure"));
+
+  if (Option.isSome(settingsService) && settingsService.value.subscribeInterfaceLanguage) {
+    const unsubscribe = settingsService.value.subscribeInterfaceLanguage(() => {
+      void runPromise(configure).catch((error) => {
+        console.error("Could not update menu language", error);
+      });
+    });
+    yield* Effect.addFinalizer(() => Effect.sync(unsubscribe));
+  }
 
   return DesktopApplicationMenu.of({
     configure,
