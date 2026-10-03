@@ -21,6 +21,7 @@ let nextId = 0;
 const pending = new Map();
 let answer = "";
 let stderr = "";
+const usageUpdates = [];
 child.stderr.on("data", (chunk) => {
   stderr = (stderr + chunk).slice(-3000);
   if (
@@ -46,6 +47,7 @@ lines.on("line", (line) => {
     else resolve(packet.result);
   } else if (packet.method === "session/update") {
     const update = packet.params.update;
+    if (update.sessionUpdate === "usage_update") usageUpdates.push(update);
     if (update.sessionUpdate === "agent_message_chunk" && update.content?.type === "text")
       answer += update.content.text;
   } else if (packet.id !== undefined) {
@@ -114,6 +116,12 @@ try {
     });
     console.log("session/prompt:", JSON.stringify({ stopReason: result.stopReason, answer }));
     if (!writeProbe && !answer.includes("DSH_T3_OK")) throw new Error("Expected marker absent");
+    if (process.argv.includes("--assert-usage")) {
+      const usage = usageUpdates.at(-1);
+      if (!usage || !(usage.used > 0) || !(usage.size >= usage.used))
+        throw new Error("Valid context usage update absent");
+      console.log("context usage:", JSON.stringify(usage));
+    }
     const lockedPreset = argument("--assert-preset-locked");
     if (lockedPreset) {
       let rejected = false;

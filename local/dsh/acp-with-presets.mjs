@@ -15,7 +15,7 @@ const { isBuiltInPreset } = await import(
 );
 export const name = "acp-with-presets";
 export const Config = acp.Config;
-export const inject = [...acp.inject, "agentPresets", "sessionProjections"];
+export const inject = [...acp.inject, "agentPresets", "sessionProjections", "tokenMeter"];
 export const PRESET_CONFIG_ID = "agent_preset";
 
 export function apply(ctx, config) {
