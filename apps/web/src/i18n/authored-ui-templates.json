@@ -133,5 +133,8 @@
   "{0} It will appear in the sidebar once this client catches up.",
   "Could not remove {0}. {1}",
   "Changed {0} files",
-  "Changed {0}"
+  "Changed {0}",
+  "Later today ({0})",
+  "Tomorrow ({0})",
+  "Next week ({0})"
 ]
