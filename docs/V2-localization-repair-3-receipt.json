@@ -1,0 +1,31 @@
+{
+  "version": "0.0.46-nightly.20261003.3",
+  "installedPath": "/Applications/T3 Code (Nightly).app",
+  "appAsarSHA256": "33a5d0c968053747be793300e5bd1967c84e387eaf70c2708cca46e4723368d9",
+  "previousAppBackup": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/.trash/retired-V2-2/T3 Code (Nightly).app",
+  "previousAppAsarSHA256": "9c44c122edfc8d52121555a2f6befda247c00fe5100eb6b4911794db4074d54d",
+  "sourceCommit": "165b2ef4041d94b3bbf890e749184ac05f5a441a",
+  "dmgPath": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/verified-desktop-3-final/T3-Code-0.0.46-nightly.20261003.3-arm64.dmg",
+  "dmgSHA256": "1ea31ead6c3b8125513083a582ba572721e69d1f3873fdf4a5fbf1c147330b72",
+  "buildExitCode": 0,
+  "packageVerifierExitCode": 0,
+  "codesignExitCode": 0,
+  "backendHelpExitCode": 0,
+  "publicConfigurationIdenticalToPrevious": true,
+  "userDataTouched": false,
+  "guiVisualTest": false,
+  "automaticallyRelaunched": false,
+  "timestamp": "2026-10-03T10:15:37.411Z",
+  "testsPassed": 237,
+  "auditNegativeTestsPassed": 3,
+  "translationAudit": {
+    "dictionaryKeys": 4299,
+    "catalogFiles": 915,
+    "catalogSources": 1402,
+    "jsxFiles": 433,
+    "errors": 0
+  },
+  "installedPackageVerifierExitCode": 0,
+  "appleDeveloperIdNotarized": false,
+  "autoUpdateVerified": false
+}
