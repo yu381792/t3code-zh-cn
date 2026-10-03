@@ -1,0 +1,34 @@
+{
+  "intent": "User requested removing old desktop version and keeping only V2 in repository",
+  "repository": "yu381792/t3code-zh-cn",
+  "soleBranch": "main",
+  "V2SourceCommit": "7efe44632bc7e86e6837bb59806ec4373b12f83f",
+  "remoteDeletedHeads": 1078,
+  "remoteDeletedTags": 564,
+  "localDeletedVersionRefs": 58,
+  "oldApplication": {
+    "from": "/Applications/T3 Code (Alpha).app",
+    "to": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/.trash/old-apps/T3 Code (Alpha)-0.0.42.app",
+    "version": "0.0.42",
+    "sha256": "4eed1f989de5205065624ff3fa0eaf2b923e7a229d8b634b4755cbaa6eba57b0"
+  },
+  "oldWorktree": {
+    "from": "/Users/yu/t3code-desktop-zh",
+    "to": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/.trash/old-source/t3code-desktop-V1-zh",
+    "sha256": "a3fb318e2050aa0afba1a3ff9fd3739e8a8ccf2e8d3bd4911cc82982b71def62"
+  },
+  "onlyActiveWorktree": "/Users/yu/t3code-src",
+  "recoveryMirror": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/cleanup-V2-only/repository-before.git",
+  "backupDepth": "All original local objects plus depth-1 source snapshots for each remote old ref; not all upstream branches full ancestry",
+  "recoveryRefs": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/cleanup-V2-only/remote-refs-before.json",
+  "oldApplicationWasRunning": false,
+  "userDataReadOrChanged": false,
+  "V2InstallerPreserved": true,
+  "V2ApplicationInstalled": false,
+  "restoreWasNotRequested": false,
+  "exitCodes": {
+    "backup": 0,
+    "remoteRefCleanup": 0,
+    "localRefCleanup": 0
+  }
+}

@@ -1,6 +1,6 @@
-# T3 Code
+# T3 Code V2 · 简体中文 / English
 
-[简体中文界面说明](README.zh-CN.md) · 本分支的汉化需自行构建，官方安装包不包含此改动。
+本仓库现只保留 **V2 中英双语版 `main`**。请看[中文桌面安装与使用说明](README.zh-CN.md)。官方稳定版 v0.0.45 是 V1，不是此仓库的 V2 中文构建；官方稳定下载也不包含这里的语言层。
 
 T3 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t3tools.t3code)), [web app](https://app.t3.codes) and [Electron-based desktop app](https://t3.codes).
 
@@ -13,6 +13,8 @@ Nothing. We built T3 Code because we wanted the best possible development experi
 We wanted something performant, remote-ready, and truly open. If we ever go the wrong direction, we want you to have everything you need to fork and build the editor that you want.
 
 ## Installation
+
+> 本 fork 的 **V2 中英双语桌面版**请使用已交付的 `T3 Code (Nightly)` 安装包，见 [中文说明](README.zh-CN.md)。下方是上游 CLI / Web / Mobile 的安装方法，不是本 fork 双语桌面安装包；GitHub Release 尚未发布。
 
 > [!WARNING]
 > T3 Code currently supports Codex, Claude, Cursor, Grok Build, OpenCode, and Antigravity. Install and authenticate at least one provider before use:
