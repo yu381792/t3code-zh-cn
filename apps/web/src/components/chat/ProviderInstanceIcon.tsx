@@ -15,6 +15,7 @@ import {
 } from "../Icons";
 
 import { cn } from "~/lib/utils";
+import { DSH_ICON_ID } from "./DshIcon";
 import {
   AcpRegistryAgentIcon,
   officialAcpRegistryIconUrlForAgentId,
@@ -51,6 +52,7 @@ export function resolveProviderInstanceAcpRegistryIconUrl(input: {
   readonly iconUrl?: string | undefined;
 }): string | null {
   if (input.driverKind !== "acpRegistry") return null;
+  if (input.iconUrl === DSH_ICON_ID) return DSH_ICON_ID;
   return (
     resolveOfficialAcpRegistryIconUrl(input.iconUrl ?? null) ??
     officialAcpRegistryIconUrlForAgentId(input.agentId?.trim() || null)

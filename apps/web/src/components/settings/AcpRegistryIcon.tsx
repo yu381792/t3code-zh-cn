@@ -6,6 +6,7 @@ import {
 
 import { cn } from "../../lib/utils";
 import { ACPRegistryIcon } from "../Icons";
+import { DshIcon, DSH_ICON_ID } from "../chat/DshIcon";
 
 const ACP_REGISTRY_ICON_CACHE = "t3-acp-registry-icons-v1";
 const MAX_ICON_BYTES = 512 * 1_024;
@@ -115,6 +116,17 @@ export function AcpRegistryAgentIcon({
       if (objectUrl !== null) URL.revokeObjectURL(objectUrl);
     };
   }, [iconUrl]);
+
+  if (icon === DSH_ICON_ID) {
+    return (
+      <span
+        aria-hidden
+        className={cn("flex size-8 shrink-0 items-center justify-center", className)}
+      >
+        <DshIcon className="size-full text-black dark:text-white" />
+      </span>
+    );
+  }
 
   return (
     <span
