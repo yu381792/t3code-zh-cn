@@ -1,4 +1,0 @@
-# Verification only: loaded by verify-acp.mjs --preset-probe.
-- insert:
-    - id: verify-t3-preset
-      name: /Users/yu/t3code-src/local/dsh/verify-preset.mjs
