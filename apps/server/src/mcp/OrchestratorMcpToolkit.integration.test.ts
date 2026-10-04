@@ -2258,6 +2258,7 @@ describe("orchestrator MCP toolkit", () => {
             const reportCall = yield* invoke("t3_thread_send", {
               threadId: activeThread.threadId,
               message: "Background report: keep working on the current task.",
+              mode: "queue",
               clientRequestId: "managed-active-auto-report-1",
             });
             const report = yield* decodeThreadSendResult(reportCall.structuredContent).pipe(
@@ -2269,7 +2270,7 @@ describe("orchestrator MCP toolkit", () => {
             const steerCall = yield* invoke("t3_thread_send", {
               threadId: activeThread.threadId,
               message: "Include the latest parent guidance before finishing.",
-              mode: "steer",
+              mode: "auto",
               clientRequestId: "managed-active-steer-1",
             });
             const steered = yield* decodeThreadSendResult(steerCall.structuredContent).pipe(

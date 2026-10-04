@@ -209,7 +209,7 @@ retry and the normal snooze choices.
 
 On web and desktop, use **Agents** to follow work delegated to subagents.
 
-代理之间发送的普通消息和 T3 子代理完成通知，会等待目标会话当前这一轮结束再处理；空闲会话可以直接开始处理。你在输入框中选择的引导行为仍然有效，代理也可以在明确需要即时调整任务时指定引导发送。
+代理之间发送的普通消息默认遵循原版自动投递：空闲时开始处理，当前轮支持引导时直接引导，否则排队。T3 子代理完成通知仍等待当前轮结束；输入框中的引导／排队选择仍然有效。
 
 Subagent threads started by the agent can't take messages; message the parent
 thread instead. When such a subagent needs an approval or an answer, the parent
