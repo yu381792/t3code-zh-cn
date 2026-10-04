@@ -116,13 +116,44 @@ type MessageDispatchMode = Extract<
   { readonly type: "message.dispatch" }
 >["dispatchMode"];
 
+/** Keep steer requests non-destructive for providers without restart steering. */
+export function resolveSteeringDispatchMode(
+  projection: Pick<
+    OrchestrationV2ThreadProjection,
+    "runs" | "providerThreads" | "providerSessions"
+  >,
+  requestedMode: MessageDispatchMode,
+  modelSelection?: ModelSelection,
+): MessageDispatchMode {
+  if (requestedMode.type !== "steer_active") return requestedMode;
+  const run = projection.runs.find((candidate) => candidate.id === requestedMode.targetRunId);
+  if (run?.status === "preparing" || run?.status === "starting")
+    return { type: "queue_after_active" };
+  const thread = projection.providerThreads.find(
+    (candidate) => candidate.id === run?.providerThreadId,
+  );
+  const session = projection.providerSessions.find(
+    (candidate) => candidate.id === thread?.providerSessionId,
+  );
+  const turns = session?.capabilities.turns;
+  if (
+    turns !== undefined &&
+    !turns.supportsSteeringByInterruptRestart &&
+    (!turns.supportsActiveSteering ||
+      (modelSelection !== undefined && modelSelection.instanceId !== run?.providerInstanceId))
+  ) {
+    return { type: "queue_after_active" };
+  }
+  return requestedMode;
+}
+
 /** Resolve client intent from the state serialized by the thread dispatch lock. */
 export function resolveMessageDispatchIntent(
   projection: OrchestrationV2ThreadProjection,
   requestedMode: MessageDispatchMode,
   deliveryIntent?: "auto" | "steer" | "restart",
 ): MessageDispatchMode {
-  if (deliveryIntent === undefined) return requestedMode;
+  if (deliveryIntent === undefined) return resolveSteeringDispatchMode(projection, requestedMode);
 
   const activeRun = projection.runs.findLast(
     (run) =>
@@ -133,7 +164,10 @@ export function resolveMessageDispatchIntent(
   );
   if (activeRun === undefined) return { type: "start_immediately" };
   if (deliveryIntent === "steer") {
-    return { type: "steer_active", targetRunId: activeRun.id };
+    return resolveSteeringDispatchMode(projection, {
+      type: "steer_active",
+      targetRunId: activeRun.id,
+    });
   }
   if (deliveryIntent === "restart") {
     return { type: "restart_active", targetRunId: activeRun.id };

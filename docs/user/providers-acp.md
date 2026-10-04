@@ -126,3 +126,5 @@ for those actions.
   keeping the registry-declared arguments and environment.
 - **Authentication method** picks a specific method when the agent advertises more than one.
 - **Custom models** adds model IDs the agent does not report.
+
+通过 ACP 接入时，引导优先使用智能体开放的原生通路，不再通过取消当前回答并重开来模拟。DSH 支持将补充要求送入下一步；没有开放原生引导的智能体会将消息排队，等当前轮结束后处理。停止按钮仍可主动停止工作。

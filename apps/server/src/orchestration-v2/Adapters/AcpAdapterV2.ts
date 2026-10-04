@@ -558,7 +558,8 @@ export const AcpProviderCapabilitiesV2 = {
     emitsTurnCompleted: true,
     supportsInterrupt: true,
     supportsActiveSteering: false,
-    supportsSteeringByInterruptRestart: true,
+    // Steering must preserve active work; unsupported agents use the app queue.
+    supportsSteeringByInterruptRestart: false,
     supportsQueuedMessages: true,
     terminalStatusQuality: "strong",
   },

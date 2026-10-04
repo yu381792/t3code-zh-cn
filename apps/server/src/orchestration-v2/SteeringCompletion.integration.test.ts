@@ -56,9 +56,7 @@ it.effect.each(
       })),
     )
     .filter(({ mailbox, timing }) =>
-      mailbox
-        ? timing !== "during delivery"
-        : timing !== "without native steering" && timing !== "settled only",
+      mailbox ? timing !== "during delivery" : timing !== "settled only",
     ),
 )("delivers $label when completion wins $timing", ({ mailbox, timing }) =>
   Effect.scoped(
@@ -74,6 +72,7 @@ it.effect.each(
         turns: {
           ...CodexProviderCapabilitiesV2.turns,
           supportsActiveSteering: timing !== "without native steering",
+          supportsSteeringByInterruptRestart: timing !== "without native steering",
         },
       };
       const adapter: ProviderAdapterV2Shape = {
@@ -296,7 +295,7 @@ it.effect.each(
         });
         if (timing !== "before dispatch") yield* dispatchSteer;
         if (timing === "after delivery") yield* worker.drain();
-        if (mailbox && timing !== "before dispatch") {
+        if ((mailbox || timing === "without native steering") && timing !== "before dispatch") {
           const queued = yield* orchestrator.getThreadProjection(threadId);
           assert.equal(steerCalls, 0);
           assert.equal(started.length, 1);
@@ -305,6 +304,23 @@ it.effect.each(
             queued.runs.find((run) => run.userMessageId === messageId)?.status,
             "queued",
           );
+          if (!mailbox) {
+            const queuedRun = queued.runs.find((run) => run.userMessageId === messageId)!;
+            const promoteError = yield* orchestrator
+              .dispatch({
+                type: "queued-message.promote-to-steer",
+                commandId: CommandId.make("unsupported-native-promote"),
+                threadId,
+                queuedRunId: queuedRun.id,
+                targetRunId: first.runId,
+              })
+              .pipe(Effect.flip);
+            assert.equal(promoteError._tag, "OrchestratorDispatchError");
+            const preserved = yield* orchestrator.getThreadProjection(threadId);
+            assert.equal(preserved.runs.find((run) => run.id === queuedRun.id)?.status, "queued");
+            assert.equal(preserved.runs.find((run) => run.id === first.runId)?.status, "running");
+            assert.equal(steerCalls, 0);
+          }
         }
         const delivery =
           !mailbox && timing === "during delivery"

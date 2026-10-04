@@ -69,7 +69,11 @@ import {
   SHARED_WORKSPACE_RESTORE_MESSAGE,
 } from "./CheckpointRestoreSafety.ts";
 import { CheckpointServiceV2 } from "./CheckpointService.ts";
-import { CommandPolicyV2, resolveMessageDispatchIntent } from "./CommandPolicy.ts";
+import {
+  CommandPolicyV2,
+  resolveMessageDispatchIntent,
+  resolveSteeringDispatchMode,
+} from "./CommandPolicy.ts";
 import { CommandReceiptStoreV2 } from "./CommandReceiptStore.ts";
 import { ContextHandoffServiceV2 } from "./ContextHandoffService.ts";
 import { notificationTurnItem } from "./Notification.ts";
@@ -4431,6 +4435,7 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
         command.dispatchMode,
         command.deliveryIntent,
       );
+      dispatchMode = resolveSteeringDispatchMode(projection, dispatchMode, modelSelection);
       if (dispatchMode.type === "steer_active") {
         const targetRunId = dispatchMode.targetRunId;
         const target = projection.runs.find((run) => run.id === targetRunId);
@@ -7046,6 +7051,20 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
           commandId: command.commandId,
           commandType: command.type,
           cause: "Automatic completion deliveries cannot be promoted to Steer.",
+        });
+      }
+
+      if (
+        resolveSteeringDispatchMode(
+          projection,
+          { type: "steer_active", targetRunId: command.targetRunId },
+          projection.thread.modelSelection,
+        ).type === "queue_after_active"
+      ) {
+        return yield* new OrchestratorDispatchError({
+          commandId: command.commandId,
+          commandType: command.type,
+          cause: "当前智能体暂不支持原生引导，消息仍保留在队列中；当前工作不会被打断。",
         });
       }
 

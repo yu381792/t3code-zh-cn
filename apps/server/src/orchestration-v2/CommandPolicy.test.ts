@@ -11,6 +11,7 @@ import {
 } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
 
+import { AcpProviderCapabilitiesV2 } from "./Adapters/AcpAdapterV2.ts";
 import { CodexProviderCapabilitiesV2 } from "./Adapters/CodexAdapterV2.ts";
 import { CursorProviderCapabilitiesV2 } from "./Adapters/CursorAdapterV2.ts";
 import { GrokProviderCapabilitiesV2 } from "./Adapters/GrokAdapterV2.ts";
@@ -37,7 +38,14 @@ function dispatchProjection(
     runs:
       sessionCapabilities === undefined
         ? []
-        : [{ id: activeRunId, status: "running", providerThreadId }],
+        : [
+            {
+              id: activeRunId,
+              status: "running",
+              providerThreadId,
+              providerInstanceId: ProviderInstanceId.make("codex"),
+            },
+          ],
     providerThreads:
       sessionCapabilities === undefined ? [] : [{ id: providerThreadId, providerSessionId }],
     providerSessions:
@@ -141,6 +149,38 @@ it("targets the latest active run for explicit steer and restart intent", () => 
   );
 });
 
+it("queues ACP steering when native input is absent and preserves negotiated native steering", () => {
+  const requested = { type: "steer_active", targetRunId: activeRunId } as const;
+  const unsupported = dispatchProjection(AcpProviderCapabilitiesV2);
+  assert.isFalse(AcpProviderCapabilitiesV2.turns.supportsSteeringByInterruptRestart);
+  assert.deepEqual(CommandPolicy.resolveMessageDispatchIntent(unsupported, requested), {
+    type: "queue_after_active",
+  });
+  assert.deepEqual(
+    CommandPolicy.resolveMessageDispatchIntent(unsupported, { type: "start_immediately" }, "steer"),
+    { type: "queue_after_active" },
+  );
+  const native = dispatchProjection({
+    ...AcpProviderCapabilitiesV2,
+    turns: { ...AcpProviderCapabilitiesV2.turns, supportsActiveSteering: true },
+  });
+  assert.deepEqual(CommandPolicy.resolveMessageDispatchIntent(native, requested), requested);
+  assert.deepEqual(
+    CommandPolicy.resolveSteeringDispatchMode(native, requested, {
+      instanceId: ProviderInstanceId.make("codex"),
+      model: "next-model",
+    }),
+    requested,
+  );
+  assert.deepEqual(
+    CommandPolicy.resolveSteeringDispatchMode(native, requested, {
+      instanceId: ProviderInstanceId.make("another-provider"),
+      model: "other",
+    }),
+    { type: "queue_after_active" },
+  );
+});
+
 const layer = it.layer(CommandPolicy.layer);
 
 layer("CommandPolicyV2", (it) => {
@@ -182,20 +222,18 @@ layer("CommandPolicyV2", (it) => {
     }),
   );
 
-  it.effect("uses interrupt-and-restart steering for Grok ACP", () =>
-    Effect.gen(function* () {
-      const policy = yield* CommandPolicy.CommandPolicyV2;
-
-      const result = yield* policy.decideSteeringExecution({
-        commandId,
-        threadId,
-        providerInstanceId: ProviderInstanceId.make("grok"),
-        capabilities: GrokProviderCapabilitiesV2,
-      });
-
-      assert.equal(result, "interrupt_restart");
-    }),
-  );
+  it("queues Grok ACP input instead of interrupting when native steering is unavailable", () => {
+    const requested = { type: "steer_active", targetRunId: activeRunId } as const;
+    assert.deepEqual(
+      CommandPolicy.resolveMessageDispatchIntent(
+        dispatchProjection(GrokProviderCapabilitiesV2),
+        requested,
+      ),
+      { type: "queue_after_active" },
+    );
+    assert.isFalse(GrokProviderCapabilitiesV2.turns.supportsSteeringByInterruptRestart);
+    assert.isTrue(GrokProviderCapabilitiesV2.turns.supportsInterrupt);
+  });
 
   it.effect("honors an explicit interrupt-and-restart request", () =>
     Effect.gen(function* () {
