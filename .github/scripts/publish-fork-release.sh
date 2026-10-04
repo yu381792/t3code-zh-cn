@@ -44,7 +44,7 @@ notes="$RUNNER_TEMP/fork-release-notes.md"
 } > "$notes"
 
 # 先上传到草稿，全部附件成功后才公开，避免发布半个安装包。
-gh release create "$tag" --verify-tag --draft --prerelease --latest=false --title "T3 Code 中文版 $RELEASE_VERSION" --notes-file "$notes"
-gh release upload "$tag" "${assets[@]}"
-gh release edit "$tag" --draft=false
+gh release create "$tag" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "T3 Code 中文版 $RELEASE_VERSION" --notes-file "$notes"
+gh release upload "$tag" --repo "$GITHUB_REPOSITORY" "${assets[@]}"
+gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false
 echo "通过：已发布 ${tag}；签名状态 ${signed:-false}。" >> "$GITHUB_STEP_SUMMARY"
