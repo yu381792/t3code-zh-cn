@@ -45,6 +45,7 @@ import {
   RunId,
   ThreadLinkedPullRequest,
   ThreadId,
+  TurnItemId,
 } from "@t3tools/contracts";
 import { modelSelectionsEqual } from "@t3tools/shared/model";
 import {
@@ -351,6 +352,7 @@ const threadPullRequestLinksEqual = Schema.toEquivalence(Schema.NullOr(ThreadLin
 
 function commandThreadId(command: OrchestrationV2ServerCommand): ThreadId {
   switch (command.type) {
+    case "thread.native-history.import":
     case "thread.create":
     case "thread.archive":
     case "thread.unarchive":
@@ -2144,6 +2146,120 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
       });
     }
   });
+
+  const dispatchNativeHistoryImport = Effect.fn("orchestrationV2.dispatch.nativeHistoryImport")(
+    function* (
+      command: Extract<OrchestrationV2Command, { readonly type: "thread.native-history.import" }>,
+      events: Ref.Ref<Array<OrchestrationV2DomainEvent>>,
+    ) {
+      const projection = yield* mapDispatchError(command)(
+        projectionStore.getThreadRecords(command.threadId, ["providerThreads", "turnItems"]),
+      );
+      const providerThread = projection.providerThreads.find(
+        (candidate) =>
+          candidate.providerInstanceId === command.providerInstanceId &&
+          candidate.nativeThreadRef?.nativeId === command.nativeSessionId,
+      );
+      if (!providerThread)
+        return yield* new OrchestratorDispatchError({
+          commandId: command.commandId,
+          commandType: command.type,
+          cause: "Native history does not belong to this conversation.",
+        });
+      const knownIds = new Set(projection.turnItems.map((item) => String(item.id)));
+      let ordinal = projection.turnItems.reduce((max, item) => Math.max(max, item.ordinal), 0);
+      const now = yield* DateTime.now;
+      const emitEvent = emit(events, command);
+      for (const item of command.items) {
+        const itemId = TurnItemId.make(
+          `native-history:${command.threadId}:${command.nativeSessionId}:${item.id}`,
+        );
+        if (knownIds.has(itemId)) continue;
+        knownIds.add(itemId);
+        const at = item.createdAt ? DateTime.makeUnsafe(item.createdAt) : now;
+        const common = {
+          id: itemId,
+          threadId: command.threadId,
+          runId: null,
+          nodeId: null,
+          providerThreadId: providerThread.id,
+          providerTurnId: null,
+          nativeItemRef: null,
+          parentItemId: null,
+          ordinal: ++ordinal,
+          status: "completed" as const,
+          title: null,
+          startedAt: at,
+          completedAt: at,
+          updatedAt: at,
+        };
+        if (item.type === "tool_call") {
+          yield* emitEvent({
+            type: "turn-item.updated",
+            threadId: command.threadId,
+            providerInstanceId: command.providerInstanceId,
+            occurredAt: now,
+            payload: {
+              ...common,
+              type: "dynamic_tool",
+              toolName: item.name,
+              status: item.status === "running" ? "interrupted" : item.status,
+              input: item.detail.input,
+              output: item.detail.output,
+            },
+          });
+        } else {
+          const messageId = MessageId.make(String(itemId));
+          const createdBy = item.type === "user_message" ? ("user" as const) : ("agent" as const);
+          yield* emitEvent({
+            type: "message.updated",
+            threadId: command.threadId,
+            providerInstanceId: command.providerInstanceId,
+            occurredAt: now,
+            payload: {
+              id: messageId,
+              threadId: command.threadId,
+              runId: null,
+              nodeId: null,
+              createdBy,
+              creationSource: "provider",
+              role: createdBy === "user" ? "user" : "assistant",
+              text: item.text,
+              attachments: [],
+              streaming: false,
+              createdAt: at,
+              updatedAt: at,
+            },
+          });
+          yield* emitEvent({
+            type: "turn-item.updated",
+            threadId: command.threadId,
+            providerInstanceId: command.providerInstanceId,
+            occurredAt: now,
+            payload:
+              item.type === "user_message"
+                ? {
+                    ...common,
+                    type: "user_message",
+                    createdBy,
+                    creationSource: "provider",
+                    messageId,
+                    inputIntent: "turn_start",
+                    text: item.text,
+                    attachments: [],
+                  }
+                : {
+                    ...common,
+                    type: "assistant_message",
+                    messageId,
+                    text: item.text,
+                    streaming: false,
+                  },
+          });
+        }
+      }
+    },
+  );
 
   const dispatchThreadVisit = Effect.fn("orchestrationV2.dispatch.threadVisit")(function* (
     command: Extract<OrchestrationV2Command, { readonly type: "thread.visit" }>,
@@ -9047,6 +9163,9 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
         }
       | undefined;
     switch (command.type) {
+      case "thread.native-history.import":
+        yield* dispatchNativeHistoryImport(command, events);
+        break;
       case "thread.create":
         yield* dispatchThreadCreate(command, events);
         break;
@@ -9355,7 +9474,9 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
       Effect.flatMap((planned) =>
         // A settle that finds the provider already ended everything has
         // nothing to record, which is its expected outcome, not a failure.
-        planned.events.length > 0 || command.type === "thread.background-work.settle"
+        planned.events.length > 0 ||
+        command.type === "thread.background-work.settle" ||
+        command.type === "thread.native-history.import"
           ? Effect.succeed(planned)
           : Effect.fail(
               new OrchestratorDispatchError({

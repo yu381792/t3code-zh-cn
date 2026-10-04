@@ -1,5 +1,7 @@
 /** V2 interface messages. Values, commands, model IDs and user content stay untranslated. */
 export const ZH_CN_V2_DICTIONARY: Readonly<Record<string, string>> = {
+  "Refresh history": "刷新历史",
+  "Session history refreshed": "会话历史已刷新",
   " (default)": "（默认）",
   " / bookshelf": " / 书架",
   " Mixed cells keep each environment’s rate until you edit them.":

@@ -87,6 +87,7 @@ export function AcpSessionManagementSection(props: {
   const canLogout =
     props.provider.auth.canLogout === true && !props.provider.setup?.canAuthenticate;
   const canDelete = props.provider.nativeSessions?.canDelete === true;
+  const canReadHistory = props.provider.nativeSessions?.canReadHistory === true;
   const canConfigureProviders = props.provider.configurableProviders === true;
   const projectOperationPending =
     loading ||
@@ -143,7 +144,13 @@ export function AcpSessionManagementSection(props: {
       );
       toastManager.add({
         type: "success",
-        title: result.value.imported ? "ACP session imported" : "ACP session already imported",
+        title: t3T(
+          result.value.imported
+            ? "ACP session imported"
+            : result.value.historyImported
+              ? "Session history refreshed"
+              : "ACP session already imported",
+        ),
       });
       return;
     }
@@ -383,15 +390,15 @@ export function AcpSessionManagementSection(props: {
                         disabled={
                           props.readOnly ||
                           !canImport ||
-                          session.importedThreadId !== null ||
-                          importingSessionId !== null
+                          importingSessionId !== null ||
+                          (session.importedThreadId !== null && !canReadHistory)
                         }
                         onClick={() => void importNativeSession(session)}
                       >
-                        {session.importedThreadId !== null
-                          ? t3T("Imported")
-                          : importingSessionId === session.sessionId
-                            ? t3T("Importing")
+                        {importingSessionId === session.sessionId
+                          ? t3T("Importing")
+                          : session.importedThreadId !== null
+                            ? t3T(canReadHistory ? "Refresh history" : "Imported")
                             : t3T("Import")}
                       </Button>
                       {canDelete ? (

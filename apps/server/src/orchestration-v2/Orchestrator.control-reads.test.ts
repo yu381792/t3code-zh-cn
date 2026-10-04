@@ -534,3 +534,83 @@ it.effect("settles only the stopped run's background work, once", () =>
     ]);
   }).pipe(Effect.provide(testLayer)),
 );
+
+it.effect(
+  "imports native messages and tools without inference and deduplicates later refreshes",
+  () =>
+    Effect.gen(function* () {
+      const orchestrator = yield* Orchestrator.OrchestratorV2;
+      const projections = yield* ProjectionStore.ProjectionStoreV2;
+      const threadId = ThreadId.make("thread:native-history");
+      yield* orchestrator.dispatch({
+        type: "thread.create",
+        commandId: CommandId.make("create-native-history"),
+        threadId,
+        projectId: ProjectId.make("project:native-history"),
+        title: "Imported conversation",
+        modelSelection,
+        runtimeMode: "full-access",
+        interactionMode: "default",
+        branch: null,
+        worktreePath: null,
+        createdBy: "user",
+        creationSource: "web",
+        importedNativeThread: {
+          ref: { driver: ProviderDriverKind.make("codex"), nativeId: "saved", strength: "strong" },
+        },
+      });
+      const items = [
+        {
+          id: "user:1",
+          type: "user_message" as const,
+          text: "以前的提问",
+          createdAt: "2026-10-01T01:00:00.000Z",
+        },
+        {
+          id: "call:2",
+          type: "tool_call" as const,
+          name: "bash",
+          status: "completed" as const,
+          detail: { input: { command: "pwd" }, output: "/work" },
+        },
+        { id: "agent:3", type: "assistant_message" as const, text: "以前的回答" },
+      ];
+      for (const attempt of [1, 2])
+        yield* orchestrator.dispatch({
+          type: "thread.native-history.import",
+          commandId: CommandId.make(`import-native-${attempt}`),
+          threadId,
+          providerInstanceId: instanceId,
+          nativeSessionId: "saved",
+          items,
+        });
+      const projection = yield* projections.getThreadProjection(threadId);
+      assert.equal(projection.runs.length, 0);
+      assert.deepEqual(
+        projection.messages.map((message) => message.text),
+        ["以前的提问", "以前的回答"],
+      );
+      assert.equal(
+        DateTime.formatIso(projection.messages[0]!.createdAt),
+        "2026-10-01T01:00:00.000Z",
+      );
+      assert.deepEqual(
+        projection.turnItems.map((item) => item.type),
+        ["user_message", "dynamic_tool", "assistant_message"],
+      );
+      const tool = projection.turnItems.find((item) => item.type === "dynamic_tool");
+      assert.equal(tool?.output, "/work");
+      const wrongSource = yield* orchestrator
+        .dispatch({
+          type: "thread.native-history.import",
+          commandId: CommandId.make("import-wrong-native"),
+          threadId,
+          providerInstanceId: instanceId,
+          nativeSessionId: "another",
+          items,
+        })
+        .pipe(Effect.exit);
+      assert.equal(wrongSource._tag, "Failure");
+      assert.equal((yield* projections.getThreadProjection(threadId)).turnItems.length, 3);
+    }).pipe(Effect.provide(testLayer)),
+);

@@ -1,4 +1,5 @@
 import { OrchestrationMessageContext } from "./composerContext.ts";
+import { NativeSessionHistoryItem } from "./nativeSessionHistory.ts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as SchemaAST from "effect/SchemaAST";
@@ -2435,6 +2436,14 @@ export const OrchestrationV2StoredEventJson = Schema.Struct({
 export type OrchestrationV2StoredEventJson = typeof OrchestrationV2StoredEventJson.Type;
 
 export const OrchestrationV2Command = Schema.Union([
+  Schema.Struct({
+    type: Schema.Literal("thread.native-history.import"),
+    commandId: CommandId,
+    threadId: ThreadId,
+    providerInstanceId: ProviderInstanceId,
+    nativeSessionId: TrimmedNonEmptyString,
+    items: Schema.Array(NativeSessionHistoryItem),
+  }),
   Schema.Struct({
     type: Schema.Literal("thread.create"),
     ...OrchestrationV2CreationFields,

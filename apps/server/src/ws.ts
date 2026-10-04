@@ -1336,8 +1336,8 @@ const makeWsRpcLayer = (
       ) {
         return yield* acpRegistryRuntimeCoordinator.withSessionMutation(
           Effect.gen(function* () {
-            yield* acpRegistryProject(input.projectId);
-            const { instance } = yield* acpSessionManager(input.instanceId);
+            const project = yield* acpRegistryProject(input.projectId);
+            const { instance, manager } = yield* acpSessionManager(input.instanceId);
             const providerSnapshot = yield* instance.snapshot.getSnapshot;
             if (
               providerSnapshot.nativeSessions?.canLoad !== true &&
@@ -1363,7 +1363,46 @@ const makeWsRpcLayer = (
                   }),
               ),
             );
-            if (existing !== null) return { threadId, imported: false } as const;
+            if (existing !== null && existing.projectId !== input.projectId)
+              return yield* new AcpRegistryOperationError({
+                reason: "session_import_failed",
+                message: "The session was imported into another project.",
+              });
+            // Read before creating the mapping: a history failure must be visible,
+            // and retrying an older empty import must be able to backfill it.
+            const history =
+              manager.readHistory === undefined
+                ? null
+                : yield* manager.readHistory({
+                    cwd: project.workspaceRoot,
+                    sessionId: input.sessionId,
+                  });
+            const importHistory =
+              history === null
+                ? Effect.void
+                : threadManagement
+                    .dispatch({
+                      type: "thread.native-history.import",
+                      commandId: CommandId.make(NodeCrypto.randomUUID()),
+                      threadId,
+                      providerInstanceId: input.instanceId,
+                      nativeSessionId: input.sessionId,
+                      items: history.items,
+                    })
+                    .pipe(
+                      Effect.mapError(
+                        (cause) =>
+                          new AcpRegistryOperationError({
+                            reason: "session_import_failed",
+                            message: "Could not save the imported session history.",
+                            cause,
+                          }),
+                      ),
+                    );
+            if (existing !== null) {
+              yield* importHistory;
+              return { threadId, imported: false, historyImported: history !== null } as const;
+            }
 
             const provider = (yield* providerRegistry.getProviders).find(
               (candidate) => candidate.instanceId === input.instanceId,
@@ -1412,14 +1451,18 @@ const makeWsRpcLayer = (
                     }),
                 ),
               );
-              if (racedImport !== null) return { threadId, imported: false } as const;
+              if (racedImport !== null) {
+                yield* importHistory;
+                return { threadId, imported: false, historyImported: history !== null } as const;
+              }
               return yield* new AcpRegistryOperationError({
                 reason: "session_import_failed",
                 message: "Could not create a T3 thread for the ACP session.",
                 cause: launched.failure,
               });
             }
-            return { threadId, imported: true } as const;
+            yield* importHistory;
+            return { threadId, imported: true, historyImported: history !== null } as const;
           }),
         );
       });

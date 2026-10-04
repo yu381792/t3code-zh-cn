@@ -185,6 +185,7 @@ export type AcpRegistryImportSessionInput = typeof AcpRegistryImportSessionInput
 export const AcpRegistryImportSessionResult = Schema.Struct({
   threadId: ThreadId,
   imported: Schema.Boolean,
+  historyImported: Schema.optional(Schema.Boolean),
 });
 export type AcpRegistryImportSessionResult = typeof AcpRegistryImportSessionResult.Type;
 
@@ -288,6 +289,7 @@ export const AcpRegistryProbeResult = Schema.Struct({
   // provider option descriptors so model capabilities can carry them directly.
   configOptions: Schema.Array(ProviderOptionDescriptor).check(Schema.isMaxLength(16)),
   sessionManagement: Schema.Struct({
+    canReadHistory: Schema.optional(Schema.Boolean),
     canList: Schema.Boolean,
     canLoad: Schema.Boolean,
     canResume: Schema.Boolean,

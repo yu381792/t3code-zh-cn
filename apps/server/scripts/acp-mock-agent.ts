@@ -488,7 +488,10 @@ const program = Effect.gen(function* () {
       return {
         protocolVersion: 2,
         info: { name: "t3-acp-mock-agent", version: "0.0.0" },
-        _meta: { modelState: modelState() },
+        _meta: {
+          modelState: modelState(),
+          ...(process.env.T3_ACP_READ_HISTORY === "1" ? { "t3code/read-history": true } : {}),
+        },
         capabilities: {
           session: {
             ...(supportsSessionLifecycle ? { fork: {}, additionalDirectories: {} } : {}),
@@ -2261,6 +2264,26 @@ const program = Effect.gen(function* () {
   );
 
   yield* agent.handleUnknownExtRequest((method, params) => {
+    if (method === "_t3/read_history" && process.env.T3_ACP_READ_HISTORY === "1") {
+      return Effect.succeed({
+        items: [
+          {
+            id: "old-user",
+            type: "user_message",
+            text: "历史提问",
+            createdAt: "2026-10-01T00:00:00.000Z",
+          },
+          {
+            id: "old-tool",
+            type: "tool_call",
+            name: "bash",
+            status: "completed",
+            detail: { input: { command: "pwd" }, output: "/work" },
+          },
+          { id: "old-agent", type: "assistant_message", text: "历史回答" },
+        ],
+      });
+    }
     if (method === "_test/environment") {
       return Effect.succeed({
         inherited: process.env.T3_ACP_RUNTIME_AMBIENT === "sentinel",

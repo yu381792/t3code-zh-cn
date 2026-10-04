@@ -1,4 +1,5 @@
 import {
+  NativeSessionHistory,
   AcpRegistryListProvidersResult,
   AcpRegistryOperationError,
   AcpRegistryListSessionsResult,
@@ -44,6 +45,7 @@ const MAX_COMMAND_LINE_LENGTH = 2_048;
 const PROBE_TIMEOUT_SECONDS = 60;
 const PROBE_TIMEOUT = `${PROBE_TIMEOUT_SECONDS} seconds`;
 const COMMAND_ADVERTISEMENT_GRACE = "500 millis";
+const decodeNativeSessionHistory = Schema.decodeUnknownEffect(NativeSessionHistory);
 const decodeModelConfigOptions = Schema.decodeUnknownOption(
   Schema.Array(ProviderOptionDescriptor).check(Schema.isMaxLength(16)),
 );
@@ -265,6 +267,10 @@ export function acpRegistryProbeResult(
     icon,
     authMethods: normalizeAcpRegistryAuthMethods(started.initializeResult.authMethods, spawn),
     sessionManagement: {
+      ...(started.initializeResult._meta?.["t3code/read-history"] === true ||
+      started.initializeResult.agentCapabilities?._meta?.["t3code/read-history"] === true
+        ? { canReadHistory: true }
+        : {}),
       canList: started.initializeResult.agentCapabilities?.sessionCapabilities?.list != null,
       canLoad: started.initializeResult.agentCapabilities?.loadSession === true,
       canResume: started.initializeResult.agentCapabilities?.sessionCapabilities?.resume != null,
@@ -644,6 +650,54 @@ export const listAcpRegistrySessions = Effect.fn("AcpRegistryProbe.listSessions"
           ),
       }),
       Effect.mapError((error) => managementFailure("list", error)),
+    ),
+);
+
+export const readAcpRegistryHistory = Effect.fn("AcpRegistryProbe.readHistory")(
+  function* (input: AcpRegistryManagementInput & { readonly sessionId: string }) {
+    const runtime = yield* makeAcpRegistryManagementRuntime(input);
+    const initialized = yield* runtime.initialize();
+    if (
+      initialized._meta?.["t3code/read-history"] !== true &&
+      initialized.agentCapabilities?._meta?.["t3code/read-history"] !== true
+    )
+      return null;
+    const response = yield* runtime.request("_t3/read_history", {
+      sessionId: input.sessionId,
+      cwd: input.cwd,
+    });
+    return yield* decodeNativeSessionHistory(response).pipe(
+      Effect.mapError(
+        (cause) =>
+          new AcpRegistryOperationError({
+            reason: "session_import_failed",
+            message: "The agent returned invalid session history.",
+            cause,
+          }),
+      ),
+    );
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.scoped,
+      Effect.timeoutOrElse({
+        duration: "5 minutes",
+        orElse: () =>
+          Effect.fail(
+            new AcpRegistryOperationError({
+              reason: "session_import_failed",
+              message: "Reading the native session history timed out.",
+            }),
+          ),
+      }),
+      Effect.mapError(
+        (cause) =>
+          new AcpRegistryOperationError({
+            reason: "session_import_failed",
+            message: "Could not read the native session history.",
+            cause,
+          }),
+      ),
     ),
 );
 

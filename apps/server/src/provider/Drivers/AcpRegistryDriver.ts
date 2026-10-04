@@ -52,6 +52,7 @@ import {
   deleteAcpRegistrySession,
   disableAcpRegistryProvider,
   listAcpRegistrySessions,
+  readAcpRegistryHistory,
   listAcpRegistryProviders,
   logoutAcpRegistry,
   probeAcpRegistryConfiguration,
@@ -236,6 +237,7 @@ function baseSnapshot(
       ? {}
       : {
           nativeSessions: {
+            ...(input.probe.probe.sessionManagement.canReadHistory ? { canReadHistory: true } : {}),
             canList: input.probe.probe.sessionManagement.canList,
             canLoad: input.probe.probe.sessionManagement.canLoad,
             canResume: input.probe.probe.sessionManagement.canResume,
@@ -807,6 +809,16 @@ export const AcpRegistryDriver: ProviderDriver<AcpRegistrySettings, AcpRegistryD
         orchestrationAdapter,
         textGeneration: makeUnsupportedTextGeneration(),
         acpSessionManagement: {
+          readHistory: ({ cwd, sessionId }) =>
+            provideAcpManagementServices(
+              readAcpRegistryHistory({
+                instanceId,
+                settings: effectiveConfig,
+                cwd,
+                environment: processEnvironment,
+                sessionId,
+              }),
+            ),
           listSessions: ({ cwd, cursor }) =>
             provideAcpManagementServices(
               listAcpRegistrySessions({

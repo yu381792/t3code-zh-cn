@@ -17,6 +17,7 @@ import {
   acpRegistryProbeFailure,
   acpRegistryProbeResult,
   listAcpRegistrySessions,
+  readAcpRegistryHistory,
   logoutAcpRegistry,
   normalizeAcpRegistryAuthMethods,
   normalizeAcpRegistryCommands,
@@ -560,3 +561,57 @@ describe("ACP Registry probe", () => {
     ).toBe("probe_failed");
   });
 });
+
+it.effect(
+  "reads advertised native history without authenticating or starting a conversation",
+  () => {
+    const catalog = AcpRegistrySupport.AcpRegistryCatalog.of({
+      search: () => Effect.die("unused"),
+      prepare: () => Effect.die("unused"),
+      inspect: () => Effect.die("unused"),
+      uninstallManagedBinary: () => Effect.die("unused"),
+      resolve: () =>
+        Effect.succeed({
+          agent: {
+            id: "mock-agent",
+            name: "Mock Agent",
+            version: "1.0.0",
+            description: "History reader",
+            distribution: { npx: { package: "mock-agent@1.0.0" } },
+          },
+          distribution: "npx" as const,
+          spawn: {
+            command: "node",
+            args: [mockAgentPath],
+            env: {
+              ...process.env,
+              T3_ACP_READ_HISTORY: "1",
+              T3_ACP_AUTH_METHOD_ID: "mock-login",
+            },
+          },
+        }),
+    });
+    return Effect.gen(function* () {
+      const history = yield* readAcpRegistryHistory({
+        instanceId,
+        settings: decodeSettings({ agentId: "mock-agent" }),
+        cwd: process.cwd(),
+        environment: process.env,
+        sessionId: "saved",
+      });
+      expect(history?.items.map((item) => item.type)).toEqual([
+        "user_message",
+        "tool_call",
+        "assistant_message",
+      ]);
+      expect(history?.items[0]).toMatchObject({
+        text: "历史提问",
+        createdAt: "2026-10-01T00:00:00.000Z",
+      });
+    }).pipe(
+      Effect.provideService(AcpRegistrySupport.AcpRegistryCatalog, catalog),
+      Effect.provide(NodeServices.layer),
+      Effect.scoped,
+    );
+  },
+);

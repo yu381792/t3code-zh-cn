@@ -22,6 +22,7 @@
  * @module provider/ProviderDriver
  */
 import type {
+  NativeSessionHistory,
   ProviderConsumeResetCreditOutcome,
   AcpRegistryListSessionsResult,
   AcpRegistryListProvidersResult,
@@ -93,6 +94,10 @@ export interface ProviderInstance {
   readonly textGeneration: TextGeneration["Service"];
   readonly auth?: ProviderAuthController;
   readonly acpSessionManagement?: {
+    readonly readHistory?: (input: {
+      readonly cwd: string;
+      readonly sessionId: string;
+    }) => Effect.Effect<NativeSessionHistory | null, AcpRegistryOperationError>;
     readonly listSessions: (input: {
       readonly cwd: string;
       readonly cursor?: string;

@@ -239,6 +239,7 @@ export const ServerProvider = Schema.Struct({
   ),
   nativeSessions: Schema.optional(
     Schema.Struct({
+      canReadHistory: Schema.optional(Schema.Boolean),
       canList: Schema.Boolean,
       canLoad: Schema.Boolean,
       canResume: Schema.Boolean,

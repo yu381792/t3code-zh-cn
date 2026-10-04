@@ -99,7 +99,13 @@ const provider = {
   version: "1.0.0",
   status: "ready",
   auth: { status: "authenticated", canLogout: true },
-  nativeSessions: { canList: true, canLoad: true, canResume: true, canDelete: true },
+  nativeSessions: {
+    canList: true,
+    canLoad: true,
+    canResume: true,
+    canDelete: true,
+    canReadHistory: true,
+  },
   configurableProviders: true,
   checkedAt: "2026-08-23T00:00:00.000Z",
   models: [],
@@ -214,7 +220,12 @@ describe("AcpSessionManagementSection", () => {
         updatedAt: session.updatedAt,
       },
     });
-    expect(findByLabel(render(), "Imported")).not.toBeNull();
+    const refresh = findByLabel(render(), "Refresh history");
+    expect(refresh.props.disabled).toBeFalsy();
+    (refresh.props.onClick as (() => void) | undefined)?.();
+    await flushPromises();
+    expect(commands.import).toHaveBeenCalledTimes(2);
+    expect(commands.import.mock.calls[1]?.[0].input.sessionId).toBe(session.sessionId);
   });
 
   it("logs out the provider instance through the owning environment", async () => {

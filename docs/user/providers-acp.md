@@ -82,6 +82,8 @@ choose a project, and select **List sessions**. Importing one creates a determin
 backed by that native session. Importing the same agent session again returns the existing thread,
 including when another client performs the import.
 
+DSH 导入后可直接查看旧的用户消息、助手回答和工具记录。已导入的会话可用“刷新历史”补齐旧记录；重复刷新不会创建第二份对话或重复消息。读取历史不会让旧会话开始回答。
+
 The thread keeps the native session's title and last-update value as provider metadata without
 overwriting a title you set in T3 Code. Agents that report ACP context usage drive the composer's
 context meter and cumulative cost metadata. Text resources and links render as assistant output;
