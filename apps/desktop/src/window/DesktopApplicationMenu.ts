@@ -285,9 +285,11 @@ export const make = Effect.gen(function* () {
 
   if (Option.isSome(settingsService) && settingsService.value.subscribeInterfaceLanguage) {
     const unsubscribe = settingsService.value.subscribeInterfaceLanguage(() => {
-      void runPromise(configure).catch((error) => {
-        console.error("Could not update menu language", error);
-      });
+      void runPromise(
+        configure.pipe(
+          Effect.catchCause((cause) => Effect.logError("Could not update menu language", cause)),
+        ),
+      );
     });
     yield* Effect.addFinalizer(() => Effect.sync(unsubscribe));
   }
