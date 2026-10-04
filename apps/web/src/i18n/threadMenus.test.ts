@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vite-plus/test";
 import {
+  buildDraftActionMenuItems,
   buildThreadActionMenuItems,
   type ThreadActionMenuState,
 } from "../components/threadActionMenu.logic";
@@ -29,6 +30,23 @@ const state: ThreadActionMenuState = {
 };
 afterEach(() => setInterfaceLanguage("en"));
 describe("actual thread action menu localization", () => {
+  it("localizes the official draft menu without changing actions or flags", () => {
+    const original = buildDraftActionMenuItems({
+      hasPath: true,
+      hasBranch: true,
+      hasProject: true,
+    });
+    const menu = localizeContextMenuItems(original, "zh-CN");
+    expect(menu.find((item) => item.id === "discard")?.label).toBe("丢弃草稿");
+    expect(menu.find((item) => item.id === "discard")?.destructive).toBe(true);
+    expect(menu.find((item) => item.id === "project-settings")?.label).toBe("项目设置");
+    expect(menu.find((item) => item.id === "copy")?.children?.map((item) => item.label)).toEqual([
+      "路径",
+      "分支",
+    ]);
+    expect(menu.map((item) => item.id)).toEqual(original.map((item) => item.id));
+    expect(localizeContextMenuItems(original, "en")).toEqual(original);
+  });
   it("localizes screenshot actions and child settings without changing the input or IDs", () => {
     const original = buildThreadActionMenuItems(state);
     const snapshot = JSON.stringify(original);

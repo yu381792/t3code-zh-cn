@@ -6,15 +6,34 @@ if [[ "${SYNC_UPSTREAM:-true}" == true ]]; then
   git remote add upstream https://github.com/pingdotgg/t3code.git
   git fetch --no-tags upstream main
   upstream_sha="$(git rev-parse FETCH_HEAD)"
-  if ! git merge --no-edit "$upstream_sha"; then
-    {
-      echo '### 官方更新合并不通过'
-      echo '以下文件存在冲突，本轮停止；未推送冲突代码，也未发布安装包。'
-      echo '```'
-      git diff --name-only --diff-filter=U
-      echo '```'
-    } >> "$GITHUB_STEP_SUMMARY"
-    exit 1
+  before="$(git rev-parse HEAD)"
+  if [[ -f .github/fork-upstream.txt ]]; then
+    previous_upstream="$(cat .github/fork-upstream.txt)"
+    [[ "$previous_upstream" =~ ^[0-9a-f]{40}$ ]]
+    git merge-base --is-ancestor "$previous_upstream" "$upstream_sha"
+  else
+    previous_upstream="$(git merge-base HEAD "$upstream_sha")"
+  fi
+  if [[ "$previous_upstream" != "$upstream_sha" ]]; then
+    merge_output="$RUNNER_TEMP/fork-merge.txt"
+    # Git 按上次官方快照做三方合并。提交仅以 fork 主线为父提交，
+    # 不导入官方 workflow 历史，使用仓库自带令牌即可正常推送。
+    if ! git merge-tree --write-tree --merge-base="$previous_upstream" HEAD "$upstream_sha" > "$merge_output"; then
+      {
+        echo '### 官方更新合并不通过'
+        echo '以下文件存在冲突，本轮停止；未推送冲突代码，也未发布安装包。'
+        echo '```'
+        sed -n '/CONFLICT/p' "$merge_output"
+        echo '```'
+      } >> "$GITHUB_STEP_SUMMARY"
+      exit 1
+    fi
+    merged_tree="$(head -n 1 "$merge_output")"
+    git restore --source="$merged_tree" --staged --worktree .
+    git restore --source="$before" --staged --worktree .github/workflows
+    echo "$upstream_sha" > .github/fork-upstream.txt
+    git add .github/fork-upstream.txt
+    git commit -m "merge: sync official V2 snapshot $upstream_sha"
   fi
 fi
 

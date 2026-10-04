@@ -6,7 +6,7 @@ import {
   threadPullRequestKeyOf,
   visibleThreadPullRequests,
 } from "@t3tools/shared/threadPullRequests";
-import { MinusIcon, PlusIcon } from "lucide-react";
+import { Minus, Plus } from "lucide";
 import { useState, type ComponentProps, type MouseEvent as ReactMouseEvent } from "react";
 
 import { findProjectOnChangeRequestHost, parseChangeRequestUrl } from "~/lib/openPullRequestLink";
@@ -14,6 +14,7 @@ import { findProjectOnChangeRequestHost, parseChangeRequestUrl } from "~/lib/ope
 import { useProjects } from "~/state/entities";
 
 import { pullRequestListLines } from "../pullRequest/pullRequestListLines";
+import { MorphIcon } from "~/components/MorphIcon";
 import { linkedPullRequestSnapshotStatus, prStatusIndicator } from "../ThreadStatusIndicators";
 
 import { ThreadDetailsPrRow } from "./ThreadDetailsPrRow";
@@ -99,11 +100,7 @@ export function ThreadDetailsPrRows({
         tone="muted"
         className="w-full active:scale-100"
       >
-        {expanded ? (
-          <MinusIcon aria-hidden className="size-4 shrink-0" />
-        ) : (
-          <PlusIcon aria-hidden className="size-4 shrink-0" />
-        )}
+        <MorphIcon aria-hidden className="size-4 shrink-0" icon={expanded ? Minus : Plus} />
         {expanded ? t3T("Show less") : t3T("Show {0} more", [rest.length])}
       </ThreadDetailsControl>
     </>

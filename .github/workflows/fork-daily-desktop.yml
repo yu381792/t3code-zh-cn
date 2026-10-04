@@ -24,7 +24,8 @@ concurrency:
 
 jobs:
   release:
-    if: github.repository == 'yu381792/t3code-zh-cn'
+    # 免费方案仅在公开仓库运行，不使用付费的大型机器。
+    if: github.repository == 'yu381792/t3code-zh-cn' && github.event.repository.private == false
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -69,6 +70,7 @@ jobs:
           node scripts/check-interface-localization.mjs
           vp test run apps/web/src/i18n/translate.test.tsx apps/web/src/i18n/selectedValues.test.tsx apps/web/src/i18n/threadMenus.test.ts
           vp run --filter @t3tools/web --filter @t3tools/desktop typecheck
+          node_modules/.bin/tsc --noEmit -p apps/server/tsconfig.json
 
       - name: 设置本次版本
         if: steps.source.outputs.build == 'true'

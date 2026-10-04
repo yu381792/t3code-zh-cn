@@ -35,6 +35,7 @@ import { Tooltip, TooltipTrigger, TooltipPopup } from "../ui/tooltip";
 import { USAGE_PRICE_FIELDS } from "./usagePriceForm";
 import {
   isEmptyUsagePriceDraft,
+  usageAliasCell,
   usagePriceCell,
   usagePriceTableChanges,
   usagePriceTableErrors,
@@ -64,6 +65,10 @@ const priceTargetsAtom = Atom.make((get): readonly UsagePriceTarget[] =>
       environmentId,
       label: environment.entry.target.label,
       prices: settings?.usagePriceOverrides ?? null,
+      aliases:
+        environment.serverConfig?.environment.capabilities.usageModelAliases === true
+          ? (settings?.usageModelAliases ?? null)
+          : null,
       unavailable:
         environment.connection.phase !== "connected"
           ? "Offline"
@@ -92,13 +97,19 @@ type SaveAttempt = {
   >;
 };
 
+/**
+ * Edits custom model prices and mappings. A mapped model's usage counts as its
+ * target model. `initialModel` opens with a new row for that model.
+ */
 export function UsagePriceOverrides({
   usage,
   initialSelectedEnvironmentIds,
+  initialModel,
   onOpenChange,
 }: {
   readonly usage: readonly EnvironmentUsageStatus[];
   readonly initialSelectedEnvironmentIds: ReadonlySet<EnvironmentId> | null;
+  readonly initialModel?: string | undefined;
   readonly onOpenChange: (open: boolean) => void;
 }) {
   const t3T = useUiTranslate();
@@ -108,14 +119,29 @@ export function UsagePriceOverrides({
   const selected = environments.filter(
     (environment) => selectedIds === null || selectedIds.has(environment.environmentId),
   );
-  const [drafts, setDrafts] = useState<readonly UsagePriceDraft[]>([]);
+  // A model that already has a custom price or mapping is edited in its existing row.
+  const [drafts, setDrafts] = useState<readonly UsagePriceDraft[]>(() =>
+    initialModel === undefined ||
+    selected.some(
+      (environment) =>
+        Object.hasOwn(environment.prices ?? {}, initialModel) ||
+        Object.hasOwn(environment.aliases ?? {}, initialModel),
+    )
+      ? []
+      : [{ id: "new:initial", model: initialModel, isNew: true, values: {} }],
+  );
   const [pending, setPending] = useState(false);
   const [attempt, setAttempt] = useState<SaveAttempt | null>(null);
   const focusRowRef = useRef<string | null>(null);
   const nextRowId = useRef(0);
   const updateSettings = useAtomCommand(serverEnvironment.updateSettings, { reportFailure: false });
   const customModels = [
-    ...new Set(selected.flatMap((environment) => Object.keys(environment.prices ?? {}))),
+    ...new Set(
+      selected.flatMap((environment) => [
+        ...Object.keys(environment.prices ?? {}),
+        ...Object.keys(environment.aliases ?? {}),
+      ]),
+    ),
   ].sort();
   const models = [
     ...new Set([
@@ -182,19 +208,31 @@ export function UsagePriceOverrides({
     );
     setAttempt(null);
   };
+  // An existing row edited back to its saved values has nothing left to save.
+  const matchesSaved = (
+    row: UsagePriceDraft,
+    cell: { value: string; placeholder: string },
+    value: string,
+  ) =>
+    !row.isNew &&
+    cell.placeholder !== "Mixed" &&
+    cell.placeholder !== "Unavailable" &&
+    value === cell.value;
+  const updateOrDropDraft = (draft: UsagePriceDraft) => {
+    if (!draft.isNew && Object.keys(draft.values).length === 0 && draft.alias === undefined)
+      setDrafts((previous) => previous.filter((entry) => entry.id !== draft.id));
+    else updateDraft(draft);
+  };
   const editCell = (row: UsagePriceDraft, field: UsagePriceField, value: string) => {
     const values = { ...row.values, [field]: value };
     const original = usagePriceCell(selected, row.model, field);
-    if (
-      !row.isNew &&
-      original.placeholder !== "Mixed" &&
-      original.placeholder !== "Unavailable" &&
-      value === original.value
-    )
-      delete values[field];
-    if (!row.isNew && Object.keys(values).length === 0)
-      setDrafts((previous) => previous.filter((entry) => entry.id !== row.id));
-    else updateDraft({ ...row, values });
+    if (matchesSaved(row, original, value)) delete values[field];
+    updateOrDropDraft({ ...row, values });
+  };
+  const editAlias = (row: UsagePriceDraft, value: string) => {
+    const { alias: _alias, ...rest } = row;
+    const original = usageAliasCell(selected, row.model);
+    updateOrDropDraft(matchesSaved(row, original, value) ? rest : { ...rest, alias: value });
   };
   const save = async (retry = false) => {
     if (pending) return;
@@ -205,7 +243,7 @@ export function UsagePriceOverrides({
       (destination) =>
         environments.find(
           (environment) => environment.environmentId === destination.environmentId,
-        ) ?? { ...destination, prices: null, unavailable: "Environment removed" },
+        ) ?? { ...destination, prices: null, aliases: null, unavailable: "Environment removed" },
     );
     const changes = new Map(
       targets.map((target) => [target.environmentId, usagePriceTableChanges(target, edits)]),
@@ -248,11 +286,13 @@ export function UsagePriceOverrides({
         if (!pending) onOpenChange(open);
       }}
     >
-      <DialogPopup className="max-w-3xl">
+      <DialogPopup className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t3T("Custom model prices")}</DialogTitle>
           <DialogDescription>
-            {t3T("Prices apply to all past and future usage on the environments you select.")}
+            {t3T(
+              "Prices and mappings apply to all past and future usage on the environments you select.",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
@@ -317,9 +357,10 @@ export function UsagePriceOverrides({
           ) : (
             <>
               <div className="min-w-0 overflow-hidden rounded-lg border border-border">
-                <Table className="min-w-160 table-fixed" aria-label={t3T("Custom model prices")}>
+                <Table className="min-w-180 table-fixed" aria-label={t3T("Custom model prices")}>
                   <colgroup>
-                    <col className="w-[34%]" />
+                    <col className="w-[22%]" />
+                    <col className="w-[18%]" />
                     {USAGE_PRICE_FIELDS.map((field) => (
                       <col key={field.key} />
                     ))}
@@ -328,6 +369,7 @@ export function UsagePriceOverrides({
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t3T("Model ID")}</TableHead>
+                      <TableHead>{t3T("Map to")}</TableHead>
                       {USAGE_PRICE_FIELDS.map((field) => (
                         <TableHead key={field.key}>{field.label}</TableHead>
                       ))}
@@ -351,135 +393,160 @@ export function UsagePriceOverrides({
                   <TableBody>
                     {rows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center whitespace-normal">
+                        <TableCell colSpan={7} className="text-center whitespace-normal">
                           <p className="py-6 text-muted-foreground">
                             {selected.some((environment) => environment.prices === null)
                               ? t3T("Some environment prices are unavailable.")
-                              : t3T("No custom prices. Add a row to override automatic pricing.")}
+                              : t3T("No custom prices or mappings. Add a row to set one.")}
                           </p>
                         </TableCell>
                       </TableRow>
                     ) : (
-                      rows.map((row) => (
-                        <TableRow key={row.id} data-row-id={row.id}>
-                          <TableCell className="whitespace-normal">
-                            {row.isNew ? (
-                              <Input
-                                size="compact"
-                                value={row.model}
-                                ref={(node) => {
-                                  if (node && focusRowRef.current === row.id) {
-                                    node.focus();
-                                    focusRowRef.current = null;
+                      rows.map((row) => {
+                        const aliasCell = usageAliasCell(selected, row.model);
+                        const alias = (row.alias ?? aliasCell.value).trim();
+                        return (
+                          <TableRow key={row.id} data-row-id={row.id}>
+                            <TableCell className="whitespace-normal">
+                              {row.isNew ? (
+                                <Input
+                                  size="compact"
+                                  value={row.model}
+                                  ref={(node) => {
+                                    if (node && focusRowRef.current === row.id) {
+                                      node.focus();
+                                      focusRowRef.current = null;
+                                    }
+                                  }}
+                                  aria-label={t3T("New model ID")}
+                                  aria-invalid={
+                                    (row.model.trim() !== "" && errors.has(row.id)) || undefined
                                   }
-                                }}
-                                aria-label={t3T("New model ID")}
-                                aria-invalid={
-                                  (row.model.trim() !== "" && errors.has(row.id)) || undefined
-                                }
-                                list="usage-price-models"
-                                placeholder={t3T("Model ID")}
-                                autoComplete="off"
-                                spellCheck={false}
-                                disabled={locked}
-                                onChange={(event) =>
-                                  updateDraft({ ...row, model: event.target.value })
-                                }
-                              />
-                            ) : (
-                              <span
-                                className={cn(
-                                  "block break-all",
-                                  row.removed && "text-muted-foreground line-through",
-                                )}
-                              >
-                                {row.model}
-                              </span>
-                            )}
-                            {errors.has(row.id) &&
-                            (row.model.trim() !== "" ||
-                              Object.values(row.values).some((value) => value !== "")) ? (
-                              <p role="alert" className="mt-1 text-xs text-destructive">
-                                {errors.get(row.id)}
-                              </p>
-                            ) : null}
-                          </TableCell>
-                          {row.removed ? (
-                            <TableCell colSpan={4}>
-                              <span className="text-muted-foreground">
-                                {t3T("Automatic pricing after saving")}
-                              </span>
+                                  list="usage-price-models"
+                                  placeholder={t3T("Model ID")}
+                                  autoComplete="off"
+                                  spellCheck={false}
+                                  disabled={locked}
+                                  onChange={(event) =>
+                                    updateDraft({ ...row, model: event.target.value })
+                                  }
+                                />
+                              ) : (
+                                <span
+                                  className={cn(
+                                    "block break-all",
+                                    row.removed && "text-muted-foreground line-through",
+                                  )}
+                                >
+                                  {row.model}
+                                </span>
+                              )}
+                              {errors.has(row.id) &&
+                              (row.model.trim() !== "" ||
+                                Object.values(row.values).some((value) => value !== "")) ? (
+                                <p role="alert" className="mt-1 text-xs text-destructive">
+                                  {errors.get(row.id)}
+                                </p>
+                              ) : null}
                             </TableCell>
-                          ) : (
-                            USAGE_PRICE_FIELDS.map((field) => {
-                              const cell = usagePriceCell(selected, row.model, field.key);
-                              return (
-                                <TableCell key={field.key}>
-                                  <Input
-                                    size="compact"
-                                    inputMode="decimal"
-                                    aria-label={t3T("{0} price for {1}", [
-                                      field.label,
-                                      row.model || "new model",
-                                    ])}
-                                    value={row.values[field.key] ?? (row.isNew ? "" : cell.value)}
-                                    placeholder={
-                                      row.isNew
-                                        ? field.optional
-                                          ? t3T("Input rate")
-                                          : "0.00"
-                                        : cell.placeholder
-                                    }
-                                    autoComplete="off"
-                                    disabled={locked}
-                                    font="mono"
-                                    onChange={(event) =>
-                                      editCell(row, field.key, event.target.value)
-                                    }
-                                  />
-                                </TableCell>
-                              );
-                            })
-                          )}
-                          <TableCell>
-                            <Tooltip>
-                              <TooltipTrigger
-                                render={<Button size="icon-xs" variant="ghost" />}
-                                disabled={locked}
-                                aria-label={
-                                  row.removed
-                                    ? t3T("Undo reset for {0}", [row.model])
-                                    : row.isNew
-                                      ? t3T("Remove new model")
-                                      : t3T("Reset price for {0} to automatic", [row.model])
-                                }
-                                onClick={() => {
-                                  if (row.isNew)
-                                    setDrafts((previous) =>
-                                      previous.filter((entry) => entry.id !== row.id),
-                                    );
-                                  else if (row.removed) {
-                                    if (Object.keys(row.values).length === 0)
+                            {row.removed ? (
+                              <TableCell colSpan={5}>
+                                <span className="text-muted-foreground">
+                                  {t3T("Automatic pricing after saving")}
+                                </span>
+                              </TableCell>
+                            ) : (
+                              <TableCell>
+                                <Input
+                                  size="compact"
+                                  value={row.alias ?? aliasCell.value}
+                                  aria-label={t3T("Map {0} to model", [row.model || "new model"])}
+                                  list="usage-alias-models"
+                                  placeholder={row.isNew ? t3T("Optional") : aliasCell.placeholder}
+                                  autoComplete="off"
+                                  spellCheck={false}
+                                  disabled={locked}
+                                  onChange={(event) => editAlias(row, event.target.value)}
+                                />
+                              </TableCell>
+                            )}
+                            {row.removed ? null : alias !== "" ? (
+                              <TableCell colSpan={4} className="whitespace-normal">
+                                <span className="break-all text-muted-foreground">
+                                  {t3T("Counted as {0}", [alias])}
+                                </span>
+                              </TableCell>
+                            ) : (
+                              USAGE_PRICE_FIELDS.map((field) => {
+                                const cell = usagePriceCell(selected, row.model, field.key);
+                                return (
+                                  <TableCell key={field.key}>
+                                    <Input
+                                      size="compact"
+                                      inputMode="decimal"
+                                      aria-label={t3T("{0} price for {1}", [
+                                        field.label,
+                                        row.model || "new model",
+                                      ])}
+                                      value={row.values[field.key] ?? (row.isNew ? "" : cell.value)}
+                                      placeholder={
+                                        row.isNew
+                                          ? field.optional
+                                            ? t3T("Input rate")
+                                            : "0.00"
+                                          : cell.placeholder
+                                      }
+                                      autoComplete="off"
+                                      disabled={locked}
+                                      font="mono"
+                                      onChange={(event) =>
+                                        editCell(row, field.key, event.target.value)
+                                      }
+                                    />
+                                  </TableCell>
+                                );
+                              })
+                            )}
+                            <TableCell>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  render={<Button size="icon-xs" variant="ghost" />}
+                                  disabled={locked}
+                                  aria-label={
+                                    row.removed
+                                      ? t3T("Undo reset for {0}", [row.model])
+                                      : row.isNew
+                                        ? t3T("Remove new model")
+                                        : t3T("Reset price for {0} to automatic", [row.model])
+                                  }
+                                  onClick={() => {
+                                    if (row.isNew)
                                       setDrafts((previous) =>
                                         previous.filter((entry) => entry.id !== row.id),
                                       );
-                                    else updateDraft({ ...row, removed: false });
-                                  } else updateDraft({ ...row, removed: true });
-                                }}
-                              >
-                                {row.isNew ? <XIcon aria-hidden /> : <RotateCcwIcon aria-hidden />}
-                              </TooltipTrigger>
-                              <TooltipPopup>
-                                {row.removed
-                                  ? t3T("Undo reset")
-                                  : row.isNew
-                                    ? t3T("Remove row")
-                                    : t3T("Reset to automatic")}
-                              </TooltipPopup>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                                    else if (row.removed)
+                                      updateOrDropDraft({ ...row, removed: false });
+                                    else updateDraft({ ...row, removed: true });
+                                  }}
+                                >
+                                  {row.isNew ? (
+                                    <XIcon aria-hidden />
+                                  ) : (
+                                    <RotateCcwIcon aria-hidden />
+                                  )}
+                                </TooltipTrigger>
+                                <TooltipPopup>
+                                  {row.removed
+                                    ? t3T("Undo reset")
+                                    : row.isNew
+                                      ? t3T("Remove row")
+                                      : t3T("Reset to automatic")}
+                                </TooltipPopup>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>
@@ -491,8 +558,21 @@ export function UsagePriceOverrides({
                     <option key={model} value={model} />
                   ))}
               </datalist>
+              <datalist id="usage-alias-models">
+                {models
+                  .filter((model) =>
+                    selected.every(
+                      (environment) => !Object.hasOwn(environment.aliases ?? {}, model),
+                    ),
+                  )
+                  .map((model) => (
+                    <option key={model} value={model} />
+                  ))}
+              </datalist>
               <p className="text-xs text-muted-foreground">
-                {t3T("Blank cache rates use the input price. Enter 0 for free tokens.")}
+                {t3T(
+                  "Blank cache rates use the input price. Enter 0 for free tokens. A mapped model’s usage counts as the model it maps to.",
+                )}
                 {selected.length > 1
                   ? t3T(" Mixed cells keep each environment’s rate until you edit them.")
                   : ""}

@@ -1,11 +1,13 @@
 import { useTranslate as useUiTranslate } from "~/i18n/translate";
 import { DeviceHostUpdates } from "./DeviceHostUpdates";
 import type { DevicePlatform, DeviceServiceState, EnvironmentId } from "@t3tools/contracts";
-import { Check, CircleAlert } from "lucide-react";
+import { Check } from "lucide-react";
+import { Check as CheckGlyph, CircleAlert } from "lucide";
 import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { DialogClose } from "~/components/ui/dialog";
+import { MorphIcon } from "~/components/MorphIcon";
 import { WizardHeader, WizardPanel, WizardSteps, WizardFooter } from "~/components/ui/wizard";
 import { Spinner } from "~/components/ui/spinner";
 import { Switch } from "~/components/ui/switch";
@@ -64,6 +66,9 @@ export function DeviceSetup(props: {
   const [step, setStep] = useState(0);
   const enabled = props.state.hostStatus !== "disabled";
   const busy = props.state.hostStatus === "installing" || props.state.hostStatus === "starting";
+  const localPlatformsUnavailable = props.state.hosts.some(
+    (host) => host.kind === "local" && !host.platforms.some((platform) => platform.available),
+  );
 
   const update = async (
     kind: NonNullable<typeof pending>,
@@ -120,8 +125,8 @@ export function DeviceSetup(props: {
           </section>
         ) : null}
 
-        {step === 1 ? (
-          <section className="space-y-3 text-sm">
+        {step === 1 || (step === 0 && enabled && localPlatformsUnavailable) ? (
+          <section className={cn("space-y-3 text-sm", step === 0 && "mt-4")}>
             <h3 className="font-medium">{t3T("Check simulator support")}</h3>
             <DevicePlatformSetup
               state={props.state}
@@ -301,17 +306,16 @@ export function PlatformStatus(props: {
   readonly compact?: boolean;
 }) {
   const t3T = useUiTranslate();
-
-  const Icon = props.status.ready ? Check : CircleAlert;
   return (
     <div
       className={cn("flex gap-2", !props.compact && "rounded-md border border-border/60 px-3 py-2")}
     >
-      <Icon
+      <MorphIcon
         className={cn(
           "mt-0.5 size-4 shrink-0",
           props.status.ready ? "text-success" : "text-muted-foreground",
         )}
+        icon={props.status.ready ? CheckGlyph : CircleAlert}
       />
       <div className={cn(props.compact && props.status.ready && "flex items-center gap-2")}>
         <p className="font-medium">{props.platform}</p>

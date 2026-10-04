@@ -62,7 +62,11 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
 
   const workspacePath = displayMode === "panel" ? (activeWorktreePath ?? workspaceRoot) : null;
   const workspaceDisplayName = resolveWorkspaceDisplayName(workspacePath);
-  const workspaceKind = activeWorktreePath ? "Worktree" : "Project folder";
+  // The panel names the workspace kind only when it is not the project folder.
+  const workspaceKind = activeWorktreePath ? "Worktree" : null;
+  const lockedWorkspaceKind = forceNewWorktree ? "Worktree" : workspaceKind;
+  const selectWorkspaceKind =
+    effectiveEnvMode === "worktree" && !activeWorktreePath ? "Create" : workspaceKind;
   const composerFloatingLayerProps = useComposerMenuProps();
   const showPreviousWorktree = Boolean(previousWorktreeLabel && onUsePreviousWorktree);
   const envModeItems = useMemo(
@@ -150,9 +154,9 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
             : (workspaceDisplayName ??
               t3T(resolveLockedWorkspaceLabel(activeWorktreePath, effectiveEnvMode)))}
         </ComposerContextLabel>
-        {displayMode === "panel" ? (
+        {displayMode === "panel" && lockedWorkspaceKind ? (
           <span className="shrink-0 text-3xs font-normal text-muted-foreground/70">
-            {forceNewWorktree ? t3T("Worktree") : t3T(workspaceKind)}
+            {t3T(lockedWorkspaceKind)}
           </span>
         ) : null}
       </span>
@@ -213,11 +217,9 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
           <ComposerContextLabel displayMode={displayMode}>
             <SelectValue />
           </ComposerContextLabel>
-          {displayMode === "panel" ? (
+          {displayMode === "panel" && selectWorkspaceKind ? (
             <span className="shrink-0 text-3xs font-normal text-muted-foreground/70">
-              {effectiveEnvMode === "worktree" && !activeWorktreePath
-                ? t3T("Create")
-                : t3T(workspaceKind)}
+              {t3T(selectWorkspaceKind)}
             </span>
           ) : null}
         </TooltipTrigger>
