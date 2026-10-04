@@ -604,6 +604,97 @@ function makeTurnInput(input: {
 }
 
 describe("AcpAdapterV2", () => {
+  it.effect("uses negotiated native steering without cancelling the in-flight prompt", () =>
+    Effect.gen(function* () {
+      const protocolEvents = yield* Queue.unbounded<EffectAcpProtocol.AcpProtocolLogEvent>();
+      const instanceId = ProviderInstanceId.make("acp-native-steering");
+      const adapter = makeAcpAdapterV2({
+        crypto: yield* Crypto.Crypto,
+        instanceId,
+        flavor: {
+          driver: ACP_TEST_DRIVER,
+          capabilities: AcpProviderCapabilitiesV2,
+          makeRuntime: makeMockRuntime({
+            childProcessSpawner: yield* ChildProcessSpawner.ChildProcessSpawner,
+            mockAgentPath: yield* (yield* Path.Path).fromFileUrl(
+              new URL("../../../scripts/acp-mock-agent.ts", import.meta.url),
+            ),
+            environment: { T3_ACP_ACTIVE_STEERING: "1", T3_ACP_PROMPT_DELAY_MS: "500" },
+            protocolEvents,
+          }),
+        },
+        fileSystem: yield* FileSystem.FileSystem,
+        idAllocator: yield* IdAllocator.IdAllocatorV2,
+        serverConfig: yield* ServerConfig.ServerConfig,
+        selfInvocation: yield* resolveSelfInvocation(),
+      });
+      const threadId = ThreadId.make("thread-acp-native-steering");
+      const runtimePolicy = ProviderAdapterV2RuntimePolicy.make({
+        runtimeMode: "full-access",
+        interactionMode: "default",
+        cwd: process.cwd(),
+      });
+      const modelSelection = { instanceId, model: "default" } as const;
+      const runtime = yield* adapter.openSession({
+        threadId,
+        providerSessionId: ProviderSessionId.make("session-acp-native-steering"),
+        modelSelection,
+        runtimePolicy,
+      });
+      assert.isTrue(runtime.providerSession.capabilities.turns.supportsActiveSteering);
+      const providerThread = yield* runtime.ensureThread({
+        threadId,
+        modelSelection,
+        runtimePolicy,
+      });
+      const input = makeTurnInput({
+        threadId,
+        providerThread,
+        instanceId,
+        runtimePolicy,
+        now: yield* DateTime.now,
+      });
+      yield* runtime.startTurn(input);
+      const started = Option.getOrThrow(
+        yield* runtime.events.pipe(
+          Stream.filter(
+            (event) =>
+              event.type === "provider_turn.updated" && event.providerTurn.status === "running",
+          ),
+          Stream.runHead,
+        ),
+      );
+      if (started.type !== "provider_turn.updated")
+        return yield* Effect.die("Expected active turn");
+      yield* runtime.steerTurn({
+        threadId,
+        runId: input.runId,
+        providerThread,
+        providerTurnId: started.providerTurn.id,
+        message: {
+          ...input.message,
+          messageId: MessageId.make("steering-message"),
+          text: "Continue without cancelling",
+        },
+      });
+      const terminalEvents = yield* runtime.events.pipe(
+        Stream.takeUntil((event) => event.type === "turn.terminal"),
+        Stream.runCollect,
+      );
+      assert.isTrue(
+        terminalEvents.some(
+          (event) => event.type === "turn.terminal" && event.status === "completed",
+        ),
+      );
+      const methods = (yield* Queue.takeAll(protocolEvents))
+        .filter((event) => event.direction === "outgoing")
+        .map(rawProtocolMethod);
+      assert.include(methods, "_t3/steer");
+      assert.notInclude(methods, "session/cancel");
+      assert.equal(methods.filter((method) => method === "session/prompt").length, 1);
+    }).pipe(Effect.provide(testLayer), Effect.scoped),
+  );
+
   it.live.each(["failed", "recovered", "completed", "cancelled"] as const)(
     "projects Mistral retry notices and their %s outcome",
     (outcome) =>

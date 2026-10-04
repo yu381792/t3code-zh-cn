@@ -647,6 +647,13 @@ function negotiatedCapabilities(
   const canFork = session?.fork != null;
   return {
     ...base,
+    turns: {
+      ...base.turns,
+      supportsActiveSteering:
+        started.initializeResult._meta?.["t3code/active-steering"] === true ||
+        agent._meta?.["t3code/active-steering"] === true ||
+        base.turns.supportsActiveSteering,
+    },
     sessions: {
       ...base.sessions,
       supportsModelSwitchInSession: hasModelConfig,
@@ -7288,11 +7295,62 @@ export function makeAcpAdapterV2(
               }
             : {}),
           steerTurn: (turnInput) =>
-            Effect.fail(
-              new ProviderAdapter.ProviderAdapterSteerRunUnsupportedError({
-                driver,
-                providerThreadId: turnInput.providerThread.id,
-              }),
+            Effect.gen(function* () {
+              if (!capabilities.turns.supportsActiveSteering) {
+                return yield* new ProviderAdapter.ProviderAdapterSteerRunUnsupportedError({
+                  driver,
+                  providerThreadId: turnInput.providerThread.id,
+                });
+              }
+              const turn = yield* Ref.get(activeTurn);
+              const sessionId = yield* Ref.get(activeSessionId);
+              if (
+                turn === null ||
+                turn.providerTurnId !== turnInput.providerTurnId ||
+                sessionId === null
+              ) {
+                return yield* new ProviderAdapter.ProviderAdapterProtocolError({
+                  driver,
+                  detail: "ACP turn is no longer active for steering",
+                });
+              }
+              const text = providerMessageTextWithAttachmentPaths({
+                text: turnInput.message.text,
+                attachments: turnInput.message.attachments,
+                attachmentsDir: serverConfig.attachmentsDir,
+              });
+              const prompt: Array<EffectAcpSchema.ContentBlock> = [{ type: "text", text }];
+              for (const attachment of turnInput.message.attachments.filter(
+                isProviderNativeImageAttachment,
+              )) {
+                const path = resolveAttachmentPath({
+                  attachmentsDir: serverConfig.attachmentsDir,
+                  attachment: attachment as ChatAttachment,
+                });
+                if (path === null) {
+                  return yield* new ProviderAdapter.ProviderAdapterProtocolError({
+                    driver,
+                    detail: "Invalid steering attachment",
+                  });
+                }
+                const bytes = yield* fileSystem.readFile(path);
+                prompt.push({
+                  type: "image",
+                  data: Buffer.from(bytes).toString("base64"),
+                  mimeType: attachment.mimeType,
+                });
+              }
+              yield* runtime.request("_t3/steer", { sessionId, prompt });
+            }).pipe(
+              Effect.mapError(
+                (cause) =>
+                  new ProviderAdapter.ProviderAdapterSteerRunError({
+                    driver,
+                    providerThreadId: turnInput.providerThread.id,
+                    providerTurnId: turnInput.providerTurnId,
+                    cause,
+                  }),
+              ),
             ),
           interruptTurn: Effect.fn("AcpAdapterV2.interruptTurn")(
             function* (turnInput: ProviderAdapter.ProviderAdapterV2InterruptInput) {

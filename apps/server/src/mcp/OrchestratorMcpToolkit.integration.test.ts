@@ -2247,6 +2247,17 @@ describe("orchestrator MCP toolkit", () => {
               status: "running",
               timedOut: true,
             });
+            const reportCall = yield* invoke("t3_thread_send", {
+              threadId: activeThread.threadId,
+              message: "Background report: keep working on the current task.",
+              clientRequestId: "managed-active-auto-report-1",
+            });
+            const report = yield* decodeThreadSendResult(reportCall.structuredContent).pipe(
+              Effect.orDie,
+            );
+            expect(report).toMatchObject({ delivery: "queued", status: "queued" });
+            const afterReport = yield* orchestrator.getThreadProjection(activeThread.threadId);
+            expect(afterReport.runs.find((run) => run.id === activeRun.id)?.status).toBe("running");
             const steerCall = yield* invoke("t3_thread_send", {
               threadId: activeThread.threadId,
               message: "Include the latest parent guidance before finishing.",

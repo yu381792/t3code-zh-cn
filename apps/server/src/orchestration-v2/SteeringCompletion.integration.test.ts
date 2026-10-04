@@ -55,9 +55,10 @@ it.effect.each(
         label: mailbox ? "mailbox notification" : "steering",
       })),
     )
-    .filter(
-      ({ mailbox, timing }) =>
-        mailbox || (timing !== "without native steering" && timing !== "settled only"),
+    .filter(({ mailbox, timing }) =>
+      mailbox
+        ? timing !== "during delivery"
+        : timing !== "without native steering" && timing !== "settled only",
     ),
 )("delivers $label when completion wins $timing", ({ mailbox, timing }) =>
   Effect.scoped(
@@ -295,8 +296,20 @@ it.effect.each(
         });
         if (timing !== "before dispatch") yield* dispatchSteer;
         if (timing === "after delivery") yield* worker.drain();
+        if (mailbox && timing !== "before dispatch") {
+          const queued = yield* orchestrator.getThreadProjection(threadId);
+          assert.equal(steerCalls, 0);
+          assert.equal(started.length, 1);
+          assert.equal(queued.runs.find((run) => run.id === first.runId)?.status, "running");
+          assert.equal(
+            queued.runs.find((run) => run.userMessageId === messageId)?.status,
+            "queued",
+          );
+        }
         const delivery =
-          timing === "during delivery" ? yield* worker.runOnce.pipe(Effect.forkScoped) : null;
+          !mailbox && timing === "during delivery"
+            ? yield* worker.runOnce.pipe(Effect.forkScoped)
+            : null;
         if (delivery !== null) yield* Deferred.await(steerEntered);
         const completed = yield* watch(
           (event) =>
@@ -330,36 +343,9 @@ it.effect.each(
         yield* worker.drain();
         yield* orchestrator.resumeQueuedRuns;
         yield* worker.drain();
-        if (timing === "after delivery") {
+        if (!mailbox && timing === "after delivery") {
           assert.equal(steerCalls, 1);
           assert.equal(started.length, 1);
-          if (mailbox) {
-            const delivered = yield* orchestrator.getThreadProjection(threadId);
-            assert.equal(delivered.subagents[0]?.completionDelivery?.state, "delivered");
-            assert.equal(delivered.subagents[0]?.completionDelivery?.observedByRunId, null);
-            assert.equal(delivered.runs[0]?.delegatedCompletion?.delivery, null);
-            assert.equal(
-              delivered.turnItems.filter((item) => item.type === "notification").length,
-              1,
-            );
-            yield* orchestrator.dispatch({
-              type: "notification.delivery.accept",
-              commandId: CommandId.make("duplicate-acceptance"),
-              threadId,
-              messageId,
-            });
-            yield* worker.drain();
-            assert.equal(steerCalls, 1);
-            yield* orchestrator.dispatch({
-              type: "delegated_task.completion-delivery.acknowledge",
-              commandId: CommandId.make("read-result"),
-              parentThreadId: threadId,
-              taskId,
-              observedByRunId: first.runId,
-            });
-            const acknowledged = yield* orchestrator.getThreadProjection(threadId);
-            assert.equal(acknowledged.subagents[0]?.completionDelivery?.state, "acknowledged");
-          }
           return;
         }
         assert.equal(started.length, 2);

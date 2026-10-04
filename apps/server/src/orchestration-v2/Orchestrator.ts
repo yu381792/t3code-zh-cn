@@ -4504,41 +4504,8 @@ const makeOrchestrator = Effect.fn("orchestrationV2.Orchestrator.layer")(functio
           taskIds: delivery.taskIds,
         };
       }
-      // Route durable mailbox deliveries under the thread lock, using the live
-      // session's capabilities. Never interrupt/restart a turn for a notification.
-      if (
-        delegatedCompletion !== undefined &&
-        delegatedCompletion.taskIds.every(
-          (id) => projection.subagents.find((task) => task.id === id)?.completionWake === "always",
-        )
-      ) {
-        const active = projection.runs.find((run) => run.status === "running");
-        const providerThread = projection.providerThreads.find(
-          (row) => row.id === active?.providerThreadId,
-        );
-        const activeTurn = projection.providerTurns.find(
-          (turn) => turn.runAttemptId === active?.activeAttemptId && turn.status === "running",
-        );
-        const activeMessage = projection.messages.find(
-          (message) => message.id === active?.userMessageId,
-        );
-        if (
-          active !== undefined &&
-          activeTurn !== undefined &&
-          providerThread?.providerSessionId != null &&
-          (activeMessage === undefined || !isNativeMaintenanceCommand(activeMessage))
-        ) {
-          const session = yield* providerSessions
-            .get(providerThread.providerSessionId)
-            .pipe(Effect.orElseSucceed(() => Option.none()));
-          if (
-            Option.isSome(session) &&
-            session.value.providerSession.capabilities.turns.supportsActiveSteering
-          ) {
-            dispatchMode = { type: "steer_active", targetRunId: active.id };
-          }
-        }
-      }
+      // Completion reports remain queued until the active turn settles. User steering
+      // and explicit cross-thread steering use their own dispatch modes.
       const dispatchText =
         delegatedCompletion === undefined
           ? command.text

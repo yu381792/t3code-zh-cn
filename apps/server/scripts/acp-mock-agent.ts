@@ -491,6 +491,7 @@ const program = Effect.gen(function* () {
         _meta: {
           modelState: modelState(),
           ...(process.env.T3_ACP_READ_HISTORY === "1" ? { "t3code/read-history": true } : {}),
+          ...(process.env.T3_ACP_ACTIVE_STEERING === "1" ? { "t3code/active-steering": true } : {}),
         },
         capabilities: {
           session: {
@@ -2264,6 +2265,9 @@ const program = Effect.gen(function* () {
   );
 
   yield* agent.handleUnknownExtRequest((method, params) => {
+    if (method === "_t3/steer" && process.env.T3_ACP_ACTIVE_STEERING === "1") {
+      return Effect.succeed({ messageId: "native-steer-message" });
+    }
     if (method === "_t3/read_history" && process.env.T3_ACP_READ_HISTORY === "1") {
       return Effect.succeed({
         items: [
