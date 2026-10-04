@@ -544,19 +544,11 @@ const make = Effect.gen(function* () {
           type: input.mode === "steer" ? "steer_active" : "restart_active",
           targetRunId: steerableRun.id,
         };
-      } else if (
-        input.mode === "auto" &&
-        input.createdBy !== "agent" &&
-        steerableRun !== undefined
-      ) {
+      } else if (input.mode === "auto" && steerableRun !== undefined) {
         dispatchMode = { type: "steer_active", targetRunId: steerableRun.id };
       } else {
         dispatchMode = {
-          // Agent reports wait for the active turn; explicit steer/restart stays available.
-          type:
-            input.mode === "queue" || (input.mode === "auto" && input.createdBy === "agent")
-              ? "queue_after_active"
-              : "start_immediately",
+          type: input.mode === "queue" ? "queue_after_active" : "start_immediately",
         };
       }
 
