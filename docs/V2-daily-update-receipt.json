@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-04",
+  "repository": "https://github.com/yu381792/t3code-zh-cn",
+  "workflow": ".github/workflows/fork-daily-desktop.yml",
+  "scheduledTime": "每天 07:17，Asia/Shanghai",
+  "version": "0.0.46-nightly.20261004.1000004",
+  "buildSourceCommit": "4e9d97a26c6ded6c9c51300c82e9dbf857abcdd6",
+  "officialCommit": "4ee6bfd50ef4a089440d5c3662db2298da9cc50e",
+  "run": "https://github.com/yu381792/t3code-zh-cn/actions/runs/37211634692",
+  "runConclusion": "success",
+  "release": "https://github.com/yu381792/t3code-zh-cn/releases/tag/v0.0.46-nightly.20261004.1000004",
+  "dmgSha256": "71679b4c79cd25734b648f8f7305cd855e2d0afff047c1cf15b2467bcce9ea28",
+  "freePolicy": {
+    "repositoryVisibility": "public",
+    "runner": "macos-15 标准机器",
+    "privateRepository": "跳过任务",
+    "paidServicePurchased": false,
+    "pricingReference": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners"
+  },
+  "verification": {
+    "localFocusedTestsUniquePassed": 146,
+    "webDesktopServerTypechecksExitCode": 0,
+    "localizationAuditErrors": 0,
+    "workflowGitMergeFixtures": "PASS",
+    "realUnchangedSourceSkipCondition": "PASS",
+    "cloudBuildAndDmgVerification": "PASS",
+    "cloudReleasePublication": "PASS",
+    "guiVisualCheck": false,
+    "nativeAutoInstallVerified": false
+  },
+  "appleDeveloperSigned": false,
+  "automaticInstallationAvailable": false,
+  "installation": "下载 DMG 手动安装；未替换或重启当前使用中的应用",
+  "failurePolicy": "冲突、检查失败或主线并行推进导致推送被拒绝时停止；保留已发布版本",
+  "validationSnapshot": {
+    "oldPath": "/Users/yu/t3code-auto-update-work",
+    "archivedPath": "/Users/yu/.dsh/artifacts/t3code-desktop-V2-zh-fed41fa8/daily-update-setup/已验证快照",
+    "commit": "ec668a85644334d362dd5769cc9f0403b8958366",
+    "trackedSourceArchiveSha256": "9c2786a6be6e2b48169a618fd1df39435599bf01730405e8d24ee9322754f21b",
+    "activeInput": false
+  },
+  "retiredAttempt": {
+    "tag": "v0.0.46-nightly.20261004.1000003",
+    "publishedRelease": false,
+    "reason": "已通过构建，但 gh 默认识别为官方仓库；随后改为显式 --repo，并成功发布 .1000004。此标签不作安装入口。"
+  }
+}
